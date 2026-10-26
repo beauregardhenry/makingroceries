@@ -1,24 +1,57 @@
 import Foundation
 
-/// Looks up a product name for a barcode in the Open Food Facts database.
+struct ScannedProduct {
+    let name: String
+    /// Nil when the product's categories don't map to one of our aisles.
+    let aisle: Aisle?
+}
+
+/// Looks up a product in the Open Food Facts database.
 /// The barcode is the only thing sent.
 enum ProductLookup {
     private struct Response: Decodable {
-        struct Product: Decodable { var product_name: String? }
-        var status: Int?
+        struct Product: Decodable {
+            var product_name: String?
+            var categories_tags: [String]?
+        }
         var product: Product?
     }
 
-    static func name(for barcode: String) async throws -> String? {
+    static func product(for barcode: String) async throws -> ScannedProduct? {
         guard barcode.allSatisfy(\.isNumber),
               var components = URLComponents(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json")
         else { return nil }
-        components.queryItems = [URLQueryItem(name: "fields", value: "product_name")]
+        components.queryItems = [URLQueryItem(name: "fields", value: "product_name,categories_tags")]
         guard let url = components.url else { return nil }
 
         let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(Response.self, from: data)
-        let name = response.product?.product_name?.trimmingCharacters(in: .whitespacesAndNewlines)
-        return (name?.isEmpty == false) ? name : nil
+        let product = try JSONDecoder().decode(Response.self, from: data).product
+        guard let name = product?.product_name?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty
+        else { return nil }
+        return ScannedProduct(name: name, aisle: Aisle.guess(fromCategories: product?.categories_tags ?? []))
+    }
+}
+
+extension Aisle {
+    /// Keyword rules (matched against the start of each word in the category tags) checked in order, so "frozen vegetables" lands in Frozen, not Produce.
+    private static let rules: [(Aisle, [String])] = [
+        (.frozen, ["frozen", "ice-cream"]),
+        (.drinks, ["beverage", "water", "juice", "soda", "tea", "coffee", "beer", "wine"]),
+        (.dairy, ["dair", "milk", "cheese", "yogurt", "yoghurt", "egg", "butter", "cream"]),
+        (.meat, ["meat", "fish", "seafood", "poultry", "sausage", "ham", "chicken", "beef", "pork"]),
+        (.bakery, ["bread", "bakery", "pastr", "viennoiserie", "baguette"]),
+        (.produce, ["fruit", "vegetable", "salad", "herb"]),
+        (.pantry, ["spread", "cereal", "pasta", "rice", "canned", "snack", "sauce", "chocolate",
+                   "biscuit", "cookie", "condiment", "oil", "flour", "sugar", "legume", "soup", "jam"]),
+        (.household, ["cleaning", "household", "paper", "detergent"]),
+    ]
+
+    static func guess(fromCategories tags: [String]) -> Aisle? {
+        let words = tags.flatMap { $0.lowercased().split(whereSeparator: { !$0.isLetter }) }
+        for (aisle, keywords) in rules where words.contains(where: { word in keywords.contains(where: word.hasPrefix) }) {
+            return aisle
+        }
+        return nil
     }
 }

@@ -122,8 +122,9 @@ struct AddItemView: View {
         lookupMessage = nil
         defer { isLookingUp = false }
         do {
-            if let found = try await ProductLookup.name(for: code) {
-                name = found
+            if let product = try await ProductLookup.product(for: code) {
+                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle)
+                dismiss()
             } else {
                 lookupMessage = "No product found for \(code). Type the name instead."
             }
