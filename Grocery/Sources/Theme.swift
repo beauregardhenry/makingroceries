@@ -2,13 +2,16 @@ import SwiftUI
 
 /// Background tint for the list screen. Grey is the system default, with no tint.
 enum Theme: String, CaseIterable, Identifiable {
-    case grey, sage, sky, blush, butter, lavender
+    case grey, sage, sky, blush, butter, lavender, custom
 
     var id: String { rawValue }
     var name: String { rawValue.capitalized }
 
-    var tint: Color {
+    static let presets = allCases.filter { $0 != .custom }
+
+    func tint(custom: Color) -> Color {
         switch self {
+        case .custom: custom
         case .grey: .clear
         case .sage: .green
         case .sky: .blue
@@ -19,15 +22,31 @@ enum Theme: String, CaseIterable, Identifiable {
     }
 
     /// Swatch shown in the picker; grey has no tint so it needs its own color.
-    var swatch: Color { self == .grey ? Color(.systemGray3) : tint.opacity(0.55) }
+    var swatch: Color { self == .grey ? Color(.systemGray3) : tint(custom: .clear).opacity(0.55) }
+}
+
+extension Color {
+    init(hex: String) {
+        let value = UInt64(hex.trimmingCharacters(in: CharacterSet(charactersIn: "#")), radix: 16) ?? 0x34C759
+        self.init(red: Double((value >> 16) & 0xFF) / 255,
+                  green: Double((value >> 8) & 0xFF) / 255,
+                  blue: Double(value & 0xFF) / 255)
+    }
+
+    var hex: String {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+    }
 }
 
 struct ThemePicker: View {
     @Binding var selection: Theme
+    @Binding var custom: Color
 
     var body: some View {
         HStack(spacing: 14) {
-            ForEach(Theme.allCases) { theme in
+            ForEach(Theme.presets) { theme in
                 Button {
                     selection = theme
                 } label: {
@@ -44,6 +63,17 @@ struct ThemePicker: View {
                 .accessibilityLabel(theme.name)
                 .accessibilityAddTraits(theme == selection ? .isSelected : [])
             }
+            ColorPicker("Custom color", selection: $custom, supportsOpacity: false)
+                .labelsHidden()
+                .scaleEffect(1.25)
+                .frame(width: 34, height: 34)
+                .overlay {
+                    if selection == .custom {
+                        Circle().strokeBorder(.primary.opacity(0.6), lineWidth: 2).frame(width: 42, height: 42)
+                    }
+                }
+                .accessibilityLabel("Custom color")
+                .accessibilityAddTraits(selection == .custom ? .isSelected : [])
         }
         .padding()
         .presentationCompactAdaptation(.popover)

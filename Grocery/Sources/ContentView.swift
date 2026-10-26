@@ -5,9 +5,15 @@ struct ContentView: View {
     @State private var showingAdd = false
     @State private var showingThemes = false
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
+    @AppStorage("customColor") private var customHex = "34C759"
 
     private var theme: Binding<Theme> {
         Binding(get: { Theme(rawValue: themeName) ?? .grey }, set: { themeName = $0.rawValue })
+    }
+
+    private var customColor: Binding<Color> {
+        Binding(get: { Color(hex: customHex) },
+                set: { customHex = $0.hex; themeName = Theme.custom.rawValue })
     }
 
     private var sections: [(Aisle, [GroceryItem])] {
@@ -36,10 +42,10 @@ struct ContentView: View {
             .scrollContentBackground(.hidden)
             .background {
                 Color(.systemGroupedBackground)
-                    .overlay(theme.wrappedValue.tint.opacity(0.22))
+                    .overlay(theme.wrappedValue.tint(custom: customColor.wrappedValue).opacity(0.22))
                     .ignoresSafeArea()
             }
-            .animation(.default, value: themeName)
+            .animation(.default, value: themeName + customHex)
             .overlay {
                 if store.items.isEmpty {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
@@ -54,7 +60,7 @@ struct ContentView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
-                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme) }
+                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor) }
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
