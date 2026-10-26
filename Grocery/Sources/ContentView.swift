@@ -6,6 +6,12 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var systemScheme
     @State private var showingThemes = false
     @State private var showingShops = false
+    @State private var showingUsual = false
+    @State private var showingMeals = false
+    @State private var showingTotals = false
+    @State private var clearedBatch: ClearedBatch?
+    @State private var pricingItem: GroceryItem?
+    @State private var priceText = ""
     @AppStorage("selectedShop") private var selectedShopRaw = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
     @AppStorage("appearance") private var appearanceName = Appearance.system.rawValue
@@ -81,13 +87,43 @@ struct ContentView: View {
         }
     }
 
+    /// The visible list as plain text, grouped by aisle in walking order, for sharing.
+    private var shareText: String {
+        var lines = [filter == .all ? "Grocery list" : "\(navigationTitle) list"]
+        for (aisle, items) in sections {
+            var header = aisle.rawValue
+            if let label = mappedShop?.label(for: aisle) { header += " (\(label))" }
+            lines += ["", header]
+            for item in items {
+                var line = "\(item.isChecked ? "☑" : "☐") \(item.name)"
+                if item.quantity > 1 { line += " ×\(item.quantity)" }
+                if filter == .all, let shop = store.shopName(for: item.shopID) { line += " (\(shop))" }
+                lines.append(line)
+            }
+        }
+        let totals = Totals(visibleItems)
+        if totals.priced > 0 { lines += ["", "Total: \(Price.format(totals.sum))"] }
+        return lines.joined(separator: "\n")
+    }
+
+    private func clearDone() {
+        let removed = store.clearChecked(where: isVisible)
+        guard !removed.isEmpty else { return }
+        withAnimation { clearedBatch = ClearedBatch(items: removed) }
+    }
+
+    private func beginPricing(_ item: GroceryItem) {
+        priceText = Price.editText(item.price)
+        pricingItem = item
+    }
+
     var body: some View {
         NavigationStack {
             List {
                 ForEach(sections, id: \.0) { aisle, items in
                     Section {
                         ForEach(items) { item in
-                            ItemRow(item: item, showShop: filter == .all)
+                            ItemRow(item: item, showShop: filter == .all, onSetPrice: beginPricing)
                         }
                         .onDelete { offsets in
                             offsets.map { items[$0] }.forEach(store.delete)
@@ -105,6 +141,30 @@ struct ContentView: View {
             }
             .safeAreaInset(edge: .top, spacing: 0) {
                 ShopBar(selection: selectedShop) { showingShops = true }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 8) {
+                    if let batch = clearedBatch {
+                        UndoBanner(count: batch.items.count) {
+                            withAnimation {
+                                store.restore(batch.items)
+                                clearedBatch = nil
+                            }
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    TotalsBar(items: visibleItems) { showingTotals = true }
+                    QuickAddBar(shopID: newItemShopID, inferShop: filter == .all)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+                .background(.ultraThinMaterial)
+            }
+            .task(id: clearedBatch?.id) {
+                guard let id = clearedBatch?.id else { return }
+                try? await Task.sleep(for: .seconds(7))
+                if clearedBatch?.id == id { withAnimation { clearedBatch = nil } }
             }
             .scrollContentBackground(.hidden)
             .background {
@@ -124,10 +184,22 @@ struct ContentView: View {
             .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Clear Done") { store.clearChecked(where: isVisible) }
+                    Button("Clear Done", action: clearDone)
                         .disabled(!visibleItems.contains(where: \.isChecked))
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu {
+                        Button("Usual & Buy Again", systemImage: "star") { showingUsual = true }
+                        Button("Meals", systemImage: "fork.knife") { showingMeals = true }
+                        Button("Totals by Store", systemImage: "dollarsign.circle") { showingTotals = true }
+                        ShareLink(item: shareText) {
+                            Label("Share List", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(visibleItems.isEmpty)
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("More")
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
                         .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor, appearance: appearance) }
                     Button("Add", systemImage: "plus") { showingAdd = true }
@@ -135,6 +207,19 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAdd) { AddItemView(shopID: newItemShopID) }
             .sheet(isPresented: $showingShops) { ManageShopsView() }
+            .sheet(isPresented: $showingUsual) { UsualView(shopID: newItemShopID) }
+            .sheet(isPresented: $showingMeals) { MealsView(shopID: newItemShopID, currentItems: visibleItems) }
+            .sheet(isPresented: $showingTotals) { TotalsView() }
+            .alert("Set Price", isPresented: Binding(get: { pricingItem != nil },
+                                                     set: { if !$0 { pricingItem = nil } }),
+                   presenting: pricingItem) { item in
+                TextField("0.00", text: $priceText).keyboardType(.decimalPad)
+                Button("Save") { store.setPrice(Price.parse(priceText), for: item) }
+                Button("Remove Price", role: .destructive) { store.setPrice(nil, for: item) }
+                Button("Cancel", role: .cancel) {}
+            } message: { item in
+                Text("Price of one \(item.name)")
+            }
         }
         .preferredColorScheme(appearance.wrappedValue.scheme)
     }
@@ -144,6 +229,15 @@ struct ItemRow: View {
     @Environment(GroceryStore.self) private var store
     let item: GroceryItem
     var showShop = false
+    var onSetPrice: (GroceryItem) -> Void = { _ in }
+
+    /// Second line: the store (when listing every store) and the unit price.
+    private var detail: String? {
+        var parts: [String] = []
+        if showShop, let shop = store.shopName(for: item.shopID) { parts.append(shop) }
+        if let price = item.price { parts.append(item.quantity > 1 ? "\(Price.format(price)) each" : Price.format(price)) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
 
     var body: some View {
         Button {
@@ -157,24 +251,33 @@ struct ItemRow: View {
                     Text(item.name)
                         .strikethrough(item.isChecked)
                         .foregroundStyle(item.isChecked ? .secondary : .primary)
-                    if showShop, let shop = store.shopName(for: item.shopID) {
-                        Text(shop).font(.caption).foregroundStyle(.secondary)
+                    if let detail {
+                        Text(detail).font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 if item.quantity > 1 {
                     Text("×\(item.quantity)").foregroundStyle(.secondary).monospacedDigit()
                 }
+                if let line = item.lineTotal {
+                    Text(Price.format(line)).monospacedDigit()
+                        .foregroundStyle(item.isChecked ? .secondary : .primary)
+                }
             }
         }
         .buttonStyle(.plain)
         .contextMenu {
+            Button("Set Price…", systemImage: "dollarsign.circle") { onSetPrice(item) }
+            Button("Add to Usual", systemImage: "star") {
+                store.addFavorite(name: item.name, quantity: item.quantity, aisle: item.aisle)
+            }
             Menu("Move to Store", systemImage: "arrow.right.circle") {
                 ForEach(store.shops) { shop in
                     Button(shop.name) { store.move(item, to: shop.id) }
                 }
                 Button("Any Store") { store.move(item, to: nil) }
             }
+            Button("Delete", systemImage: "trash", role: .destructive) { store.delete(item) }
         }
     }
 }
@@ -186,6 +289,7 @@ struct AddItemView: View {
     @State private var quantity = 1
     @State private var aisle: Aisle = .produce
     @State private var shopID: UUID?
+    @State private var priceText = ""
     @State private var showingScanner = false
     @State private var lookupMessage: String?
     @State private var isLookingUp = false
@@ -205,6 +309,7 @@ struct AddItemView: View {
                     Text(lookupMessage).font(.footnote).foregroundStyle(.secondary)
                 }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
+                TextField("Price (optional)", text: $priceText).keyboardType(.decimalPad)
                 Picker("Aisle", selection: $aisle) {
                     ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
                 }
@@ -219,14 +324,14 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID)
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID, price: Price.parse(priceText))
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .sheet(isPresented: $showingScanner) {
             ScanSheet { code in Task { await lookUp(code) } }
         }
@@ -238,7 +343,7 @@ struct AddItemView: View {
         defer { isLookingUp = false }
         do {
             if let product = try await ProductLookup.product(for: code) {
-                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID)
+                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID, price: Price.parse(priceText))
                 dismiss()
             } else {
                 lookupMessage = "No product found for \(code). Type the name instead."
@@ -246,5 +351,27 @@ struct AddItemView: View {
         } catch {
             lookupMessage = "Couldn't look up that barcode. Check your connection."
         }
+    }
+}
+
+/// What Clear Done removed, kept briefly so it can be undone.
+struct ClearedBatch: Identifiable {
+    let id = UUID()
+    let items: [ClearedItem]
+}
+
+struct UndoBanner: View {
+    let count: Int
+    let onUndo: () -> Void
+
+    var body: some View {
+        HStack {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            Text("Cleared \(count) item\(count == 1 ? "" : "s")")
+            Spacer()
+            Button("Undo", action: onUndo).fontWeight(.semibold)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(.regularMaterial, in: Capsule())
     }
 }

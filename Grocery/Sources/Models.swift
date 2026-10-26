@@ -37,6 +37,47 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var isChecked = false
     /// Nil means the item isn't tied to a particular store.
     var shopID: UUID?
+    /// Price of one unit, if known.
+    var price: Double?
+}
+
+/// Something added before, remembered for autocomplete and "buy again".
+struct PastItem: Identifiable, Codable, Equatable {
+    var name: String
+    var aisle: Aisle
+    var shopID: UUID?
+    var price: Double?
+    var count = 1
+    var lastUsed = Date()
+
+    var id: String { name.lowercased() }
+}
+
+/// A staple on the "usual" list.
+struct Favorite: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    var quantity = 1
+    var aisle: Aisle = .other
+}
+
+struct MealIngredient: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    var quantity = 1
+    var aisle: Aisle = .other
+}
+
+struct Meal: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    var ingredients: [MealIngredient] = []
+}
+
+/// A checked item removed by Clear Done, with where it was, so it can be put back.
+struct ClearedItem {
+    let index: Int
+    let item: GroceryItem
 }
 
 struct Shop: Identifiable, Codable, Equatable, Hashable {
@@ -83,41 +124,182 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
 @Observable
 final class GroceryStore {
     var items: [GroceryItem] = [] {
-        didSet { save() }
+        didSet { write(items, to: itemsURL) }
     }
 
     var shops: [Shop] = [] {
-        didSet { saveShops() }
+        didSet { write(shops, to: shopsURL) }
     }
 
-    private let url = URL.documentsDirectory.appending(path: "grocery.json")
+    var favorites: [Favorite] = [] {
+        didSet { write(favorites, to: favoritesURL) }
+    }
+
+    var meals: [Meal] = [] {
+        didSet { write(meals, to: mealsURL) }
+    }
+
+    var history: [PastItem] = [] {
+        didSet { write(history, to: historyURL) }
+    }
+
+    private let itemsURL = URL.documentsDirectory.appending(path: "grocery.json")
     private let shopsURL = URL.documentsDirectory.appending(path: "shops.json")
+    private let favoritesURL = URL.documentsDirectory.appending(path: "favorites.json")
+    private let mealsURL = URL.documentsDirectory.appending(path: "meals.json")
+    private let historyURL = URL.documentsDirectory.appending(path: "history.json")
 
     init() {
-        if let data = try? Data(contentsOf: url),
-           let decoded = try? JSONDecoder().decode([GroceryItem].self, from: data) {
-            items = decoded
-        } else {
-            items = [
-                GroceryItem(name: "Bananas", quantity: 6, aisle: .produce),
-                GroceryItem(name: "Milk", aisle: .dairy),
-                GroceryItem(name: "Sourdough", aisle: .bakery),
-            ]
-        }
-
-        if let data = try? Data(contentsOf: shopsURL),
-           let decoded = try? JSONDecoder().decode([Shop].self, from: data) {
-            shops = decoded
-        } else {
-            shops = Shop.defaultNames.map { Shop(name: $0) }
-        }
+        items = read([GroceryItem].self, from: itemsURL) ?? [
+            GroceryItem(name: "Bananas", quantity: 6, aisle: .produce),
+            GroceryItem(name: "Milk", aisle: .dairy),
+            GroceryItem(name: "Sourdough", aisle: .bakery),
+        ]
+        shops = read([Shop].self, from: shopsURL) ?? Shop.defaultNames.map { Shop(name: $0) }
+        favorites = read([Favorite].self, from: favoritesURL) ?? []
+        meals = read([Meal].self, from: mealsURL) ?? []
+        // First run with history: start from what's already on the list.
+        history = read([PastItem].self, from: historyURL)
+            ?? items.map { PastItem(name: $0.name, aisle: $0.aisle, shopID: $0.shopID, price: $0.price) }
     }
 
-    func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil) {
+    // MARK: Items
+
+    func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
-        items.append(GroceryItem(name: trimmed, quantity: quantity, aisle: aisle, shopID: shopID))
+        items.append(GroceryItem(name: trimmed, quantity: quantity, aisle: aisle, shopID: shopID, price: price))
+        remember(name: trimmed, aisle: aisle, shopID: shopID, price: price)
     }
+
+    /// Adds an item, or raises the quantity of the same unchecked item already in that store.
+    /// A missing aisle or price comes from history, then a keyword guess. With `inferShop`,
+    /// a missing store comes from history too.
+    func addOrBump(name: String, quantity: Int = 1, aisle: Aisle? = nil, shopID: UUID?,
+                   price: Double? = nil, inferShop: Bool = false) {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        let past = pastItem(named: trimmed)
+        var shop = shopID
+        if shop == nil, inferShop, let remembered = past?.shopID, self.shop(for: remembered) != nil {
+            shop = remembered
+        }
+        if let i = items.firstIndex(where: { !$0.isChecked && $0.shopID == shop && Self.same($0.name, trimmed) }) {
+            items[i].quantity += quantity
+            return
+        }
+        add(name: trimmed, quantity: quantity, aisle: aisle ?? resolveAisle(for: trimmed),
+            shopID: shop, price: price ?? past?.price)
+    }
+
+    func toggle(_ item: GroceryItem) {
+        guard let i = items.firstIndex(of: item) else { return }
+        items[i].isChecked.toggle()
+    }
+
+    func delete(_ item: GroceryItem) {
+        items.removeAll { $0.id == item.id }
+    }
+
+    func move(_ item: GroceryItem, to shopID: UUID?) {
+        guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[i].shopID = shopID
+    }
+
+    func setPrice(_ price: Double?, for item: GroceryItem) {
+        guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[i].price = price
+        remember(name: item.name, aisle: item.aisle, shopID: item.shopID, price: price, countsAsUse: false)
+    }
+
+    /// Clears checked items, limited to those `include` accepts (all by default).
+    /// Returns what was removed so the caller can offer undo.
+    @discardableResult
+    func clearChecked(where include: (GroceryItem) -> Bool = { _ in true }) -> [ClearedItem] {
+        let removed = items.enumerated().filter { $0.element.isChecked && include($0.element) }
+            .map { ClearedItem(index: $0.offset, item: $0.element) }
+        let ids = Set(removed.map(\.item.id))
+        items.removeAll { ids.contains($0.id) }
+        return removed
+    }
+
+    /// Puts cleared items back where they were.
+    func restore(_ cleared: [ClearedItem]) {
+        var restored = items
+        for entry in cleared.sorted(by: { $0.index < $1.index }) {
+            restored.insert(entry.item, at: min(entry.index, restored.count))
+        }
+        items = restored
+    }
+
+    func isOnList(_ name: String) -> Bool {
+        items.contains { !$0.isChecked && Self.same($0.name, name) }
+    }
+
+    // MARK: History, autocomplete and buy again
+
+    func pastItem(named name: String) -> PastItem? {
+        history.first { Self.same($0.name, name) }
+    }
+
+    func resolveAisle(for name: String) -> Aisle {
+        pastItem(named: name)?.aisle ?? Aisle.guess(fromCategories: [name]) ?? .other
+    }
+
+    private func remember(name: String, aisle: Aisle, shopID: UUID?, price: Double?, countsAsUse: Bool = true) {
+        if let i = history.firstIndex(where: { Self.same($0.name, name) }) {
+            history[i].aisle = aisle
+            history[i].shopID = shopID
+            if let price { history[i].price = price }
+            if countsAsUse {
+                history[i].count += 1
+                history[i].lastUsed = Date()
+            }
+        } else {
+            history.append(PastItem(name: name, aisle: aisle, shopID: shopID, price: price))
+        }
+    }
+
+    /// Past items starting with `prefix`, most used first, skipping what's already on the list.
+    func suggestions(for prefix: String, limit: Int = 6) -> [PastItem] {
+        let prefix = prefix.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !prefix.isEmpty else { return [] }
+        return history
+            .filter { $0.name.lowercased().hasPrefix(prefix) && $0.name.lowercased() != prefix && !isOnList($0.name) }
+            .sorted { ($0.count, $0.lastUsed) > ($1.count, $1.lastUsed) }
+            .prefix(limit).map { $0 }
+    }
+
+    /// Past items not on the list now, most recent first.
+    func buyAgain(limit: Int = 25) -> [PastItem] {
+        history.filter { !isOnList($0.name) }
+            .sorted { $0.lastUsed > $1.lastUsed }
+            .prefix(limit).map { $0 }
+    }
+
+    // MARK: Usual items
+
+    func addFavorite(name: String, quantity: Int = 1, aisle: Aisle? = nil) {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, !favorites.contains(where: { Self.same($0.name, trimmed) }) else { return }
+        favorites.append(Favorite(name: trimmed, quantity: quantity, aisle: aisle ?? resolveAisle(for: trimmed)))
+    }
+
+    func addToList(_ favorite: Favorite, shopID: UUID?) {
+        addOrBump(name: favorite.name, quantity: favorite.quantity, aisle: favorite.aisle,
+                  shopID: shopID, inferShop: shopID == nil)
+    }
+
+    // MARK: Meals
+
+    func addToList(_ meal: Meal, shopID: UUID?) {
+        for ingredient in meal.ingredients {
+            addOrBump(name: ingredient.name, quantity: ingredient.quantity, aisle: ingredient.aisle,
+                      shopID: shopID, inferShop: shopID == nil)
+        }
+    }
+
+    // MARK: Stores
 
     /// Adds a store unless the name is blank or already taken (ignoring case).
     @discardableResult
@@ -149,30 +331,17 @@ final class GroceryStore {
         id.flatMap { id in shops.first { $0.id == id }?.name }
     }
 
-    func move(_ item: GroceryItem, to shopID: UUID?) {
-        guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
-        items[i].shopID = shopID
+    // MARK: Storage
+
+    private static func same(_ a: String, _ b: String) -> Bool {
+        a.trimmingCharacters(in: .whitespaces).caseInsensitiveCompare(b.trimmingCharacters(in: .whitespaces)) == .orderedSame
     }
 
-    func toggle(_ item: GroceryItem) {
-        guard let i = items.firstIndex(of: item) else { return }
-        items[i].isChecked.toggle()
+    private func write<T: Encodable>(_ value: T, to url: URL) {
+        try? JSONEncoder().encode(value).write(to: url, options: .atomic)
     }
 
-    func delete(_ item: GroceryItem) {
-        items.removeAll { $0.id == item.id }
-    }
-
-    /// Clears checked items, limited to those `include` accepts (all by default).
-    func clearChecked(where include: (GroceryItem) -> Bool = { _ in true }) {
-        items.removeAll { $0.isChecked && include($0) }
-    }
-
-    private func save() {
-        try? JSONEncoder().encode(items).write(to: url, options: .atomic)
-    }
-
-    private func saveShops() {
-        try? JSONEncoder().encode(shops).write(to: shopsURL, options: .atomic)
+    private func read<T: Decodable>(_ type: T.Type, from url: URL) -> T? {
+        (try? Data(contentsOf: url)).flatMap { try? JSONDecoder().decode(type, from: $0) }
     }
 }
