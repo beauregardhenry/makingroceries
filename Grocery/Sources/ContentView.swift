@@ -3,6 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @Environment(GroceryStore.self) private var store
     @State private var showingAdd = false
+    @State private var showingThemes = false
+    @AppStorage("theme") private var themeName = Theme.grey.rawValue
+
+    private var theme: Binding<Theme> {
+        Binding(get: { Theme(rawValue: themeName) ?? .grey }, set: { themeName = $0.rawValue })
+    }
 
     private var sections: [(Aisle, [GroceryItem])] {
         Aisle.allCases.compactMap { aisle in
@@ -27,6 +33,13 @@ struct ContentView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background {
+                Color(.systemGroupedBackground)
+                    .overlay(theme.wrappedValue.tint.opacity(0.22))
+                    .ignoresSafeArea()
+            }
+            .animation(.default, value: themeName)
             .overlay {
                 if store.items.isEmpty {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
@@ -39,7 +52,9 @@ struct ContentView: View {
                     Button("Clear Done", action: store.clearChecked)
                         .disabled(!store.items.contains(where: \.isChecked))
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("Color", systemImage: "paintpalette") { showingThemes = true }
+                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme) }
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
