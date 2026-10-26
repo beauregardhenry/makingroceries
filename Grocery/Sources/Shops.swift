@@ -1,18 +1,42 @@
 import SwiftUI
 
+/// Which items the list screen shows.
+enum ShopFilter: Equatable {
+    case all
+    /// Items that aren't tied to a particular store.
+    case anyStore
+    case shop(UUID)
+
+    init(raw: String) {
+        switch raw {
+        case "any": self = .anyStore
+        case let raw: self = UUID(uuidString: raw).map(ShopFilter.shop) ?? .all
+        }
+    }
+
+    var raw: String {
+        switch self {
+        case .all: ""
+        case .anyStore: "any"
+        case .shop(let id): id.uuidString
+        }
+    }
+}
+
 /// Horizontal chips for choosing which store's list to show.
 struct ShopBar: View {
     @Environment(GroceryStore.self) private var store
-    @Binding var selection: UUID?
+    @Binding var selection: ShopFilter
     let onManage: () -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                chip("All", isSelected: selection == nil) { selection = nil }
+                chip("All", isSelected: selection == .all) { selection = .all }
+                chip("Any Store", isSelected: selection == .anyStore) { selection = .anyStore }
                 ForEach(store.shops) { shop in
-                    chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == shop.id) {
-                        selection = shop.id
+                    chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(shop.id)) {
+                        selection = .shop(shop.id)
                     }
                 }
                 Button(action: onManage) {

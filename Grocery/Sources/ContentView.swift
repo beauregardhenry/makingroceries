@@ -30,22 +30,41 @@ struct ContentView: View {
         return dark ? 0.12 : 0.22
     }
 
-    /// The chosen store, or nil for "All" (also when the chosen store was deleted).
-    private var selectedShopID: UUID? {
-        UUID(uuidString: selectedShopRaw).flatMap { id in store.shops.contains { $0.id == id } ? id : nil }
+    /// The chosen filter; falls back to "All" when the chosen store was deleted.
+    private var filter: ShopFilter {
+        let filter = ShopFilter(raw: selectedShopRaw)
+        if case .shop(let id) = filter, !store.shops.contains(where: { $0.id == id }) { return .all }
+        return filter
     }
 
-    private var selectedShop: Binding<UUID?> {
-        Binding(get: { selectedShopID }, set: { selectedShopRaw = $0?.uuidString ?? "" })
+    private var selectedShop: Binding<ShopFilter> {
+        Binding(get: { filter }, set: { selectedShopRaw = $0.raw })
+    }
+
+    private func isVisible(_ item: GroceryItem) -> Bool {
+        switch filter {
+        case .all: true
+        case .anyStore: item.shopID == nil
+        case .shop(let id): item.shopID == id
+        }
     }
 
     private var visibleItems: [GroceryItem] {
-        guard let id = selectedShopID else { return store.items }
-        return store.items.filter { $0.shopID == id }
+        store.items.filter(isVisible)
+    }
+
+    /// The store new items start in: the chosen one, otherwise none.
+    private var newItemShopID: UUID? {
+        if case .shop(let id) = filter { return id }
+        return nil
     }
 
     private var navigationTitle: String {
-        store.shopName(for: selectedShopID) ?? "Groceries"
+        switch filter {
+        case .all: "Groceries"
+        case .anyStore: "Any Store"
+        case .shop(let id): store.shopName(for: id) ?? "Groceries"
+        }
     }
 
     private var sections: [(Aisle, [GroceryItem])] {
@@ -61,7 +80,7 @@ struct ContentView: View {
                 ForEach(sections, id: \.0) { aisle, items in
                     Section {
                         ForEach(items) { item in
-                            ItemRow(item: item, showShop: selectedShopID == nil)
+                            ItemRow(item: item, showShop: filter == .all)
                         }
                         .onDelete { offsets in
                             offsets.map { items[$0] }.forEach(store.delete)
@@ -84,15 +103,15 @@ struct ContentView: View {
             .overlay {
                 if visibleItems.isEmpty {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
-                                           description: Text(selectedShopID == nil
+                                           description: Text(filter == .all
                                                              ? "Tap + to add your first item."
-                                                             : "Tap + to add something for this store."))
+                                                             : "Tap + to add something here."))
                 }
             }
             .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Clear Done") { store.clearChecked(shopID: selectedShopID) }
+                    Button("Clear Done") { store.clearChecked(where: isVisible) }
                         .disabled(!visibleItems.contains(where: \.isChecked))
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -101,7 +120,7 @@ struct ContentView: View {
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
-            .sheet(isPresented: $showingAdd) { AddItemView(shopID: selectedShopID) }
+            .sheet(isPresented: $showingAdd) { AddItemView(shopID: newItemShopID) }
             .sheet(isPresented: $showingShops) { ManageShopsView() }
         }
         .preferredColorScheme(appearance.wrappedValue.scheme)
@@ -141,7 +160,7 @@ struct ItemRow: View {
                 ForEach(store.shops) { shop in
                     Button(shop.name) { store.move(item, to: shop.id) }
                 }
-                Button("No Store") { store.move(item, to: nil) }
+                Button("Any Store") { store.move(item, to: nil) }
             }
         }
     }
@@ -177,7 +196,7 @@ struct AddItemView: View {
                     ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
                 }
                 Picker("Store", selection: $shopID) {
-                    Text("Any store").tag(UUID?.none)
+                    Text("Any Store").tag(UUID?.none)
                     ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                 }
             }

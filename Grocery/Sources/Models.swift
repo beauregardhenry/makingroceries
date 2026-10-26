@@ -129,9 +129,9 @@ final class GroceryStore {
         items.removeAll { $0.id == item.id }
     }
 
-    /// Clears checked items, only those for one store when `shopID` is given.
-    func clearChecked(shopID: UUID? = nil) {
-        items.removeAll { $0.isChecked && (shopID == nil || $0.shopID == shopID) }
+    /// Clears checked items, limited to those `include` accepts (all by default).
+    func clearChecked(where include: (GroceryItem) -> Bool = { _ in true }) {
+        items.removeAll { $0.isChecked && include($0) }
     }
 
     private func save() {
