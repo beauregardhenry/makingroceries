@@ -40,11 +40,41 @@ extension Color {
     }
 }
 
+enum Appearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+
+    var id: String { rawValue }
+    var name: String { rawValue.capitalized }
+
+    /// Nil follows the device setting.
+    var scheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
+
 struct ThemePicker: View {
     @Binding var selection: Theme
     @Binding var custom: Color
+    @Binding var appearance: Appearance
 
     var body: some View {
+        VStack(spacing: 16) {
+            swatches
+            Picker("Appearance", selection: $appearance) {
+                ForEach(Appearance.allCases) { Text($0.name).tag($0) }
+            }
+            .pickerStyle(.segmented)
+        }
+        .padding()
+        .frame(width: 340)
+        .presentationCompactAdaptation(.popover)
+    }
+
+    private var swatches: some View {
         HStack(spacing: 14) {
             ForEach(Theme.presets) { theme in
                 Button {
@@ -75,7 +105,5 @@ struct ThemePicker: View {
                 .accessibilityLabel("Custom color")
                 .accessibilityAddTraits(selection == .custom ? .isSelected : [])
         }
-        .padding()
-        .presentationCompactAdaptation(.popover)
     }
 }

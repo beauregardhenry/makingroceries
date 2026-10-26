@@ -3,17 +3,29 @@ import SwiftUI
 struct ContentView: View {
     @Environment(GroceryStore.self) private var store
     @State private var showingAdd = false
+    @Environment(\.colorScheme) private var systemScheme
     @State private var showingThemes = false
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
+    @AppStorage("appearance") private var appearanceName = Appearance.system.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
 
     private var theme: Binding<Theme> {
         Binding(get: { Theme(rawValue: themeName) ?? .grey }, set: { themeName = $0.rawValue })
     }
 
+    private var appearance: Binding<Appearance> {
+        Binding(get: { Appearance(rawValue: appearanceName) ?? .system }, set: { appearanceName = $0.rawValue })
+    }
+
     private var customColor: Binding<Color> {
         Binding(get: { Color(hex: customHex) },
                 set: { customHex = $0.hex; themeName = Theme.custom.rawValue })
+    }
+
+    /// The tint is softer on dark backgrounds, where the same strength turns muddy.
+    private var tintOpacity: Double {
+        let dark = appearance.wrappedValue.scheme.map { $0 == .dark } ?? (systemScheme == .dark)
+        return dark ? 0.12 : 0.22
     }
 
     private var sections: [(Aisle, [GroceryItem])] {
@@ -42,7 +54,7 @@ struct ContentView: View {
             .scrollContentBackground(.hidden)
             .background {
                 Color(.systemGroupedBackground)
-                    .overlay(theme.wrappedValue.tint(custom: customColor.wrappedValue).opacity(0.22))
+                    .overlay(theme.wrappedValue.tint(custom: customColor.wrappedValue).opacity(tintOpacity))
                     .ignoresSafeArea()
             }
             .animation(.default, value: themeName + customHex)
@@ -60,12 +72,13 @@ struct ContentView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
-                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor) }
+                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor, appearance: appearance) }
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
             .sheet(isPresented: $showingAdd) { AddItemView() }
         }
+        .preferredColorScheme(appearance.wrappedValue.scheme)
     }
 }
 
