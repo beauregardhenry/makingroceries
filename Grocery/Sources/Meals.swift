@@ -9,6 +9,7 @@ struct MealsView: View {
     /// What's on screen now, so it can be saved as a meal.
     let currentItems: [GroceryItem]
     @State private var path: [UUID] = []
+    @State private var showingImport = false
 
     private func newMeal(from items: [GroceryItem] = []) {
         let meal = Meal(name: "New meal", ingredients: items.map {
@@ -51,6 +52,9 @@ struct MealsView: View {
             .navigationTitle("Meals")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: UUID.self) { id in MealEditorView(mealID: id, shopID: shopID) }
+            .sheet(isPresented: $showingImport) {
+                RecipeImportView { id in path.append(id) }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Done") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -60,6 +64,7 @@ struct MealsView: View {
                             newMeal(from: currentItems)
                         }
                         .disabled(currentItems.isEmpty)
+                        Button("Import Recipe…", systemImage: "doc.text.magnifyingglass") { showingImport = true }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -130,5 +135,102 @@ struct MealEditorView: View {
             )
         }
         newText = ""
+    }
+}
+
+/// Turns a recipe web page or pasted ingredient list into a meal.
+struct RecipeImportView: View {
+    @Environment(GroceryStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    let onCreated: (UUID) -> Void
+    @State private var address = ""
+    @State private var pasted = ""
+    @State private var name = ""
+    @State private var isFetching = false
+    @State private var message: String?
+
+    private var entries: [QuickAdd.Entry] { RecipeParser.fromText(pasted) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("https://…", text: $address)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Button {
+                        Task { await fetch() }
+                    } label: {
+                        if isFetching { ProgressView() } else { Text("Get Ingredients from Page") }
+                    }
+                    .disabled(isFetching || address.trimmingCharacters(in: .whitespaces).isEmpty)
+                } header: {
+                    Text("Recipe web address")
+                } footer: {
+                    Text("Works with most recipe sites. Only the address you enter is contacted.")
+                }
+
+                if let message {
+                    Section { Text(message).font(.footnote).foregroundStyle(.secondary) }
+                }
+
+                Section {
+                    TextEditor(text: $pasted).frame(minHeight: 160)
+                } header: {
+                    Text("Ingredients, one per line")
+                } footer: {
+                    Text(entries.isEmpty ? "Paste a list, or fetch one above. Amounts like \"2 cups\" are dropped." : "\(entries.count) ingredient\(entries.count == 1 ? "" : "s") found.")
+                }
+
+                Section("Meal name") {
+                    TextField("Name", text: $name)
+                }
+            }
+            .navigationTitle("Import Recipe")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Create", action: create).disabled(entries.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func fetch() async {
+        message = nil
+        var text = address.trimmingCharacters(in: .whitespaces)
+        if !text.lowercased().hasPrefix("http") { text = "https://" + text }
+        guard let url = URL(string: text), url.scheme == "https" || url.scheme == "http", url.host() != nil else {
+            message = "That doesn't look like a web address."
+            return
+        }
+        isFetching = true
+        defer { isFetching = false }
+        var request = URLRequest(url: url, timeoutInterval: 20)
+        request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", forHTTPHeaderField: "User-Agent")
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            guard let html = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1),
+                  let recipe = RecipeParser.fromHTML(html) else {
+                message = "Couldn't find a recipe on that page. Copy the ingredients and paste them below instead."
+                return
+            }
+            pasted = recipe.ingredients.map { $0.quantity > 1 ? "\($0.quantity) \($0.name)" : $0.name }.joined(separator: "\n")
+            if name.isEmpty, let title = recipe.name { name = title }
+        } catch {
+            message = "Couldn't reach that page. Check your connection."
+        }
+    }
+
+    private func create() {
+        let meal = Meal(
+            name: name.trimmingCharacters(in: .whitespaces).isEmpty ? "Imported recipe" : name.trimmingCharacters(in: .whitespaces),
+            ingredients: entries.map { MealIngredient(name: $0.name, quantity: $0.quantity, aisle: store.resolveAisle(for: $0.name)) }
+        )
+        store.meals.append(meal)
+        dismiss()
+        onCreated(meal.id)
     }
 }

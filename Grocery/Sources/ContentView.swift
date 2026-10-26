@@ -9,6 +9,11 @@ struct ContentView: View {
     @State private var showingUsual = false
     @State private var showingMeals = false
     @State private var showingTotals = false
+    @State private var showingPantry = false
+    @State private var showingBackup = false
+    @State private var detailItem: GroceryItem?
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("shoppingMode") private var shoppingMode = false
     @State private var clearedBatch: ClearedBatch?
     @State private var pricingItem: GroceryItem?
     @State private var priceText = ""
@@ -87,6 +92,33 @@ struct ContentView: View {
         }
     }
 
+    private struct DisplaySection: Identifiable {
+        let id: String
+        let title: String
+        let symbol: String
+        let label: String?
+        let items: [GroceryItem]
+    }
+
+    /// Normal view: by aisle. Shopping mode: what's still needed by aisle, then what's in the cart.
+    private var displaySections: [DisplaySection] {
+        let order = mappedShop?.orderedAisles ?? Aisle.allCases
+        func make(_ aisle: Aisle, _ items: [GroceryItem]) -> DisplaySection {
+            DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol,
+                           label: mappedShop?.label(for: aisle), items: items)
+        }
+        guard shoppingMode else { return sections.map { make($0.0, $0.1) } }
+        var result = order.compactMap { aisle -> DisplaySection? in
+            let items = visibleItems.filter { $0.aisle == aisle && !$0.isChecked }
+            return items.isEmpty ? nil : make(aisle, items)
+        }
+        let cart = visibleItems.filter(\.isChecked)
+        if !cart.isEmpty {
+            result.append(DisplaySection(id: "cart", title: "In the cart", symbol: "cart.fill", label: nil, items: cart))
+        }
+        return result
+    }
+
     /// The visible list as plain text, grouped by aisle in walking order, for sharing.
     private var shareText: String {
         var lines = [filter == .all ? "Grocery list" : "\(navigationTitle) list"]
@@ -120,22 +152,24 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(sections, id: \.0) { aisle, items in
+                ForEach(displaySections) { section in
                     Section {
-                        ForEach(items) { item in
-                            ItemRow(item: item, showShop: filter == .all, onSetPrice: beginPricing)
+                        ForEach(section.items) { item in
+                            ItemRow(item: item, showShop: filter == .all, large: shoppingMode,
+                                    onSetPrice: beginPricing, onEdit: { detailItem = $0 })
                         }
                         .onDelete { offsets in
-                            offsets.map { items[$0] }.forEach(store.delete)
+                            offsets.map { section.items[$0] }.forEach(store.delete)
                         }
                     } header: {
                         HStack {
-                            Label(aisle.rawValue, systemImage: aisle.symbol)
+                            Label(section.title, systemImage: section.symbol)
                             Spacer()
-                            if let label = mappedShop?.label(for: aisle) {
+                            if let label = section.label {
                                 Text(label).textCase(nil).font(.subheadline.weight(.semibold))
                             }
                         }
+                        .font(shoppingMode ? .headline : nil)
                     }
                 }
             }
@@ -190,12 +224,18 @@ struct ContentView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Menu {
                         Button("Usual & Buy Again", systemImage: "star") { showingUsual = true }
+                        Button("Pantry Check", systemImage: "checklist") { showingPantry = true }
                         Button("Meals", systemImage: "fork.knife") { showingMeals = true }
                         Button("Totals by Store", systemImage: "dollarsign.circle") { showingTotals = true }
+                        Divider()
+                        Toggle(isOn: $shoppingMode) {
+                            Label("Shopping Mode", systemImage: "textformat.size")
+                        }
                         ShareLink(item: shareText) {
                             Label("Share List", systemImage: "square.and.arrow.up")
                         }
                         .disabled(visibleItems.isEmpty)
+                        Button("Back Up & Restore", systemImage: "externaldrive") { showingBackup = true }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -210,6 +250,14 @@ struct ContentView: View {
             .sheet(isPresented: $showingUsual) { UsualView(shopID: newItemShopID) }
             .sheet(isPresented: $showingMeals) { MealsView(shopID: newItemShopID, currentItems: visibleItems) }
             .sheet(isPresented: $showingTotals) { TotalsView() }
+            .sheet(isPresented: $showingPantry) { PantryCheckView(shopID: newItemShopID) }
+            .sheet(isPresented: $showingBackup) { BackupView() }
+            .sheet(item: $detailItem) { item in
+                ItemDetailView(item: item, repeatDays: store.recurrence(for: item)?.everyDays ?? 0)
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { store.reload() }
+            }
             .alert("Set Price", isPresented: Binding(get: { pricingItem != nil },
                                                      set: { if !$0 { pricingItem = nil } }),
                    presenting: pricingItem) { item in
@@ -229,7 +277,10 @@ struct ItemRow: View {
     @Environment(GroceryStore.self) private var store
     let item: GroceryItem
     var showShop = false
+    /// Shopping mode: bigger text and tap targets.
+    var large = false
     var onSetPrice: (GroceryItem) -> Void = { _ in }
+    var onEdit: (GroceryItem) -> Void = { _ in }
 
     /// Second line: the store (when listing every store) and the unit price.
     private var detail: String? {
@@ -239,34 +290,63 @@ struct ItemRow: View {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
+    private var spokenSummary: String {
+        var parts = [item.name]
+        if item.quantity > 1 { parts.append("quantity \(item.quantity)") }
+        if let shop = store.shopName(for: item.shopID), showShop { parts.append(shop) }
+        if let line = item.lineTotal { parts.append(Price.format(line)) }
+        if let note = item.note { parts.append(note) }
+        parts.append(item.isChecked ? "bought" : "needed")
+        return parts.joined(separator: ", ")
+    }
+
     var body: some View {
         Button {
             withAnimation { store.toggle(item) }
         } label: {
-            HStack {
+            HStack(spacing: 12) {
                 Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(item.isChecked ? .green : .secondary)
-                    .imageScale(.large)
+                    .font(large ? .title : .title3)
+                if let photo = item.photo {
+                    ItemThumbnail(name: photo, size: large ? 52 : 40)
+                }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.name)
+                        .font(large ? .title3.weight(.medium) : .body)
                         .strikethrough(item.isChecked)
                         .foregroundStyle(item.isChecked ? .secondary : .primary)
                     if let detail {
                         Text(detail).font(.caption).foregroundStyle(.secondary)
                     }
+                    if let note = item.note {
+                        Text(note).font(.caption).italic().foregroundStyle(.secondary)
+                    }
+                    if !item.isChecked, let hint = store.priceHint(for: item) {
+                        Text(hint).font(.caption).foregroundStyle(.green)
+                    }
                 }
                 Spacer()
                 if item.quantity > 1 {
                     Text("×\(item.quantity)").foregroundStyle(.secondary).monospacedDigit()
+                        .font(large ? .title3 : .body)
                 }
                 if let line = item.lineTotal {
                     Text(Price.format(line)).monospacedDigit()
                         .foregroundStyle(item.isChecked ? .secondary : .primary)
                 }
             }
+            .padding(.vertical, large ? 8 : 0)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(spokenSummary)
+        .accessibilityHint(item.isChecked ? "Double tap to put it back on the list" : "Double tap to mark it bought")
+        .accessibilityAction(named: "Edit details") { onEdit(item) }
+        .accessibilityAction(named: "Set price") { onSetPrice(item) }
+        .accessibilityAction(named: "Delete") { store.delete(item) }
         .contextMenu {
+            Button("Edit Details…", systemImage: "pencil") { onEdit(item) }
             Button("Set Price…", systemImage: "dollarsign.circle") { onSetPrice(item) }
             Button("Add to Usual", systemImage: "star") {
                 store.addFavorite(name: item.name, quantity: item.quantity, aisle: item.aisle)

@@ -1,35 +1,5 @@
 import SwiftUI
 
-/// Turns "milk, 6 bananas, eggs x2" into items.
-enum QuickAdd {
-    struct Entry: Equatable {
-        var name: String
-        var quantity: Int
-    }
-
-    static func parse(_ text: String) -> [Entry] {
-        text.split(whereSeparator: { ",;\n".contains($0) }).compactMap { part in
-            var words = part.split(separator: " ").map(String.init)
-            var quantity = 1
-
-            // "6 bananas", "6x bananas"
-            if words.count > 1, let n = Int(words[0].trimmingCharacters(in: CharacterSet(charactersIn: "x×X"))), (1...99).contains(n) {
-                quantity = n
-                words.removeFirst()
-            // "bananas x6", "bananas ×6"
-            } else if words.count > 1, let last = words.last, last.count > 1, "x×X".contains(last.first!),
-                      let n = Int(last.dropFirst()), (1...99).contains(n) {
-                quantity = n
-                words.removeLast()
-            }
-
-            let name = words.joined(separator: " ").trimmingCharacters(in: .whitespaces)
-            guard !name.isEmpty else { return nil }
-            return Entry(name: name.prefix(1).uppercased() + name.dropFirst(), quantity: quantity)
-        }
-    }
-}
-
 /// Type several items at once, with suggestions from items you've added before.
 struct QuickAddBar: View {
     @Environment(GroceryStore.self) private var store
@@ -54,6 +24,27 @@ struct QuickAddBar: View {
 
     var body: some View {
         VStack(spacing: 8) {
+            let due = text.isEmpty ? store.dueItems() : []
+            if !due.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        Text("Due").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        ForEach(due) { past in
+                            Button {
+                                withAnimation { store.addOrBump(name: past.name, shopID: shopID, inferShop: inferShop) }
+                            } label: {
+                                Label(past.name, systemImage: "clock.arrow.circlepath")
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 12).padding(.vertical, 7)
+                                    .background(.fill.tertiary, in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("You usually buy this about now. Adds it to the list.")
+                        }
+                    }
+                }
+            }
+
             let suggestions = store.suggestions(for: token)
             if !suggestions.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {

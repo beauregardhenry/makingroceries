@@ -7,7 +7,7 @@ targets:
   Grocery:
     type: application
     platform: iOS
-    sources: [Sources]
+    sources: [Sources, Shared]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.grocery
