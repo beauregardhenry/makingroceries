@@ -35,6 +35,19 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var quantity: Int = 1
     var aisle: Aisle = .other
     var isChecked = false
+    /// Nil means the item isn't tied to a particular store.
+    var shopID: UUID?
+}
+
+struct Shop: Identifiable, Codable, Equatable, Hashable {
+    var id = UUID()
+    var name: String
+
+    static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery"]
+    static let presetNames = [
+        "Kroger", "Walmart", "Chinese Grocery", "Costco", "Target", "Aldi", "Trader Joe's",
+        "Whole Foods", "Publix", "Safeway", "Sam's Club", "Asian Market", "Farmers Market",
+    ]
 }
 
 @Observable
@@ -43,7 +56,12 @@ final class GroceryStore {
         didSet { save() }
     }
 
+    var shops: [Shop] = [] {
+        didSet { saveShops() }
+    }
+
     private let url = URL.documentsDirectory.appending(path: "grocery.json")
+    private let shopsURL = URL.documentsDirectory.appending(path: "shops.json")
 
     init() {
         if let data = try? Data(contentsOf: url),
@@ -56,12 +74,50 @@ final class GroceryStore {
                 GroceryItem(name: "Sourdough", aisle: .bakery),
             ]
         }
+
+        if let data = try? Data(contentsOf: shopsURL),
+           let decoded = try? JSONDecoder().decode([Shop].self, from: data) {
+            shops = decoded
+        } else {
+            shops = Shop.defaultNames.map { Shop(name: $0) }
+        }
     }
 
-    func add(name: String, quantity: Int, aisle: Aisle) {
+    func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
-        items.append(GroceryItem(name: trimmed, quantity: quantity, aisle: aisle))
+        items.append(GroceryItem(name: trimmed, quantity: quantity, aisle: aisle, shopID: shopID))
+    }
+
+    /// Adds a store unless the name is blank or already taken (ignoring case).
+    @discardableResult
+    func addShop(named name: String) -> Shop? {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty,
+              !shops.contains(where: { $0.name.caseInsensitiveCompare(trimmed) == .orderedSame })
+        else { return nil }
+        let shop = Shop(name: trimmed)
+        shops.append(shop)
+        return shop
+    }
+
+    /// Items from a deleted store stay on the list, just without a store.
+    func deleteShop(_ shop: Shop) {
+        shops.removeAll { $0.id == shop.id }
+        items = items.map { item in
+            var item = item
+            if item.shopID == shop.id { item.shopID = nil }
+            return item
+        }
+    }
+
+    func shopName(for id: UUID?) -> String? {
+        id.flatMap { id in shops.first { $0.id == id }?.name }
+    }
+
+    func move(_ item: GroceryItem, to shopID: UUID?) {
+        guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[i].shopID = shopID
     }
 
     func toggle(_ item: GroceryItem) {
@@ -73,11 +129,16 @@ final class GroceryStore {
         items.removeAll { $0.id == item.id }
     }
 
-    func clearChecked() {
-        items.removeAll(where: \.isChecked)
+    /// Clears checked items, only those for one store when `shopID` is given.
+    func clearChecked(shopID: UUID? = nil) {
+        items.removeAll { $0.isChecked && (shopID == nil || $0.shopID == shopID) }
     }
 
     private func save() {
         try? JSONEncoder().encode(items).write(to: url, options: .atomic)
+    }
+
+    private func saveShops() {
+        try? JSONEncoder().encode(shops).write(to: shopsURL, options: .atomic)
     }
 }

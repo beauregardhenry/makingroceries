@@ -5,6 +5,8 @@ struct ContentView: View {
     @State private var showingAdd = false
     @Environment(\.colorScheme) private var systemScheme
     @State private var showingThemes = false
+    @State private var showingShops = false
+    @AppStorage("selectedShop") private var selectedShopRaw = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
     @AppStorage("appearance") private var appearanceName = Appearance.system.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
@@ -28,9 +30,27 @@ struct ContentView: View {
         return dark ? 0.12 : 0.22
     }
 
+    /// The chosen store, or nil for "All" (also when the chosen store was deleted).
+    private var selectedShopID: UUID? {
+        UUID(uuidString: selectedShopRaw).flatMap { id in store.shops.contains { $0.id == id } ? id : nil }
+    }
+
+    private var selectedShop: Binding<UUID?> {
+        Binding(get: { selectedShopID }, set: { selectedShopRaw = $0?.uuidString ?? "" })
+    }
+
+    private var visibleItems: [GroceryItem] {
+        guard let id = selectedShopID else { return store.items }
+        return store.items.filter { $0.shopID == id }
+    }
+
+    private var navigationTitle: String {
+        store.shopName(for: selectedShopID) ?? "Groceries"
+    }
+
     private var sections: [(Aisle, [GroceryItem])] {
         Aisle.allCases.compactMap { aisle in
-            let items = store.items.filter { $0.aisle == aisle }
+            let items = visibleItems.filter { $0.aisle == aisle }
             return items.isEmpty ? nil : (aisle, items)
         }
     }
@@ -41,7 +61,7 @@ struct ContentView: View {
                 ForEach(sections, id: \.0) { aisle, items in
                     Section {
                         ForEach(items) { item in
-                            ItemRow(item: item)
+                            ItemRow(item: item, showShop: selectedShopID == nil)
                         }
                         .onDelete { offsets in
                             offsets.map { items[$0] }.forEach(store.delete)
@@ -51,6 +71,9 @@ struct ContentView: View {
                     }
                 }
             }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                ShopBar(selection: selectedShop) { showingShops = true }
+            }
             .scrollContentBackground(.hidden)
             .background {
                 Color(.systemGroupedBackground)
@@ -59,16 +82,18 @@ struct ContentView: View {
             }
             .animation(.default, value: themeName + customHex)
             .overlay {
-                if store.items.isEmpty {
+                if visibleItems.isEmpty {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
-                                           description: Text("Tap + to add your first item."))
+                                           description: Text(selectedShopID == nil
+                                                             ? "Tap + to add your first item."
+                                                             : "Tap + to add something for this store."))
                 }
             }
-            .navigationTitle("Groceries")
+            .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Clear Done", action: store.clearChecked)
-                        .disabled(!store.items.contains(where: \.isChecked))
+                    Button("Clear Done") { store.clearChecked(shopID: selectedShopID) }
+                        .disabled(!visibleItems.contains(where: \.isChecked))
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
@@ -76,7 +101,8 @@ struct ContentView: View {
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
-            .sheet(isPresented: $showingAdd) { AddItemView() }
+            .sheet(isPresented: $showingAdd) { AddItemView(shopID: selectedShopID) }
+            .sheet(isPresented: $showingShops) { ManageShopsView() }
         }
         .preferredColorScheme(appearance.wrappedValue.scheme)
     }
@@ -85,6 +111,7 @@ struct ContentView: View {
 struct ItemRow: View {
     @Environment(GroceryStore.self) private var store
     let item: GroceryItem
+    var showShop = false
 
     var body: some View {
         Button {
@@ -94,9 +121,14 @@ struct ItemRow: View {
                 Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(item.isChecked ? .green : .secondary)
                     .imageScale(.large)
-                Text(item.name)
-                    .strikethrough(item.isChecked)
-                    .foregroundStyle(item.isChecked ? .secondary : .primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.name)
+                        .strikethrough(item.isChecked)
+                        .foregroundStyle(item.isChecked ? .secondary : .primary)
+                    if showShop, let shop = store.shopName(for: item.shopID) {
+                        Text(shop).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
                 Spacer()
                 if item.quantity > 1 {
                     Text("×\(item.quantity)").foregroundStyle(.secondary).monospacedDigit()
@@ -104,6 +136,14 @@ struct ItemRow: View {
             }
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Menu("Move to Store", systemImage: "arrow.right.circle") {
+                ForEach(store.shops) { shop in
+                    Button(shop.name) { store.move(item, to: shop.id) }
+                }
+                Button("No Store") { store.move(item, to: nil) }
+            }
+        }
     }
 }
 
@@ -113,9 +153,14 @@ struct AddItemView: View {
     @State private var name = ""
     @State private var quantity = 1
     @State private var aisle: Aisle = .produce
+    @State private var shopID: UUID?
     @State private var showingScanner = false
     @State private var lookupMessage: String?
     @State private var isLookingUp = false
+
+    init(shopID: UUID?) {
+        _shopID = State(initialValue: shopID)
+    }
 
     var body: some View {
         NavigationStack {
@@ -131,6 +176,10 @@ struct AddItemView: View {
                 Picker("Aisle", selection: $aisle) {
                     ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
                 }
+                Picker("Store", selection: $shopID) {
+                    Text("Any store").tag(UUID?.none)
+                    ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
+                }
             }
             .navigationTitle("New Item")
             .navigationBarTitleDisplayMode(.inline)
@@ -138,7 +187,7 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle)
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -157,7 +206,7 @@ struct AddItemView: View {
         defer { isLookingUp = false }
         do {
             if let product = try await ProductLookup.product(for: code) {
-                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle)
+                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID)
                 dismiss()
             } else {
                 lookupMessage = "No product found for \(code). Type the name instead."
