@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import Observation
 
 enum Aisle: String, CaseIterable, Codable, Identifiable {
     case produce = "Produce"
@@ -37,8 +37,9 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var isChecked = false
 }
 
-final class GroceryStore: ObservableObject {
-    @Published var items: [GroceryItem] = [] {
+@Observable
+final class GroceryStore {
+    var items: [GroceryItem] = [] {
         didSet { save() }
     }
 

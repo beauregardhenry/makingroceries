@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject private var store: GroceryStore
+    @Environment(GroceryStore.self) private var store
     @State private var showingAdd = false
 
     private var sections: [(Aisle, [GroceryItem])] {
@@ -29,11 +29,8 @@ struct ContentView: View {
             }
             .overlay {
                 if store.items.isEmpty {
-                    VStack(spacing: 8) {
-                        Image(systemName: "cart").font(.largeTitle).foregroundStyle(.secondary)
-                        Text("Your list is empty").font(.headline)
-                        Text("Tap + to add your first item.").foregroundStyle(.secondary)
-                    }
+                    ContentUnavailableView("Your list is empty", systemImage: "cart",
+                                           description: Text("Tap + to add your first item."))
                 }
             }
             .navigationTitle("Groceries")
@@ -43,7 +40,7 @@ struct ContentView: View {
                         .disabled(!store.items.contains(where: \.isChecked))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showingAdd = true } label: { Image(systemName: "plus") }
+                    Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
             .sheet(isPresented: $showingAdd) { AddItemView() }
@@ -52,7 +49,7 @@ struct ContentView: View {
 }
 
 struct ItemRow: View {
-    @EnvironmentObject private var store: GroceryStore
+    @Environment(GroceryStore.self) private var store
     let item: GroceryItem
 
     var body: some View {
@@ -77,7 +74,7 @@ struct ItemRow: View {
 }
 
 struct AddItemView: View {
-    @EnvironmentObject private var store: GroceryStore
+    @Environment(GroceryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var quantity = 1
