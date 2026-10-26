@@ -13,6 +13,6 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.grocery
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Groceries
-        INFOPLIST_KEY_NSCameraUsageDescription: "Groceries uses the camera to scan product barcodes."
+        INFOPLIST_KEY_CFBundleDisplayName: "Makin' Groceries"
+        INFOPLIST_KEY_NSCameraUsageDescription: "Makin' Groceries uses the camera to scan product barcodes."
         SWIFT_VERSION: "5.0"
