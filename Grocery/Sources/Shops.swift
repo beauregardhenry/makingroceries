@@ -87,8 +87,17 @@ struct ManageShopsView: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach($store.shops) { $shop in
-                        TextField("Store name", text: $shop.name)
+                    ForEach(store.shops) { shop in
+                        NavigationLink {
+                            ShopMapView(shopID: shop.id)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(shop.name.isEmpty ? "Unnamed store" : shop.name)
+                                if shop.orderedAisles != Aisle.allCases || !shop.aisleLabels.isEmpty {
+                                    Text("Custom aisle map").font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
                     }
                     .onDelete { offsets in
                         offsets.map { store.shops[$0] }.forEach(store.deleteShop)
@@ -97,7 +106,7 @@ struct ManageShopsView: View {
                 } header: {
                     Text("Your stores")
                 } footer: {
-                    Text("Tap a name to rename it. Swipe to delete a store; its items stay on your list without a store.")
+                    Text("Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
                 }
 
                 Section("Add your own") {
@@ -129,5 +138,64 @@ struct ManageShopsView: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
         }
+    }
+}
+
+/// Edit one store: its name, the order its aisles are walked in, and optional aisle labels.
+struct ShopMapView: View {
+    @Environment(GroceryStore.self) private var store
+    let shopID: UUID
+
+    var body: some View {
+        @Bindable var store = store
+        if let i = store.shops.firstIndex(where: { $0.id == shopID }) {
+            List {
+                Section("Name") {
+                    TextField("Store name", text: $store.shops[i].name)
+                }
+
+                Section {
+                    ForEach(store.shops[i].orderedAisles) { aisle in
+                        HStack {
+                            Label(aisle.rawValue, systemImage: aisle.symbol)
+                            Spacer()
+                            TextField("Aisle", text: labelBinding(index: i, aisle: aisle))
+                                .multilineTextAlignment(.trailing)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: 120)
+                        }
+                    }
+                    .onMove { offsets, destination in
+                        var order = store.shops[i].orderedAisles
+                        order.move(fromOffsets: offsets, toOffset: destination)
+                        store.shops[i].aisleOrder = order
+                    }
+                } header: {
+                    Text("Aisle order")
+                } footer: {
+                    Text("Drag the handles to match the route you walk in this store. The list sorts this way when the store is selected. The optional label on the right, like \"Aisle 7\", shows in each section header.")
+                }
+
+                Section {
+                    Button("Reset to Default Order", role: .destructive) {
+                        store.shops[i].aisleOrder = Aisle.allCases
+                        store.shops[i].aisleLabels = [:]
+                    }
+                    .disabled(store.shops[i].aisleOrder == Aisle.allCases && store.shops[i].aisleLabels.isEmpty)
+                }
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle(store.shops[i].name.isEmpty ? "Store" : store.shops[i].name)
+            .navigationBarTitleDisplayMode(.inline)
+        } else {
+            ContentUnavailableView("Store not found", systemImage: "storefront")
+        }
+    }
+
+    private func labelBinding(index i: Int, aisle: Aisle) -> Binding<String> {
+        Binding(
+            get: { store.shops[i].aisleLabels[aisle.rawValue] ?? "" },
+            set: { store.shops[i].aisleLabels[aisle.rawValue] = $0 }
+        )
     }
 }

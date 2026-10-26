@@ -42,6 +42,36 @@ struct GroceryItem: Identifiable, Codable, Equatable {
 struct Shop: Identifiable, Codable, Equatable, Hashable {
     var id = UUID()
     var name: String
+    /// The order this store's aisles are walked in; may be missing newer aisles (see `orderedAisles`).
+    var aisleOrder: [Aisle] = Aisle.allCases
+    /// Optional per-aisle labels such as "Aisle 7", keyed by `Aisle.rawValue`.
+    var aisleLabels: [String: String] = [:]
+
+    init(id: UUID = UUID(), name: String) {
+        self.id = id
+        self.name = name
+    }
+
+    // Stores saved before aisle maps existed have no order or labels.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        aisleOrder = try c.decodeIfPresent([Aisle].self, forKey: .aisleOrder) ?? Aisle.allCases
+        aisleLabels = try c.decodeIfPresent([String: String].self, forKey: .aisleLabels) ?? [:]
+    }
+
+    /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention.
+    var orderedAisles: [Aisle] {
+        var seen = Set<Aisle>()
+        let saved = aisleOrder.filter { seen.insert($0).inserted }
+        return saved + Aisle.allCases.filter { !seen.contains($0) }
+    }
+
+    func label(for aisle: Aisle) -> String? {
+        let text = aisleLabels[aisle.rawValue]?.trimmingCharacters(in: .whitespaces)
+        return (text?.isEmpty == false) ? text : nil
+    }
 
     static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery"]
     static let presetNames = [
@@ -109,6 +139,10 @@ final class GroceryStore {
             if item.shopID == shop.id { item.shopID = nil }
             return item
         }
+    }
+
+    func shop(for id: UUID?) -> Shop? {
+        id.flatMap { id in shops.first { $0.id == id } }
     }
 
     func shopName(for id: UUID?) -> String? {

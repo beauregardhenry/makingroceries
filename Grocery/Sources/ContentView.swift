@@ -67,8 +67,15 @@ struct ContentView: View {
         }
     }
 
+    /// The store whose aisle map applies, when one store is selected.
+    private var mappedShop: Shop? {
+        if case .shop(let id) = filter { return store.shop(for: id) }
+        return nil
+    }
+
+    /// Sections follow the selected store's walking order, or the default order otherwise.
     private var sections: [(Aisle, [GroceryItem])] {
-        Aisle.allCases.compactMap { aisle in
+        (mappedShop?.orderedAisles ?? Aisle.allCases).compactMap { aisle in
             let items = visibleItems.filter { $0.aisle == aisle }
             return items.isEmpty ? nil : (aisle, items)
         }
@@ -86,7 +93,13 @@ struct ContentView: View {
                             offsets.map { items[$0] }.forEach(store.delete)
                         }
                     } header: {
-                        Label(aisle.rawValue, systemImage: aisle.symbol)
+                        HStack {
+                            Label(aisle.rawValue, systemImage: aisle.symbol)
+                            Spacer()
+                            if let label = mappedShop?.label(for: aisle) {
+                                Text(label).textCase(nil).font(.subheadline.weight(.semibold))
+                            }
+                        }
                     }
                 }
             }
