@@ -38,9 +38,16 @@ struct ItemDetailView: View {
                 }
 
                 Section {
-                    TextField("Price of one (optional)", text: $priceText).keyboardType(.decimalPad)
-                    TextField("Note: brand, size, coupon, sale", text: $noteText, axis: .vertical)
-                        .lineLimit(1...3)
+                    LabeledContent("Price of one") {
+                        TextField("Optional", text: $priceText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    LabeledContent("Note") {
+                        TextField("Brand, size, coupon", text: $noteText, axis: .vertical)
+                            .lineLimit(1...3)
+                            .multilineTextAlignment(.trailing)
+                    }
                 } footer: {
                     Text("Notes show under the item, so a coupon or the exact brand is in front of you at the store.")
                 }

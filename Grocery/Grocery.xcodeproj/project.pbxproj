@@ -13,11 +13,20 @@
 		394E30AEB0EF8609BA144A6A /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4BBFEA4751E4D06061FAB /* Theme.swift */; };
 		4E94074FF4F875A0B76C9D19 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
+		60DDDE0D04DDE17637FF79D3 /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
 		7D7B96B189C4AC949D6647C9 /* Pricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */; };
 		7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */; };
+		8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
 		A26CD52107A02B7289480662 /* Meals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037FD404E088F37C6CAFE4DF /* Meals.swift */; };
+		A840AB6FECFCDC572AE6261A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
+		B099E857BDD2AECDD992B6E6 /* GroceryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */; };
+		B3348D5ED3CEFAFA2B6F2094 /* GroceryWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B70FCB828727F7E1D4929CB3 /* Shops.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF29D61E22236EF73E84558 /* Shops.swift */; };
+		B7E6A80D8CB40B374CC268F9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
+		BEE6B860BE22546840579D61 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		BF869CCAEED5BF704E53DDF9 /* Quick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */; };
+		C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */; };
+		CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9351DBAEF175CDA248781172 /* Arrival.swift */; };
 		D0F0CA9086CFACB51D141D5F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CA078D797036AB2313A5227 /* Assets.xcassets */; };
 		DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65588F8D169654D2847F9EA9 /* ItemDetail.swift */; };
 		E1EE5F13C79E3D7D69662958 /* Pantry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5540C70E607A8459DCCDAB9 /* Pantry.swift */; };
@@ -26,22 +35,54 @@
 		EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		2097069F454F8A5106B2110A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FF47BA8294BCCBCEAC1EB73 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 77F4DD046872DC8DA1DF65CB;
+			remoteInfo = GroceryWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		72258F4A14A988AECFDA0219 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B3348D5ED3CEFAFA2B6F2094 /* GroceryWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		031CE2AE19C066140118EE8D /* ProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductLookup.swift; sourceTree = "<group>"; };
 		037FD404E088F37C6CAFE4DF /* Meals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meals.swift; sourceTree = "<group>"; };
 		1388B3BE5B5BB9A90385765B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		1B01D880BC233A48201117CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usual.swift; sourceTree = "<group>"; };
 		504E059EBD40D84873D6C1F3 /* GroceryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryApp.swift; sourceTree = "<group>"; };
 		5D940F2136F269FF8EA91399 /* Grocery.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Grocery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F4FABF22DF964392BCB1339 /* GroceryWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GroceryWidget.entitlements; sourceTree = "<group>"; };
 		627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quick.swift; sourceTree = "<group>"; };
 		65588F8D169654D2847F9EA9 /* ItemDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetail.swift; sourceTree = "<group>"; };
+		69D78A5C9275B720C9B3373E /* GroceryIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryIntents.swift; sourceTree = "<group>"; };
 		8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8CA078D797036AB2313A5227 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8F33F4BA1F49153D285628F1 /* Grocery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Grocery.entitlements; sourceTree = "<group>"; };
+		9351DBAEF175CDA248781172 /* Arrival.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arrival.swift; sourceTree = "<group>"; };
 		9BF29D61E22236EF73E84558 /* Shops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shops.swift; sourceTree = "<group>"; };
 		A14032117470AF68E950FAAF /* Photos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photos.swift; sourceTree = "<group>"; };
+		A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GroceryWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWidget.swift; sourceTree = "<group>"; };
 		CCD4BBFEA4751E4D06061FAB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanner.swift; sourceTree = "<group>"; };
 		D9EF2A8057BCF9A88E835685 /* Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parsing.swift; sourceTree = "<group>"; };
+		E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryShortcuts.swift; sourceTree = "<group>"; };
 		E7B189695D0B80057BC76D09 /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
 		F5540C70E607A8459DCCDAB9 /* Pantry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pantry.swift; sourceTree = "<group>"; };
 		FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pricing.swift; sourceTree = "<group>"; };
@@ -53,6 +94,7 @@
 			children = (
 				7C4DA0B874164EEAFA746E98 /* Shared */,
 				47349F444530E22545733956 /* Sources */,
+				6073D35FE65382F7FE0BFFE5 /* Widget */,
 				149A6913ABFCB6444F3F1C5A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				5D940F2136F269FF8EA91399 /* Grocery.app */,
+				A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,11 +111,14 @@
 		47349F444530E22545733956 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				9351DBAEF175CDA248781172 /* Arrival.swift */,
 				8CA078D797036AB2313A5227 /* Assets.xcassets */,
 				E7B189695D0B80057BC76D09 /* Backup.swift */,
 				CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */,
 				8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */,
+				8F33F4BA1F49153D285628F1 /* Grocery.entitlements */,
 				504E059EBD40D84873D6C1F3 /* GroceryApp.swift */,
+				E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */,
 				65588F8D169654D2847F9EA9 /* ItemDetail.swift */,
 				037FD404E088F37C6CAFE4DF /* Meals.swift */,
 				F5540C70E607A8459DCCDAB9 /* Pantry.swift */,
@@ -86,9 +132,20 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
+		6073D35FE65382F7FE0BFFE5 /* Widget */ = {
+			isa = PBXGroup;
+			children = (
+				5F4FABF22DF964392BCB1339 /* GroceryWidget.entitlements */,
+				AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */,
+				1B01D880BC233A48201117CB /* Info.plist */,
+			);
+			path = Widget;
+			sourceTree = "<group>";
+		};
 		7C4DA0B874164EEAFA746E98 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				69D78A5C9275B720C9B3373E /* GroceryIntents.swift */,
 				1388B3BE5B5BB9A90385765B /* Models.swift */,
 				D9EF2A8057BCF9A88E835685 /* Parsing.swift */,
 				031CE2AE19C066140118EE8D /* ProductLookup.swift */,
@@ -105,10 +162,12 @@
 			buildPhases = (
 				50DFC1AF2C7F8999364B5C12 /* Sources */,
 				62042E52DFD8F9B0AB0927F2 /* Resources */,
+				72258F4A14A988AECFDA0219 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E17F78572E3433D2DF37E835 /* PBXTargetDependency */,
 			);
 			name = Grocery;
 			packageProductDependencies = (
@@ -116,6 +175,23 @@
 			productName = Grocery;
 			productReference = 5D940F2136F269FF8EA91399 /* Grocery.app */;
 			productType = "com.apple.product-type.application";
+		};
+		77F4DD046872DC8DA1DF65CB /* GroceryWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5EFB74DFF843119D979EFEC7 /* Build configuration list for PBXNativeTarget "GroceryWidget" */;
+			buildPhases = (
+				E6DF046656613794EBE12518 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GroceryWidget;
+			packageProductDependencies = (
+			);
+			productName = GroceryWidget;
+			productReference = A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -143,6 +219,7 @@
 			projectRoot = "";
 			targets = (
 				48CCE2EECFDB1EFA030FBAB5 /* Grocery */,
+				77F4DD046872DC8DA1DF65CB /* GroceryWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -163,10 +240,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */,
 				184C36CE7AE420FE09F8749B /* Backup.swift in Sources */,
 				EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */,
 				EA142E242CB985235ABAD1CA /* ContentView.swift in Sources */,
 				2DDB9282F72EA268D95D785E /* GroceryApp.swift in Sources */,
+				60DDDE0D04DDE17637FF79D3 /* GroceryIntents.swift in Sources */,
+				C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */,
 				DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */,
 				A26CD52107A02B7289480662 /* Meals.swift in Sources */,
 				E66C9069C4B911EE0B982A6A /* Models.swift in Sources */,
@@ -182,7 +262,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E6DF046656613794EBE12518 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */,
+				B099E857BDD2AECDD992B6E6 /* GroceryWidget.swift in Sources */,
+				A840AB6FECFCDC572AE6261A /* Models.swift in Sources */,
+				BEE6B860BE22546840579D61 /* Parsing.swift in Sources */,
+				B7E6A80D8CB40B374CC268F9 /* ProductLookup.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E17F78572E3433D2DF37E835 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 77F4DD046872DC8DA1DF65CB /* GroceryWidget */;
+			targetProxy = 2097069F454F8A5106B2110A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		014BB0D019AA323E8AF5C6A7 /* Debug */ = {
@@ -219,6 +319,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -237,6 +338,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -248,14 +350,35 @@
 			};
 			name = Debug;
 		};
+		031E00F4A937FAABC1EA5F84 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/GroceryWidget.entitlements;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.grocery.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		0411D3BC381B56832D25CE65 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/Grocery.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Makin' Groceries";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Makin' Groceries uses the camera to scan product barcodes.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Makin' Groceries uses your location to remind you of your list when you arrive at a store you've set up, even when the app is closed. Your location stays on this device.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Makin' Groceries uses your location to remember where a store is, so it can remind you of your list when you arrive.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -268,14 +391,35 @@
 			};
 			name = Debug;
 		};
+		1EED44AE8626B1B615A650C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/GroceryWidget.entitlements;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.grocery.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		77C22AB5874B4B796A2C5DEF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/Grocery.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Makin' Groceries";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Makin' Groceries uses the camera to scan product barcodes.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Makin' Groceries uses your location to remind you of your list when you arrive at a store you've set up, even when the app is closed. Your location stays on this device.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Makin' Groceries uses your location to remember where a store is, so it can remind you of your list when you arrive.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -322,6 +466,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -334,6 +479,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -347,6 +493,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5EFB74DFF843119D979EFEC7 /* Build configuration list for PBXNativeTarget "GroceryWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EED44AE8626B1B615A650C1 /* Debug */,
+				031E00F4A937FAABC1EA5F84 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		76D8C26626993BE3CE049955 /* Build configuration list for PBXNativeTarget "Grocery" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

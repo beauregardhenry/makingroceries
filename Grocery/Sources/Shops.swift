@@ -145,6 +145,7 @@ struct ManageShopsView: View {
 struct ShopMapView: View {
     @Environment(GroceryStore.self) private var store
     let shopID: UUID
+    @State private var locationMessage: String?
 
     var body: some View {
         @Bindable var store = store
@@ -177,6 +178,36 @@ struct ShopMapView: View {
                 }
 
                 Section {
+                    Button {
+                        Task { await useCurrentLocation(index: i) }
+                    } label: {
+                        Label(store.shops[i].hasLocation ? "Update Location to Here" : "Use My Current Location",
+                              systemImage: "location")
+                    }
+                    if store.shops[i].hasLocation {
+                        Toggle("Remind me when I arrive", isOn: Binding(
+                            get: { store.shops[i].remindOnArrival == true },
+                            set: { on in
+                                store.shops[i].remindOnArrival = on
+                                if on { Task { await ArrivalReminders.shared.requestPermissions() } }
+                            }
+                        ))
+                        Button("Clear Location", role: .destructive) {
+                            store.shops[i].latitude = nil
+                            store.shops[i].longitude = nil
+                            store.shops[i].remindOnArrival = nil
+                        }
+                    }
+                    if let locationMessage {
+                        Text(locationMessage).font(.footnote).foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Arrival reminder")
+                } footer: {
+                    Text("Tap while you're at the store. When you arrive later, you get a notification listing what's on this store's list. For this to work with the app closed, choose \"Always\" for location. Your location never leaves this device.")
+                }
+
+                Section {
                     Button("Reset to Default Order", role: .destructive) {
                         store.shops[i].aisleOrder = Aisle.allCases
                         store.shops[i].aisleLabels = [:]
@@ -190,6 +221,18 @@ struct ShopMapView: View {
         } else {
             ContentUnavailableView("Store not found", systemImage: "storefront")
         }
+    }
+
+    private func useCurrentLocation(index i: Int) async {
+        locationMessage = nil
+        guard let coordinate = await ArrivalReminders.shared.currentLocation() else {
+            locationMessage = "Couldn't get your location. Allow location access for Makin' Groceries in Settings, then try again."
+            return
+        }
+        guard store.shops.indices.contains(i) else { return }
+        store.shops[i].latitude = coordinate.latitude
+        store.shops[i].longitude = coordinate.longitude
+        locationMessage = "Location saved."
     }
 
     private func labelBinding(index i: Int, aisle: Aisle) -> Binding<String> {
