@@ -79,11 +79,20 @@ struct AddItemView: View {
     @State private var name = ""
     @State private var quantity = 1
     @State private var aisle: Aisle = .produce
+    @State private var showingScanner = false
+    @State private var lookupMessage: String?
+    @State private var isLookingUp = false
 
     var body: some View {
         NavigationStack {
             Form {
                 TextField("Item name", text: $name)
+                Button("Scan Barcode", systemImage: "barcode.viewfinder") { showingScanner = true }
+                if isLookingUp {
+                    HStack { ProgressView(); Text("Looking up product…").foregroundStyle(.secondary) }
+                } else if let lookupMessage {
+                    Text(lookupMessage).font(.footnote).foregroundStyle(.secondary)
+                }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
                 Picker("Aisle", selection: $aisle) {
                     ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
@@ -103,5 +112,23 @@ struct AddItemView: View {
             }
         }
         .presentationDetents([.medium])
+        .sheet(isPresented: $showingScanner) {
+            ScanSheet { code in Task { await lookUp(code) } }
+        }
+    }
+
+    private func lookUp(_ code: String) async {
+        isLookingUp = true
+        lookupMessage = nil
+        defer { isLookingUp = false }
+        do {
+            if let found = try await ProductLookup.name(for: code) {
+                name = found
+            } else {
+                lookupMessage = "No product found for \(code). Type the name instead."
+            }
+        } catch {
+            lookupMessage = "Couldn't look up that barcode. Check your connection."
+        }
     }
 }
