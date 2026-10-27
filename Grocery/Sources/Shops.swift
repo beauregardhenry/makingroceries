@@ -170,11 +170,25 @@ struct ShopMapView: View {
                         var order = store.shops[i].orderedAisles
                         order.move(fromOffsets: offsets, toOffset: destination)
                         store.shops[i].aisleOrder = order
+                        // Setting the order by hand means you don't want it changed underneath you.
+                        store.shops[i].learnRoute = false
                     }
                 } header: {
                     Text("Aisle order")
                 } footer: {
                     Text("Drag the handles to match the route you walk in this store. The list sorts this way when the store is selected. The optional label on the right, like \"Aisle 7\", shows in each section header.")
+                }
+
+                Section {
+                    Toggle("Learn my route", isOn: Binding(
+                        get: { store.shops[i].learnRoute != false },
+                        set: { store.shops[i].learnRoute = $0 }
+                    ))
+                } footer: {
+                    let trips = store.tripCount(for: store.shops[i])
+                    Text(store.shops[i].learnRoute == false
+                         ? "Off, because you set the order by hand. Turn it on and the app will adjust it as you shop."
+                         : "As you check things off here, the app learns the order you walk the aisles in and updates this list after a few trips. Trips learned from so far: \(trips).")
                 }
 
                 Section {

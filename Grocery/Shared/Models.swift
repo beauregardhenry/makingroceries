@@ -130,6 +130,9 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
     var longitude: Double?
     /// Notify when arriving here with items on the list.
     var remindOnArrival: Bool?
+    /// Adjust the aisle order from the order you check things off. Nil means on.
+    var learnRoute: Bool?
+    var routeEvents: [RouteEvent]?
 
     init(id: UUID = UUID(), name: String) {
         self.id = id
@@ -146,6 +149,8 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
         latitude = try c.decodeIfPresent(Double.self, forKey: .latitude)
         longitude = try c.decodeIfPresent(Double.self, forKey: .longitude)
         remindOnArrival = try c.decodeIfPresent(Bool.self, forKey: .remindOnArrival)
+        learnRoute = try c.decodeIfPresent(Bool.self, forKey: .learnRoute)
+        routeEvents = try c.decodeIfPresent([RouteEvent].self, forKey: .routeEvents)
     }
 
     /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention.
@@ -298,7 +303,28 @@ final class GroceryStore {
     func toggle(_ item: GroceryItem) {
         guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
         items[i].isChecked.toggle()
-        if items[i].isChecked { recordPurchase(of: items[i].name) }
+        if items[i].isChecked {
+            recordPurchase(of: items[i].name)
+            recordCheckOff(items[i])
+        }
+    }
+
+    /// Notes where in the store an item was checked off, and updates the store's aisle order
+    /// once enough trips agree.
+    private func recordCheckOff(_ item: GroceryItem, at date: Date = Date()) {
+        guard let id = item.shopID, let i = shops.firstIndex(where: { $0.id == id }),
+              shops[i].learnRoute != false else { return }
+        var events = shops[i].routeEvents ?? []
+        events.append(RouteEvent(aisle: item.aisle, date: date))
+        shops[i].routeEvents = Array(events.suffix(RouteLearning.maximumEvents))
+        if let learned = RouteLearning.order(current: shops[i].orderedAisles, events: shops[i].routeEvents ?? []) {
+            shops[i].aisleOrder = learned
+        }
+    }
+
+    /// Check-offs recorded for the route, for tests and the store screen.
+    func tripCount(for shop: Shop) -> Int {
+        RouteLearning.trips(from: shop.routeEvents ?? []).count
     }
 
     func delete(_ item: GroceryItem) {
@@ -324,6 +350,25 @@ final class GroceryStore {
         items[i] = item
         if oldPhoto != item.photo { removePhotoIfUnused(oldPhoto) }
         remember(name: item.name, aisle: item.aisle, shopID: item.shopID, price: item.price, countsAsUse: false)
+    }
+
+    /// Saves prices read from a receipt: sets the price of each matched list item and records every
+    /// included price in the item's price history for `shopID`. Returns how many were saved.
+    @discardableResult
+    func applyReceipt(_ lines: [(entry: ReceiptEntry, item: GroceryItem?)], shopID: UUID?) -> Int {
+        var saved = 0
+        for line in lines {
+            if let item = line.item, let i = items.firstIndex(where: { $0.id == item.id }) {
+                items[i].price = line.entry.unitPrice
+                remember(name: items[i].name, aisle: items[i].aisle, shopID: shopID ?? items[i].shopID,
+                         price: line.entry.unitPrice, countsAsUse: false)
+            } else {
+                remember(name: line.entry.name, aisle: resolveAisle(for: line.entry.name), shopID: shopID,
+                         price: line.entry.unitPrice, countsAsUse: false)
+            }
+            saved += 1
+        }
+        return saved
     }
 
     /// Clears checked items, limited to those `include` accepts (all by default).

@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var showingTotals = false
     @State private var showingPantry = false
     @State private var showingBackup = false
+    @State private var showingReceipt = false
+    @State private var showingTrip = false
     @State private var detailItem: GroceryItem?
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("shoppingMode") private var shoppingMode = false
@@ -227,6 +229,8 @@ struct ContentView: View {
                         Button("Pantry Check", systemImage: "checklist") { showingPantry = true }
                         Button("Meals", systemImage: "fork.knife") { showingMeals = true }
                         Button("Totals by Store", systemImage: "dollarsign.circle") { showingTotals = true }
+                        Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { showingTrip = true }
+                        Button("Scan Receipt", systemImage: "receipt") { showingReceipt = true }
                         Divider()
                         Toggle(isOn: $shoppingMode) {
                             Label("Shopping Mode", systemImage: "textformat.size")
@@ -252,6 +256,8 @@ struct ContentView: View {
             .sheet(isPresented: $showingTotals) { TotalsView() }
             .sheet(isPresented: $showingPantry) { PantryCheckView(shopID: newItemShopID) }
             .sheet(isPresented: $showingBackup) { BackupView() }
+            .sheet(isPresented: $showingReceipt) { ReceiptView(shopID: newItemShopID) }
+            .sheet(isPresented: $showingTrip) { TripPlanView() }
             .sheet(item: $detailItem) { item in
                 ItemDetailView(item: item, repeatDays: store.recurrence(for: item)?.everyDays ?? 0)
             }
