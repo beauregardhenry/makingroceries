@@ -1,0 +1,64 @@
+name: Coverage ratchet
+
+# Raises coverage-baseline.txt on main after coverage climbs, instead of relying on each PR to bump
+# the file itself. Two PRs open at once used to both edit the same line and conflict (or silently
+# clobber one another's real number) whenever both raised coverage; this keeps the file out of
+# feature branches entirely and lets exactly one place, post-merge on main, own writing to it.
+#
+# Pushing to main works out of the box with the workflow's own token while the repository has no
+# branch ruleset. If you later add a ruleset that requires pull requests, give the job a
+# RATCHET_DEPLOY_KEY secret (see test-count-ratchet.yml for the details).
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: coverage-ratchet-main
+  cancel-in-progress: false
+
+jobs:
+  ratchet:
+    name: Ratchet the coverage baseline
+    runs-on: macos-15
+    timeout-minutes: 45
+    if: "!contains(github.event.head_commit.message, '[skip ratchet]')"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          ssh-key: ${{ secrets.RATCHET_DEPLOY_KEY }}
+      - name: Select the newest Xcode 26
+        run: |
+          latest="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)"
+          if [ -z "$latest" ]; then
+            echo "::error::This runner has no Xcode 26, which the app needs (iOS 26 SDK)."
+            exit 1
+          fi
+          sudo xcode-select -s "$latest/Contents/Developer"
+      - name: Measure coverage and raise the baseline if it climbed
+        run: ./scripts/check-coverage.sh --update-if-higher
+      - name: Commit and push the baseline if it changed
+        run: |
+          if git diff --quiet -- coverage-baseline.txt; then
+            echo "No coverage increase to record."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add coverage-baseline.txt
+          git commit -m "chore: ratchet coverage baseline [skip ratchet] [skip ci]" -m "$(git diff --cached -- coverage-baseline.txt)"
+          # test-count-ratchet.yml runs on the same push and usually lands first, as may another
+          # merge. The two baseline files never overlap, so rebasing this one-line commit onto the
+          # new main and retrying is safe; a genuine conflict still fails the job loudly.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main moved since checkout (attempt ${attempt}); rebasing onto it and retrying."
+            git pull --rebase origin main
+          done
+          echo "Could not push the raised baseline after 3 attempts." >&2
+          exit 1

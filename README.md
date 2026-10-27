@@ -1,5 +1,7 @@
 # Makin' Groceries
 
+[![CI](https://github.com/beauregardhenry/makingroceries/actions/workflows/ci.yml/badge.svg)](https://github.com/beauregardhenry/makingroceries/actions/workflows/ci.yml)
+
 An iPhone grocery list built around how you actually shop: separate lists for each store, in the order you walk the aisles.
 
 Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencies.
@@ -114,6 +116,14 @@ Then regenerate and press Run. A free Apple ID is enough, but builds expire afte
 
 The Watch app is included in the repo but isn't embedded in the iPhone app by default, because embedding it makes every build require the watchOS platform in Xcode (Xcode > Settings > Components). To turn it on, install that platform, uncomment `- target: GroceryWatch` in `Grocery/project.yml`, set your team on the new target, and regenerate. The phone and watch talk through WatchConnectivity, so the watch shows the lists after the phone app has opened once with the watch nearby. The code type-checks against the watchOS SDK, but it hasn't been built into an app or run on a watch or the watch simulator yet.
 
+## Development and CI
+
+```bash
+./scripts/test.sh   # build everything and run the unit tests on an iPhone simulator
+```
+
+Every pull request and push to `main` runs the same tests in GitHub Actions, plus four more checks: zero tolerance for `as!`, `fatalError(`, `print(` and `TODO`/`FIXME` in the app sources; a test-count floor and a coverage floor that can only rise (the numbers live in `test-count-baseline.txt` and `coverage-baseline.txt` and are raised automatically after merges); and a check that the checked-in Xcode project hasn't drifted from the sources. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Layout
 
 | Folder | Contents |
@@ -122,7 +132,10 @@ The Watch app is included in the repo but isn't embedded in the iPhone app by de
 | `Grocery/Shared` | Data model, storage, parsing and Siri actions, used by the app and the widget |
 | `Grocery/Widget` | The widget |
 | `Grocery/ShareExtension` | The Safari Share sheet extension |
-| `Grocery/Watch`, `Grocery/WatchShared` | The Apple Watch app and the lists format the phone sends it |
+| `Grocery/Watch` | The Apple Watch app |
+| `Grocery/Tests` | Unit tests for everything in `Shared` |
+| `scripts` | Test, coverage and CI check scripts |
+| `.github/workflows` | CI and the baseline ratchets |
 | `docs/screenshots` | The README's pictures |
 | `tools/make_icon.py` | Draws the app icon: `python3 tools/make_icon.py` |
 
