@@ -8,6 +8,7 @@ struct ItemDetailView: View {
     @State private var draft: GroceryItem
     @State private var priceText: String
     @State private var noteText: String
+    @State private var sizeText: String
     @State private var repeatDays: Int
     @State private var pickedPhoto: PhotosPickerItem?
     /// Photos saved during this edit, so unused ones can be deleted afterwards.
@@ -19,6 +20,7 @@ struct ItemDetailView: View {
         _draft = State(initialValue: item)
         _priceText = State(initialValue: Price.editText(item.price))
         _noteText = State(initialValue: item.note ?? "")
+        _sizeText = State(initialValue: item.sizeAmount.flatMap { a in item.sizeUnit.map { SizeParser.label(a, $0) } } ?? "")
         _repeatDays = State(initialValue: repeatDays)
     }
 
@@ -43,13 +45,20 @@ struct ItemDetailView: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
+                    LabeledContent("Size") {
+                        TextField("16 oz, 1 lb, 12 ct", text: $sizeText)
+                            .multilineTextAlignment(.trailing)
+                            .textInputAutocapitalization(.never)
+                    }
                     LabeledContent("Note") {
                         TextField("Brand, size, coupon", text: $noteText, axis: .vertical)
                             .lineLimit(1...3)
                             .multilineTextAlignment(.trailing)
                     }
                 } footer: {
-                    Text("Notes show under the item, so a coupon or the exact brand is in front of you at the store.")
+                    let size = SizeParser.parse(sizeText)
+                    let unit = UnitPrice.text(price: Price.parse(priceText), amount: size?.amount, unit: size?.unit)
+                    Text((unit.map { "That's \($0). " } ?? "") + "Add a size to see the price per ounce, so different package sizes compare fairly. Notes show under the item, so a coupon or the exact brand is in front of you at the store.")
                 }
 
                 Section("Photo") {
@@ -101,6 +110,9 @@ struct ItemDetailView: View {
         draft.price = Price.parse(priceText)
         let note = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.note = note.isEmpty ? nil : note
+        let size = SizeParser.parse(sizeText)
+        draft.sizeAmount = size?.amount
+        draft.sizeUnit = size?.unit
         store.update(draft)
         store.setRepeat(for: draft, everyDays: repeatDays == 0 ? nil : repeatDays)
         newPhotos.filter { $0 != draft.photo }.forEach(PhotoStore.remove)

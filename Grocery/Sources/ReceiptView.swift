@@ -23,6 +23,9 @@ struct ReceiptView: View {
     @State private var pickedPhoto: PhotosPickerItem?
     @State private var showingCamera = false
     @State private var done: String?
+    @State private var receiptTotal: Double?
+    @State private var allEntries: [ReceiptEntry] = []
+    @State private var countSpending = true
 
     init(shopID: UUID?) {
         _shopID = State(initialValue: shopID)
@@ -31,6 +34,7 @@ struct ReceiptView: View {
     private var matched: [Int] { lines.indices.filter { lines[$0].item != nil } }
     private var unmatched: [Int] { lines.indices.filter { lines[$0].item == nil } }
     private var selectedCount: Int { lines.filter(\.include).count }
+    private var spendAmount: Double { receiptTotal ?? allEntries.reduce(0) { $0 + $1.total } }
 
     var body: some View {
         NavigationStack {
@@ -70,6 +74,13 @@ struct ReceiptView: View {
                         Text("Not on your list")
                     } footer: {
                         Text("Turn these on to remember their prices anyway.")
+                    }
+                }
+                if !allEntries.isEmpty {
+                    Section {
+                        Toggle("Add \(Price.format(spendAmount)) to Spending", isOn: $countSpending)
+                    } footer: {
+                        Text(receiptTotal == nil ? "Using the sum of the items found, since no total was read." : "Using the total printed on the receipt.")
                     }
                 }
                 if let done {
@@ -146,6 +157,8 @@ struct ReceiptView: View {
             rows += page
         }
         let entries = ReceiptParser.parse(rows: rows)
+        receiptTotal = ReceiptParser.total(rows: rows)
+        allEntries = entries
         guard !entries.isEmpty else {
             message = "Couldn't find any items and prices. Try a flatter, well-lit photo of the whole receipt."
             lines = []
@@ -165,9 +178,18 @@ struct ReceiptView: View {
 
     private func save() {
         let chosen = lines.filter(\.include).map { (entry: $0.entry, item: $0.item) }
-        if chosen.isEmpty { dismiss(); return }
+        let recordsSpend = countSpending && !allEntries.isEmpty
+        if chosen.isEmpty && !recordsSpend { dismiss(); return }
         let n = store.applyReceipt(chosen, shopID: shopID)
-        done = "Saved \(n) price\(n == 1 ? "" : "s")."
+        if recordsSpend {
+            var byAisle: [String: Double] = [:]
+            for entry in allEntries {
+                let aisle = lines.first { $0.entry.id == entry.id }?.item?.aisle ?? store.resolveAisle(for: entry.name)
+                byAisle[aisle.rawValue, default: 0] += entry.total
+            }
+            store.recordSpend(amount: spendAmount, shopID: shopID, byAisle: byAisle)
+        }
+        done = "Saved \(n) price\(n == 1 ? "" : "s")" + (recordsSpend ? " and the trip total." : ".")
         Task {
             try? await Task.sleep(for: .seconds(1))
             dismiss()

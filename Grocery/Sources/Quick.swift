@@ -7,6 +7,7 @@ struct QuickAddBar: View {
     let shopID: UUID?
     let inferShop: Bool
     @State private var text = ""
+    @State private var dictation = Dictation()
     @FocusState private var focused: Bool
 
     private var token: String {
@@ -65,12 +66,24 @@ struct QuickAddBar: View {
                 }
             }
 
+            if let message = dictation.message {
+                Text(message).font(.caption).foregroundStyle(.orange).frame(maxWidth: .infinity, alignment: .leading)
+            }
             HStack(spacing: 8) {
                 TextField("Add items: milk, eggs, 6 bananas", text: $text)
                     .focused($focused)
                     .submitLabel(.done)
                     .textInputAutocapitalization(.sentences)
                     .onSubmit(submit)
+                Button {
+                    Task { await dictation.toggle() }
+                } label: {
+                    Image(systemName: dictation.isListening ? "mic.fill" : "mic")
+                        .font(.title3)
+                        .foregroundStyle(dictation.isListening ? Color.red : Color.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(dictation.isListening ? "Stop dictation" : "Dictate items")
                 Button(action: submit) {
                     Image(systemName: "arrow.up.circle.fill").font(.title2)
                 }
@@ -79,6 +92,15 @@ struct QuickAddBar: View {
             }
             .padding(.horizontal, 14).padding(.vertical, 10)
             .background(.regularMaterial, in: Capsule())
+            .onChange(of: dictation.transcript) { _, spoken in
+                if dictation.isListening { text = spoken }
+            }
+            .onChange(of: dictation.isListening) { _, listening in
+                if !listening, !dictation.transcript.isEmpty {
+                    text = QuickAdd.written(fromSpoken: dictation.transcript)
+                    dictation.transcript = ""
+                }
+            }
         }
     }
 

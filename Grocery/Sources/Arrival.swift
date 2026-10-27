@@ -102,11 +102,31 @@ final class ArrivalReminders: NSObject, CLLocationManagerDelegate, UNUserNotific
         let status = manager.authorizationStatus
         guard status == .authorizedWhenInUse || status == .authorizedAlways else { return }
         guard let here = await currentLocation() else { return }
-        NearbyStore.record(NearbyStore.nearest(to: here.latitude, here.longitude, among: shops)?.id)
+        let nearest = NearbyStore.nearest(to: here.latitude, here.longitude, among: shops)
+        autoSelect(nearest?.id)
+        NearbyStore.record(nearest?.id)
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    /// Whether arriving at a store switches the list to it. On unless you turn it off.
+    static var autoSwitch: Bool {
+        get { UserDefaults.standard.object(forKey: "autoSwitchStore") as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: "autoSwitchStore") }
+    }
+
+    /// Switches the list to the store you've just arrived at. It only switches when you arrive somewhere
+    /// new, so choosing another store by hand sticks until the next arrival.
+    private func autoSelect(_ id: UUID?) {
+        guard Self.autoSwitch else { return }
+        let defaults = UserDefaults.standard
+        let new = id?.uuidString ?? ""
+        guard new != (defaults.string(forKey: "lastAutoShop") ?? "") else { return }
+        defaults.set(new, forKey: "lastAutoShop")
+        if let id { defaults.set(id.uuidString, forKey: "selectedShop") }
+    }
+
     private func notifyArrival(at shopID: UUID) {
+        autoSelect(shopID)
         NearbyStore.record(shopID)
         WidgetCenter.shared.reloadAllTimelines()
         let store = GroceryStore()

@@ -2,17 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(GroceryStore.self) private var store
-    @State private var showingAdd = false
     @State private var showingThemes = false
-    @State private var showingShops = false
-    @State private var showingUsual = false
-    @State private var showingMeals = false
-    @State private var showingTotals = false
-    @State private var showingPantry = false
-    @State private var showingBackup = false
-    @State private var showingReceipt = false
-    @State private var showingTrip = false
-    @State private var showingPlanner = false
+    @State private var sheet: AppSheet?
     @State private var detailItem: GroceryItem?
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("shoppingMode") private var shoppingMode = false
@@ -161,6 +152,28 @@ struct ContentView: View {
         pricingItem = item
     }
 
+    @ViewBuilder
+    private func sheetView(_ sheet: AppSheet) -> some View {
+        switch sheet {
+        case .add: AddItemView(shopID: newItemShopID)
+        case .shops: ManageShopsView()
+        case .usual: UsualView(shopID: newItemShopID)
+        case .meals: MealsView(shopID: newItemShopID, currentItems: visibleItems)
+        case .totals: TotalsView()
+        case .pantry: PantryCheckView(shopID: newItemShopID)
+        case .backup: BackupView()
+        case .receipt: ReceiptView(shopID: newItemShopID)
+        case .trip: TripPlanView()
+        case .planner: PlannerView(shopID: newItemShopID)
+        case .scan: ScanCheckOffView(shopID: newItemShopID)
+        case .spending: InsightsView()
+        case .atHome: AtHomeView()
+        case .avoid: AvoidListView()
+        case .icons: AppIconView()
+        case .send: SendListView(shopID: newItemShopID)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -186,7 +199,7 @@ struct ContentView: View {
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                ShopBar(selection: selectedShop) { showingShops = true }
+                ShopBar(selection: selectedShop) { sheet = .shops }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 8) {
@@ -199,7 +212,7 @@ struct ContentView: View {
                         }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
-                    TotalsBar(items: visibleItems) { showingTotals = true }
+                    TotalsBar(items: visibleItems) { sheet = .totals }
                     QuickAddBar(shopID: newItemShopID, inferShop: filter == .all)
                 }
                 .padding(.horizontal)
@@ -235,41 +248,45 @@ struct ContentView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Menu {
-                        Button("Usual & Buy Again", systemImage: "star") { showingUsual = true }
-                        Button("Pantry Check", systemImage: "checklist") { showingPantry = true }
-                        Button("Meals", systemImage: "fork.knife") { showingMeals = true }
-                        Button("Meal Plan", systemImage: "calendar") { showingPlanner = true }
-                        Button("Totals by Store", systemImage: "dollarsign.circle") { showingTotals = true }
-                        Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { showingTrip = true }
-                        Button("Scan Receipt", systemImage: "receipt") { showingReceipt = true }
+                        Button("Usual & Buy Again", systemImage: "star") { sheet = .usual }
+                        Button("Pantry Check", systemImage: "checklist") { sheet = .pantry }
+                        Button("At Home", systemImage: "refrigerator") { sheet = .atHome }
+                        Menu("Meals", systemImage: "fork.knife") {
+                            Button("Meals", systemImage: "fork.knife") { sheet = .meals }
+                            Button("Meal Plan", systemImage: "calendar") { sheet = .planner }
+                        }
+                        Menu("Money", systemImage: "dollarsign.circle") {
+                            Button("Spending", systemImage: "chart.bar") { sheet = .spending }
+                            Button("Totals by Store", systemImage: "dollarsign.circle") { sheet = .totals }
+                            Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { sheet = .trip }
+                            Button("Scan Receipt", systemImage: "receipt") { sheet = .receipt }
+                        }
                         Divider()
                         Toggle(isOn: $shoppingMode) {
                             Label("Shopping Mode", systemImage: "textformat.size")
                         }
+                        Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
+                        Divider()
+                        Button("Send List to Family", systemImage: "person.2") { sheet = .send }
                         ShareLink(item: shareText) {
-                            Label("Share List", systemImage: "square.and.arrow.up")
+                            Label("Share List as Text", systemImage: "square.and.arrow.up")
                         }
                         .disabled(visibleItems.isEmpty)
-                        Button("Back Up & Restore", systemImage: "externaldrive") { showingBackup = true }
+                        Menu("Settings", systemImage: "gearshape") {
+                            Button("Allergies & Avoid List", systemImage: "exclamationmark.shield") { sheet = .avoid }
+                            Button("App Icon", systemImage: "app") { sheet = .icons }
+                            Button("Back Up & Restore", systemImage: "externaldrive") { sheet = .backup }
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
                     .accessibilityLabel("More")
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
                         .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor) }
-                    Button("Add", systemImage: "plus") { showingAdd = true }
+                    Button("Add", systemImage: "plus") { sheet = .add }
                 }
             }
-            .sheet(isPresented: $showingAdd) { AddItemView(shopID: newItemShopID) }
-            .sheet(isPresented: $showingShops) { ManageShopsView() }
-            .sheet(isPresented: $showingUsual) { UsualView(shopID: newItemShopID) }
-            .sheet(isPresented: $showingMeals) { MealsView(shopID: newItemShopID, currentItems: visibleItems) }
-            .sheet(isPresented: $showingTotals) { TotalsView() }
-            .sheet(isPresented: $showingPantry) { PantryCheckView(shopID: newItemShopID) }
-            .sheet(isPresented: $showingBackup) { BackupView() }
-            .sheet(isPresented: $showingReceipt) { ReceiptView(shopID: newItemShopID) }
-            .sheet(isPresented: $showingTrip) { TripPlanView() }
-            .sheet(isPresented: $showingPlanner) { PlannerView(shopID: newItemShopID) }
+            .sheet(item: $sheet) { sheetView($0) }
             .sheet(item: $detailItem) { item in
                 ItemDetailView(item: item, repeatDays: store.recurrence(for: item)?.everyDays ?? 0)
             }
@@ -295,6 +312,12 @@ struct ContentView: View {
     }
 }
 
+/// Every sheet the main screen can show; one at a time.
+enum AppSheet: String, Identifiable {
+    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send
+    var id: String { rawValue }
+}
+
 struct ItemRow: View {
     @Environment(GroceryStore.self) private var store
     let item: GroceryItem
@@ -309,6 +332,7 @@ struct ItemRow: View {
         var parts: [String] = []
         if showShop, let shop = store.shopName(for: item.shopID) { parts.append(shop) }
         if let price = item.price { parts.append(item.quantity > 1 ? "\(Price.format(price)) each" : Price.format(price)) }
+        if let unit = item.unitPriceText { parts.append(unit) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
@@ -318,6 +342,7 @@ struct ItemRow: View {
         if let shop = store.shopName(for: item.shopID), showShop { parts.append(shop) }
         if let line = item.lineTotal { parts.append(Price.format(line)) }
         if let note = item.note { parts.append(note) }
+        if let warning = item.warning { parts.append("Warning: \(warning)") }
         parts.append(item.isChecked ? "bought" : "needed")
         return parts.joined(separator: ", ")
     }
@@ -343,6 +368,10 @@ struct ItemRow: View {
                     }
                     if let note = item.note {
                         Text(note).font(.caption).italic().foregroundStyle(.secondary)
+                    }
+                    if let warning = item.warning {
+                        Label(warning, systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption.weight(.semibold)).foregroundStyle(.orange)
                     }
                     if !item.isChecked, let hint = store.priceHint(for: item) {
                         Text(hint).font(.caption).foregroundStyle(.green)
@@ -446,8 +475,19 @@ struct AddItemView: View {
         defer { isLookingUp = false }
         do {
             if let product = try await ProductLookup.product(for: code) {
-                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID, price: Price.parse(priceText))
-                dismiss()
+                let size = product.size.flatMap(SizeParser.parse)
+                let warning = AvoidList.message(AvoidList.warnings(allergens: product.allergens, ingredients: product.ingredients,
+                                                                    avoid: AvoidList.words))
+                store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
+                          price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
+                          warning: warning, barcode: code)
+                if let warning {
+                    // Don't hide a warning by closing the sheet.
+                    lookupMessage = "Added \(product.name). Warning: \(warning)."
+                    name = ""
+                } else {
+                    dismiss()
+                }
             } else {
                 lookupMessage = "No product found for \(code). Type the name instead."
             }

@@ -23,6 +23,11 @@ enum QuickAdd {
         return t
     }
 
+    /// What was said, as a written list: "two limes and a dozen eggs" becomes "2 Limes, 12 Eggs".
+    static func written(fromSpoken text: String) -> String {
+        parse(text, spoken: true).map { $0.quantity > 1 ? "\($0.quantity) \($0.name)" : $0.name }.joined(separator: ", ")
+    }
+
     static func parse(_ text: String, spoken: Bool = false) -> [Entry] {
         let source = spoken ? normalizeSpoken(text) : text
         return source.split(whereSeparator: { ",;\n".contains($0) }).compactMap { part in

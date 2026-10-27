@@ -20,6 +20,21 @@ targets:
       # Apple Watch app. Uncomment to embed it in the iPhone app. This needs the watchOS platform
       # installed in Xcode (Settings > Components), or builds will stop with "watchOS must be installed".
       # - target: GroceryWatch
+    info:
+      path: Sources/Info.plist
+      properties:
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.beauregardhenry.makingroceries.list
+            UTTypeDescription: Makin' Groceries List
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [makinglist]
+              public.mime-type: application/x-makinglist
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Makin' Groceries List
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.beauregardhenry.makingroceries.list]
     entitlements:
       path: Sources/Grocery.entitlements
       properties:
@@ -36,6 +51,9 @@ targets:
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Makin' Groceries uses your location to remind you of your list when you arrive at a store you've set up, even when the app is closed. Your location stays on this device."
         SWIFT_VERSION: "5.0"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-Lime AppIcon-Berry AppIcon-Midnight"
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Makin' Groceries listens when you tap the microphone to add items by voice."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Makin' Groceries turns your voice into list items. It uses on-device recognition when your iPhone supports it."
   GroceryWidget:
     type: app-extension
     platform: iOS

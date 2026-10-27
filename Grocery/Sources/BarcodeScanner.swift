@@ -2,9 +2,11 @@ import SwiftUI
 import VisionKit
 
 struct BarcodeScannerView: UIViewControllerRepresentable {
+    /// Keep scanning after each barcode, instead of stopping at the first.
+    var continuous = false
     let onScan: (String) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onScan: onScan) }
+    func makeCoordinator() -> Coordinator { Coordinator(onScan: onScan, continuous: continuous) }
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
         let scanner = DataScannerViewController(
@@ -25,18 +27,22 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
         let onScan: (String) -> Void
+        let continuous: Bool
         private var handled = false
 
-        init(onScan: @escaping (String) -> Void) { self.onScan = onScan }
+        init(onScan: @escaping (String) -> Void, continuous: Bool) {
+            self.onScan = onScan
+            self.continuous = continuous
+        }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem],
                          allItems: [RecognizedItem]) {
             guard !handled else { return }
             for case .barcode(let barcode) in addedItems {
                 if let code = barcode.payloadStringValue {
-                    handled = true
+                    if !continuous { handled = true }
                     onScan(code)
-                    return
+                    if !continuous { return }
                 }
             }
         }

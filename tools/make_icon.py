@@ -1,6 +1,17 @@
 """Draws the app icon (1024x1024) with Pillow. Run: python3 tools/make_icon.py"""
 import math
+import sys
 from PIL import Image, ImageDraw, ImageFilter
+
+# Color variants: background top, background bottom, fruit rind, fruit flesh, segments.
+VARIANTS = {
+    "orange":   ((255, 168, 46), (240, 92, 0),    (255, 122, 0),  (255, 150, 20),  (255, 238, 205)),
+    "lime":     ((184, 230, 80), (64, 160, 30),   (110, 190, 40), (160, 220, 60),  (240, 252, 210)),
+    "berry":    ((150, 150, 255), (70, 60, 200),  (190, 70, 190), (225, 110, 215), (255, 225, 250)),
+    "midnight": ((70, 70, 84), (14, 14, 20),      (255, 122, 0),  (255, 150, 20),  (255, 238, 205)),
+}
+name = sys.argv[1] if len(sys.argv) > 1 else "orange"
+TOP, BOTTOM, RIND, FLESH, SEGMENT = VARIANTS[name]
 
 S = 1024
 K = 4  # supersample factor
@@ -14,7 +25,7 @@ def lerp(a, b, t):
 # Background: vivid orange, lighter toward the top left
 bg = Image.new("RGB", (W, W))
 px = bg.load()
-top, bottom = (255, 168, 46), (240, 92, 0)
+top, bottom = TOP, BOTTOM
 for y in range(W):
     for x in range(0, W, 1):
         t = min(1.0, max(0.0, (y * 0.75 + x * 0.25) / W))
@@ -46,15 +57,15 @@ for cx in (420, 604):
 
 # Orange slice on the bag front
 cx, cy, r = 512, 650, 150
-d.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=(255, 122, 0, 255))
+d.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=RIND + (255,))
 d.ellipse([s(cx - r + 22), s(cy - r + 22), s(cx + r - 22), s(cy + r - 22)], fill=(255, 255, 255, 255))
-d.ellipse([s(cx - r + 36), s(cy - r + 36), s(cx + r - 36), s(cy + r - 36)], fill=(255, 150, 20, 255))
+d.ellipse([s(cx - r + 36), s(cy - r + 36), s(cx + r - 36), s(cy + r - 36)], fill=FLESH + (255,))
 for i in range(8):
     a = math.radians(i * 45 + 22.5)
     x1, y1 = cx + math.cos(a) * 20, cy + math.sin(a) * 20
     x2, y2 = cx + math.cos(a) * (r - 40), cy + math.sin(a) * (r - 40)
-    d.line([s(x1), s(y1), s(x2), s(y2)], fill=(255, 238, 205, 255), width=s(14))
-d.ellipse([s(cx - 22), s(cy - 22), s(cx + 22), s(cy + 22)], fill=(255, 238, 205, 255))
+    d.line([s(x1), s(y1), s(x2), s(y2)], fill=SEGMENT + (255,), width=s(14))
+d.ellipse([s(cx - 22), s(cy - 22), s(cx + 22), s(cy + 22)], fill=SEGMENT + (255,))
 
 # Leaf sprouting from the bag top
 ld = d
@@ -90,5 +101,17 @@ img = Image.alpha_composite(img, place(shadow).transform((W, W), Image.AFFINE, (
 img = Image.alpha_composite(img, place(art))
 
 out = img.resize((S, S), Image.LANCZOS).convert("RGB")
-out.save("Grocery/Sources/Assets.xcassets/AppIcon.appiconset/icon-1024.png")
-print("saved")
+import os
+folder = "AppIcon" if name == "orange" else "AppIcon-" + name.capitalize()
+dest = f"Grocery/Sources/Assets.xcassets/{folder}.appiconset"
+os.makedirs(dest, exist_ok=True)
+out.save(f"{dest}/icon-1024.png")
+with open(f"{dest}/Contents.json", "w") as f:
+    f.write('{ "images" : [ { "filename" : "icon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" } ], "info" : { "author" : "xcode", "version" : 1 } }')
+# a small preview for the in-app picker
+prev = f"Grocery/Sources/Assets.xcassets/IconPreview-{name.capitalize()}.imageset"
+os.makedirs(prev, exist_ok=True)
+out.resize((240, 240), Image.LANCZOS).save(f"{prev}/preview.png")
+with open(f"{prev}/Contents.json", "w") as f:
+    f.write('{ "images" : [ { "filename" : "preview.png", "idiom" : "universal" } ], "info" : { "author" : "xcode", "version" : 1 } }')
+print("saved", name)

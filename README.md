@@ -29,6 +29,19 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
   </tr>
 </table>
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/family-import.png" width="230" alt="Importing a shared list"><br><sub><b>Send to family</b><br>a list arrives as a file and merges into yours; nothing is removed or duplicated</sub></td>
+    <td align="center"><img src="docs/screenshots/scan-check-off.png" width="230" alt="Scan to check off"><br><sub><b>Scan to check off</b><br>scan an item at the store and it ticks off, with a warning if it contains something you avoid</sub></td>
+    <td align="center"><img src="docs/screenshots/spending.png" width="230" alt="Spending insights"><br><sub><b>Spending</b><br>by week, store and aisle, with an optional monthly budget</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/at-home.png" width="230" alt="At home with use-by dates"><br><sub><b>At Home</b><br>what you bought and when to use it, with morning reminders</sub></td>
+    <td align="center"><img src="docs/screenshots/family-send.png" width="230" alt="Sending a list"><br><sub><b>Send a list</b><br>by iMessage, AirDrop or email</sub></td>
+    <td></td>
+  </tr>
+</table>
+
 The screenshots use made-up demo data. Regenerate them after a visible change, in light mode, so they stay accurate.
 
 ## What it does
@@ -47,18 +60,27 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - **Meals**: save a list as a meal and add all its ingredients in one tap, at ½×, 2×, 3× or 4× if you're cooking a different batch size. Measured ingredients ("2 cups flour") scale as an amount in the item's note; counted ones ("3 eggs") scale their quantity.
 - **Recipe import** from a pasted list, a recipe web page, a **photo or screenshot**, or the **document camera**. Photos are read on the device and never uploaded.
 - **Share from Safari**: choose Makin' Groceries in the Share sheet on a recipe page to save it as a meal or add it to your list.
+- **Dictation**: tap the microphone on the quick-add bar and say "milk, two limes and a dozen eggs". Recognition runs on the device where the iPhone supports it.
 - **Pantry Check**: mark which usual items you're out of, then add them all.
 - On phones with Apple Intelligence, an item the keyword list can't place is filed by the on-device language model. Phones without it keep using the keyword list.
 - Typos and plurals are caught ("tomatos" becomes "Tomatoes"), and adding something already on the list raises its quantity.
 
 **Prices**
 - Optional prices, a running total, totals by store, and a hint when an item was cheaper at another store you've priced it in.
+- **Unit prices**: give an item a size ("16 oz", "1 lb", "12 ct") and the list shows the price per ounce, fluid ounce or piece, so different package sizes compare fairly. Barcode scans fill the size in when the product has one.
+- **Spending**: receipts also record the trip total. A Spending screen shows this month against an optional budget, a week-by-week chart, and totals by store and by aisle. You can add a trip by hand too.
 - **Receipt scan**: photograph a receipt and prices fill in on matching items and in your price history. It's read on the device. Matches where the receipt says more than your list ("Peanut Butter" for "Butter") are shown but left off until you confirm them.
 - **Plan the Trip**: suggests buying an item at a cheaper store that's already on today's trip, so following it never adds a stop.
 
 **Around the phone**
 - **Home and Lock Screen widget** with a store picker, check-off buttons, and an option to switch to the store you're at.
 - **Live Activity** on the lock screen and Dynamic Island while Shopping Mode is on: items left, a progress bar and what's next.
+- **Send a list to family without iCloud**: share your list as a small file by iMessage, AirDrop or email. When they open it in their copy of the app, new items are added, anything already bought is marked bought, and nothing is removed or added twice. It isn't live syncing, and needs no developer account.
+- **Scan to check off**: scan items as they go in the cart and each is checked off your list. The app remembers each barcode after the first scan.
+- **Allergies & avoid list**: name the foods you avoid, and scanned or looked-up products that contain them are flagged. The data comes from Open Food Facts and can be wrong, so read labels if you have an allergy.
+- **At Home**: food you check off is tracked with a rough use-by date, with a quiet 9 am reminder the day before. Swipe to mark it used, buy it again, or toss it. The dates are guides, not food-safety advice.
+- **Auto-switch store**: arriving at a store you've saved a location for switches the list to it. Choosing another store by hand sticks until you arrive somewhere new.
+- **Alternate app icons**: orange, lime, berry or midnight.
 - **Meal plan**: assign meals to days, then add everything planned for the next few days to the list in one tap.
 - Haptics when you check something off and a stronger one when you finish an aisle.
 - **Apple Watch app** (optional, see below): your lists in walking order, with check-off from your wrist.
@@ -68,7 +90,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 
 ## Privacy
 
-Everything is stored on your phone. Receipts, recipe photos and the on-device language model all run on the device. The app has no account and no server. It contacts the internet only to look up a barcode (the number only) and to fetch a recipe page when you enter its address or share it from Safari.
+Everything is stored on your phone. Receipts, recipe photos, dictation (where supported) and the on-device language model all run on the device. The app has no account and no server. It contacts the internet only to look up a barcode (the number only, which also returns allergens and size) and to fetch a recipe page when you enter its address or share it from Safari.
 
 ## Building it
 

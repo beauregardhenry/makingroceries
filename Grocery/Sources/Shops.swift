@@ -109,6 +109,15 @@ struct ManageShopsView: View {
                     Text("Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
                 }
 
+                Section {
+                    Toggle("Switch to a store's list when I arrive", isOn: Binding(
+                        get: { ArrivalReminders.autoSwitch },
+                        set: { ArrivalReminders.autoSwitch = $0 }
+                    ))
+                } footer: {
+                    Text("Needs a saved location for the store (open a store below). Picking another store by hand stays until you arrive somewhere new.")
+                }
+
                 Section("Add your own") {
                     HStack {
                         TextField("Custom store name", text: $customName)
