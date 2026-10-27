@@ -18,12 +18,18 @@ final class WatchModel: NSObject, WCSessionDelegate {
     var snapshot = WatchSnapshot(groups: [])
     var isReachable = false
     private static let cacheKey = "snapshot"
+    private static let isDemo = ProcessInfo.processInfo.arguments.contains("-demo")
 
     override init() {
         super.init()
         if let data = UserDefaults.standard.data(forKey: Self.cacheKey),
            let cached = try? JSONDecoder().decode(WatchSnapshot.self, from: data) {
             snapshot = cached
+        }
+        // Screenshots and simulator checks, where there's no paired iPhone to send a list.
+        if Self.isDemo {
+            snapshot = .demo
+            return
         }
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
@@ -37,6 +43,7 @@ final class WatchModel: NSObject, WCSessionDelegate {
                 snapshot.groups[g].items[i].isChecked.toggle()
             }
         }
+        guard !Self.isDemo else { return }
         save()
         let message = [WatchSnapshot.toggleKey: entry.id]
         if WCSession.default.isReachable {
