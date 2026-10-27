@@ -40,7 +40,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
   <tr>
     <td align="center"><img src="docs/screenshots/at-home.png" width="230" alt="At home with use-by dates"><br><sub><b>At Home</b><br>what you bought and when to use it, with morning reminders</sub></td>
     <td align="center"><img src="docs/screenshots/family-send.png" width="230" alt="Sending a list"><br><sub><b>Send a list</b><br>by iMessage, AirDrop or email</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/screenshots/watch-list.png" width="180" alt="A store's list on Apple Watch"><br><sub><b>Apple Watch</b><br>each store's list in walking order; tap to check off, and the phone follows</sub></td>
   </tr>
 </table>
 
@@ -114,7 +114,7 @@ Then regenerate and press Run. A free Apple ID is enough, but builds expire afte
 
 ### Apple Watch app
 
-The Watch app is included in the repo but isn't embedded in the iPhone app by default, because embedding it makes every build require the watchOS platform in Xcode (Xcode > Settings > Components). To turn it on, install that platform, uncomment `- target: GroceryWatch` in `Grocery/project.yml`, set your team on the new target, and regenerate. The phone and watch talk through WatchConnectivity, so the watch shows the lists after the phone app has opened once with the watch nearby. The code type-checks against the watchOS SDK, but it hasn't been built into an app or run on a watch or the watch simulator yet.
+The Watch app is included in the repo but isn't embedded in the iPhone app by default, because embedding it makes every build require the watchOS platform in Xcode (Xcode > Settings > Components). To turn it on, install that platform, uncomment `- target: GroceryWatch` in `Grocery/project.yml`, set your team on the new target, and regenerate. The phone and watch talk through WatchConnectivity, so the watch shows the lists after the phone app has opened once with the watch nearby. It has been run in a paired iPhone and Apple Watch simulator: the phone's lists arrive on the watch, and checking an item off on the watch checks it off on the phone. It hasn't been tried on a real watch yet. To try the watch app alone in the simulator, launch it with the `-demo` argument for a sample list.
 
 ## Development and CI
 
