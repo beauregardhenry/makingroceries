@@ -46,6 +46,11 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var note: String?
     /// File name of the item's photo, see `Storage.photos`.
     var photo: String?
+    /// Package size, e.g. 16 and "oz", for unit prices.
+    var sizeAmount: Double?
+    var sizeUnit: String?
+    /// "Contains peanuts" and similar, from your avoid list.
+    var warning: String?
 }
 
 struct PricePoint: Codable, Equatable {
@@ -65,6 +70,10 @@ struct PastItem: Identifiable, Codable, Equatable {
     var priceHistory: [PricePoint]?
     /// When it was checked off, at most one per day, newest last.
     var purchases: [Date]?
+    /// The barcode last scanned for it, so scanning it again can check it off.
+    var barcode: String?
+    var sizeAmount: Double?
+    var sizeUnit: String?
 
     var id: String { name.lowercased() }
 }
@@ -184,11 +193,13 @@ struct Backup: Codable {
     var history: [PastItem]
     var recurring: [RecurringItem]
     var plan: [PlannedMeal]? = nil
+    var stock: [StockEntry]? = nil
+    var spending: [SpendRecord]? = nil
 }
 
 enum Storage {
     static let groupID = "group.com.beauregardhenry.makingroceries"
-    static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring", "plan"]
+    static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring", "plan", "stock", "spending"]
 
     /// The app group container when there is one, so widgets and Siri see the same data;
     /// otherwise Documents. Files from earlier versions are copied across once.
@@ -246,6 +257,15 @@ final class GroceryStore {
         didSet { write(plan, to: Storage.url("plan")) }
     }
 
+    /// What's in your kitchen and when it should be used by.
+    var stock: [StockEntry] = [] {
+        didSet { write(stock, to: Storage.url("stock")) }
+    }
+
+    var spending: [SpendRecord] = [] {
+        didSet { write(spending, to: Storage.url("spending")) }
+    }
+
     init() {
         load()
         if read([PastItem].self, from: Storage.url("history")) == nil {
@@ -273,15 +293,29 @@ final class GroceryStore {
         history = read([PastItem].self, from: Storage.url("history")) ?? []
         recurring = read([RecurringItem].self, from: Storage.url("recurring")) ?? []
         plan = read([PlannedMeal].self, from: Storage.url("plan")) ?? []
+        stock = read([StockEntry].self, from: Storage.url("stock")) ?? []
+        spending = read([SpendRecord].self, from: Storage.url("spending")) ?? []
     }
 
     // MARK: Items
 
-    func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil, note: String? = nil) {
+    func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil, note: String? = nil,
+             sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
-        items.append(GroceryItem(name: trimmed, quantity: quantity, aisle: aisle, shopID: shopID, price: price, note: note))
+        // A known size carries over from the last time you bought it.
+        let past = pastItem(named: trimmed)
+        let (amount, unit) = sizeAmount != nil ? (sizeAmount, sizeUnit) : (past?.sizeAmount, past?.sizeUnit)
+        var item = GroceryItem(name: trimmed, quantity: quantity, aisle: aisle, shopID: shopID, price: price, note: note)
+        item.sizeAmount = amount
+        item.sizeUnit = unit
+        item.warning = warning
+        items.append(item)
         remember(name: trimmed, aisle: aisle, shopID: shopID, price: price)
+        if let i = history.firstIndex(where: { Self.same($0.name, trimmed) }) {
+            if let amount, let unit { history[i].sizeAmount = amount; history[i].sizeUnit = unit }
+            if let barcode { history[i].barcode = barcode }
+        }
     }
 
     /// Adds an item, or raises the quantity of the same unchecked item already in that store.
@@ -329,6 +363,7 @@ final class GroceryStore {
         if items[i].isChecked {
             recordPurchase(of: items[i].name)
             recordCheckOff(items[i])
+            recordStock(of: items[i])
         }
     }
 
@@ -373,6 +408,10 @@ final class GroceryStore {
         items[i] = item
         if oldPhoto != item.photo { removePhotoIfUnused(oldPhoto) }
         remember(name: item.name, aisle: item.aisle, shopID: item.shopID, price: item.price, countsAsUse: false)
+        if let h = history.firstIndex(where: { Self.same($0.name, item.name) }), let amount = item.sizeAmount, let unit = item.sizeUnit {
+            history[h].sizeAmount = amount
+            history[h].sizeUnit = unit
+        }
     }
 
     /// Saves prices read from a receipt: sets the price of each matched list item and records every
@@ -659,7 +698,7 @@ final class GroceryStore {
     // MARK: Backup
 
     func makeBackup() -> Backup {
-        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan)
+        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan, stock: stock, spending: spending)
     }
 
     func restore(_ backup: Backup) {
@@ -670,6 +709,8 @@ final class GroceryStore {
         history = backup.history
         recurring = backup.recurring
         plan = backup.plan ?? []
+        stock = backup.stock ?? []
+        spending = backup.spending ?? []
     }
 
     // MARK: Storage
@@ -690,5 +731,54 @@ final class GroceryStore {
 
     private func read<T: Decodable>(_ type: T.Type, from url: URL) -> T? {
         (try? Data(contentsOf: url)).flatMap { try? JSONDecoder().decode(type, from: $0) }
+    }
+}
+
+// MARK: Barcodes
+
+enum ScanOutcome: Equatable {
+    case ticked(String)
+    case alreadyBought(String)
+    case notOnList(String)
+    case unknown
+}
+
+extension GroceryStore {
+    /// The item last scanned with this barcode, if you've scanned it before.
+    func pastItem(forBarcode code: String) -> PastItem? {
+        history.first { $0.barcode == code }
+    }
+
+    func rememberBarcode(_ code: String, for name: String) {
+        guard let i = history.firstIndex(where: { Self.same($0.name, name) }) else { return }
+        history[i].barcode = code
+    }
+
+    /// Ticks off the list item a barcode belongs to. The first time, the product's name from
+    /// `lookup` is matched to your list and the barcode is remembered, so it works instantly after that.
+    @MainActor
+    func checkOff(barcode code: String, preferring shopID: UUID?, lookup: (String) async -> String?) async -> ScanOutcome {
+        var name = pastItem(forBarcode: code)?.name
+        var learned = name != nil
+        if name == nil {
+            guard let found = await lookup(code) else { return .unknown }
+            name = found
+        }
+        guard let productName = name else { return .unknown }
+
+        let candidates = items.filter { item in
+            learned ? Self.same(item.name, productName)
+                    : ReceiptMatcher.score(productName, item.name) >= 0.99
+        }
+        let pending = candidates.filter { !$0.isChecked }
+        if let item = pending.first(where: { $0.shopID == shopID }) ?? pending.first {
+            if !learned { rememberBarcode(code, for: item.name); learned = true }
+            toggle(item)
+            return .ticked(item.name)
+        }
+        if let done = candidates.first {
+            return .alreadyBought(done.name)
+        }
+        return .notOnList(productName)
     }
 }

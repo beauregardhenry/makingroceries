@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		01A4C102574B8276021F151E /* Photos.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14032117470AF68E950FAAF /* Photos.swift */; };
+		021FA63A0BFAFDACBEB89943 /* AvoidList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0888DE257A824E4BD76E9F5D /* AvoidList.swift */; };
 		02EB98AE83B87E7793D7D05C /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
 		0C2E455BB4F705A5E18F6F32 /* RouteLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */; };
+		0D9465032EEE5F6BC5D35C30 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD53CEEF85F63223C2DC032 /* Stock.swift */; };
 		0F89DFB51190597505693E16 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1348E8201C220BA2C17B9E /* ShareViewController.swift */; };
 		1353D5BA7623C67F265B708C /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		143AB989E0E835D81B0C489F /* RouteLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */; };
@@ -19,12 +21,17 @@
 		2DDB9282F72EA268D95D785E /* GroceryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504E059EBD40D84873D6C1F3 /* GroceryApp.swift */; };
 		332EF6B3C07BACEE43EAEB82 /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		343E0B18912D4DDE9262FC5E /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
+		365031E8BE427F05C51C9DC6 /* AvoidList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0888DE257A824E4BD76E9F5D /* AvoidList.swift */; };
 		3755BAFBAB6A92FAEB282269 /* WatchSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FB05AD2C022503F3312ACE /* WatchSync.swift */; };
+		390E3C3EB2BFA0B488F97CF4 /* ListExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A7E5EB488FD37BD2073C8D /* ListExchange.swift */; };
 		394E30AEB0EF8609BA144A6A /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		3F2CA4131B45FB76FA4A85A0 /* Planner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFB8D712FA685DD46F21593 /* Planner.swift */; };
 		43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4BBFEA4751E4D06061FAB /* Theme.swift */; };
+		46B877F0AEC46445077AFC46 /* UnitPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D096A4497AA5D69830D184 /* UnitPrice.swift */; };
+		46FB3A1EF58A20F202D5606A /* AvoidList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0888DE257A824E4BD76E9F5D /* AvoidList.swift */; };
 		494BCC90D304674BCE5BD6EA /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756CD976DC1541A0451A3238 /* WatchSnapshot.swift */; };
 		4D7CE6200B27B81B335E4C6D /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
+		4E4B104C8F321CB6F0F33342 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD53CEEF85F63223C2DC032 /* Stock.swift */; };
 		4E94074FF4F875A0B76C9D19 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		50A26B163B8D9B5B1E8A46CF /* ShoppingActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA4CB59960F935691885649 /* ShoppingActivity.swift */; };
 		54C55493F4BC16AD975B9E35 /* RecipeOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */; };
@@ -33,17 +40,22 @@
 		61A4BBDE9000BBA6A50B1888 /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
 		61FF233A3F3FE8641867013C /* ShoppingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E44DC10CE6E228ABB59186 /* ShoppingLiveActivity.swift */; };
 		62113FFD93C262A8B35CF2D1 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0F92713BF9E92A55808D429E /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6328115A6540F7555AB7922F /* Spending.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48E1542608588EA2EEDBAFD /* Spending.swift */; };
 		6595B12879B1E5EAAE63353B /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		69D915FA54863CB6E401D5A8 /* ReceiptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A2611C6625D05974C3C3E3 /* ReceiptView.swift */; };
 		6D6401D4BD43C3A633AED718 /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
+		6E6183D69B0EDADD3935AC4D /* ListExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A7E5EB488FD37BD2073C8D /* ListExchange.swift */; };
 		74308CB96600897550232A4B /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756CD976DC1541A0451A3238 /* WatchSnapshot.swift */; };
+		757D4462E14074ADA0475C1F /* Spending.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48E1542608588EA2EEDBAFD /* Spending.swift */; };
 		7C5DBDBAB34CDD46EE3C1F06 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
 		7D7B96B189C4AC949D6647C9 /* Pricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */; };
+		7F6AC8D40BEE33509B8AB8DA /* Spending.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48E1542608588EA2EEDBAFD /* Spending.swift */; };
 		7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */; };
 		84486A14FC7FE3C7780BC217 /* NearbyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE29826DDB1BA8F31D229F /* NearbyStore.swift */; };
 		8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
 		8BBB22AF20C70DDBA7AE974B /* ShoppingActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA4CB59960F935691885649 /* ShoppingActivity.swift */; };
 		9838038FB00F6D870873657E /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
+		9F147B256896F9FF86695885 /* ListExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A7E5EB488FD37BD2073C8D /* ListExchange.swift */; };
 		A26CD52107A02B7289480662 /* Meals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037FD404E088F37C6CAFE4DF /* Meals.swift */; };
 		A840AB6FECFCDC572AE6261A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		AE47D7AC85ED757BCFAD9CD4 /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
@@ -57,6 +69,7 @@
 		BED320D51D869299632784F3 /* TripPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */; };
 		BEE6B860BE22546840579D61 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		BF869CCAEED5BF704E53DDF9 /* Quick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */; };
+		C0523875DC41F4A4798B5F26 /* UnitPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D096A4497AA5D69830D184 /* UnitPrice.swift */; };
 		C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */; };
 		C75AFD73B507F68E03F7114C /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
 		CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9351DBAEF175CDA248781172 /* Arrival.swift */; };
@@ -74,6 +87,8 @@
 		E66C9069C4B911EE0B982A6A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		EA142E242CB985235ABAD1CA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */; };
 		EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */; };
+		ED8A82603C37B2014114772B /* UnitPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D096A4497AA5D69830D184 /* UnitPrice.swift */; };
+		EF5A533C579F2E7706B9AB75 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD53CEEF85F63223C2DC032 /* Stock.swift */; };
 		F11F07F6B77CCA5CDC7692B7 /* RecipeOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */; };
 		FD0CC18E8C848D5A44B541A6 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
 /* End PBXBuildFile section */
@@ -115,6 +130,7 @@
 		031CE2AE19C066140118EE8D /* ProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductLookup.swift; sourceTree = "<group>"; };
 		037FD404E088F37C6CAFE4DF /* Meals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meals.swift; sourceTree = "<group>"; };
 		04FB05AD2C022503F3312ACE /* WatchSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSync.swift; sourceTree = "<group>"; };
+		0888DE257A824E4BD76E9F5D /* AvoidList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvoidList.swift; sourceTree = "<group>"; };
 		0F92713BF9E92A55808D429E /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1388B3BE5B5BB9A90385765B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -134,7 +150,9 @@
 		69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
 		7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlanView.swift; sourceTree = "<group>"; };
 		756CD976DC1541A0451A3238 /* WatchSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSnapshot.swift; sourceTree = "<group>"; };
+		7BD53CEEF85F63223C2DC032 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		7FA4CB59960F935691885649 /* ShoppingActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingActivity.swift; sourceTree = "<group>"; };
+		86A7E5EB488FD37BD2073C8D /* ListExchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListExchange.swift; sourceTree = "<group>"; };
 		8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8CA078D797036AB2313A5227 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8F33F4BA1F49153D285628F1 /* Grocery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Grocery.entitlements; sourceTree = "<group>"; };
@@ -154,6 +172,8 @@
 		CCF0E94081431EAC5A452362 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFetcher.swift; sourceTree = "<group>"; };
 		CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanner.swift; sourceTree = "<group>"; };
+		D48E1542608588EA2EEDBAFD /* Spending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spending.swift; sourceTree = "<group>"; };
+		D6D096A4497AA5D69830D184 /* UnitPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitPrice.swift; sourceTree = "<group>"; };
 		D9EF2A8057BCF9A88E835685 /* Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parsing.swift; sourceTree = "<group>"; };
 		E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryShortcuts.swift; sourceTree = "<group>"; };
 		E7B189695D0B80057BC76D09 /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
@@ -262,7 +282,9 @@
 			isa = PBXGroup;
 			children = (
 				93CC7A0C7AE37F77F82532DA /* AisleAI.swift */,
+				0888DE257A824E4BD76E9F5D /* AvoidList.swift */,
 				69D78A5C9275B720C9B3373E /* GroceryIntents.swift */,
+				86A7E5EB488FD37BD2073C8D /* ListExchange.swift */,
 				69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */,
 				1388B3BE5B5BB9A90385765B /* Models.swift */,
 				FFDE29826DDB1BA8F31D229F /* NearbyStore.swift */,
@@ -273,7 +295,10 @@
 				AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */,
 				FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */,
 				7FA4CB59960F935691885649 /* ShoppingActivity.swift */,
+				D48E1542608588EA2EEDBAFD /* Spending.swift */,
+				7BD53CEEF85F63223C2DC032 /* Stock.swift */,
 				BB705D847A427E040B53B7AE /* TripPlanner.swift */,
+				D6D096A4497AA5D69830D184 /* UnitPrice.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -439,6 +464,7 @@
 			files = (
 				61A4BBDE9000BBA6A50B1888 /* AisleAI.swift in Sources */,
 				CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */,
+				46FB3A1EF58A20F202D5606A /* AvoidList.swift in Sources */,
 				184C36CE7AE420FE09F8749B /* Backup.swift in Sources */,
 				EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */,
 				EA142E242CB985235ABAD1CA /* ContentView.swift in Sources */,
@@ -446,6 +472,7 @@
 				60DDDE0D04DDE17637FF79D3 /* GroceryIntents.swift in Sources */,
 				C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */,
 				DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */,
+				390E3C3EB2BFA0B488F97CF4 /* ListExchange.swift in Sources */,
 				7C5DBDBAB34CDD46EE3C1F06 /* MealPlan.swift in Sources */,
 				A26CD52107A02B7289480662 /* Meals.swift in Sources */,
 				E66C9069C4B911EE0B982A6A /* Models.swift in Sources */,
@@ -464,9 +491,12 @@
 				27F30E9DDE1ABD5352A3F2ED /* RouteLearning.swift in Sources */,
 				50A26B163B8D9B5B1E8A46CF /* ShoppingActivity.swift in Sources */,
 				B70FCB828727F7E1D4929CB3 /* Shops.swift in Sources */,
+				7F6AC8D40BEE33509B8AB8DA /* Spending.swift in Sources */,
+				4E4B104C8F321CB6F0F33342 /* Stock.swift in Sources */,
 				43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */,
 				BED320D51D869299632784F3 /* TripPlanView.swift in Sources */,
 				E0636B6C892669E373BEBCF1 /* TripPlanner.swift in Sources */,
+				C0523875DC41F4A4798B5F26 /* UnitPrice.swift in Sources */,
 				7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */,
 				74308CB96600897550232A4B /* WatchSnapshot.swift in Sources */,
 				3755BAFBAB6A92FAEB282269 /* WatchSync.swift in Sources */,
@@ -478,6 +508,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D1882265C58037F2EC749889 /* AisleAI.swift in Sources */,
+				365031E8BE427F05C51C9DC6 /* AvoidList.swift in Sources */,
+				6E6183D69B0EDADD3935AC4D /* ListExchange.swift in Sources */,
 				4D7CE6200B27B81B335E4C6D /* MealPlan.swift in Sources */,
 				BC5A0EF2693FEF3D7ED3F420 /* Models.swift in Sources */,
 				29ED50A4C61A08E3D4F8F66A /* NearbyStore.swift in Sources */,
@@ -490,7 +522,10 @@
 				E0622C12FA9382137329EA06 /* ShareView.swift in Sources */,
 				0F89DFB51190597505693E16 /* ShareViewController.swift in Sources */,
 				E58663B4D1572418AC549F60 /* ShoppingActivity.swift in Sources */,
+				757D4462E14074ADA0475C1F /* Spending.swift in Sources */,
+				EF5A533C579F2E7706B9AB75 /* Stock.swift in Sources */,
 				D5BF9433A776E4968A981278 /* TripPlanner.swift in Sources */,
+				ED8A82603C37B2014114772B /* UnitPrice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,8 +534,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE47D7AC85ED757BCFAD9CD4 /* AisleAI.swift in Sources */,
+				021FA63A0BFAFDACBEB89943 /* AvoidList.swift in Sources */,
 				8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */,
 				B099E857BDD2AECDD992B6E6 /* GroceryWidget.swift in Sources */,
+				9F147B256896F9FF86695885 /* ListExchange.swift in Sources */,
 				FD0CC18E8C848D5A44B541A6 /* MealPlan.swift in Sources */,
 				A840AB6FECFCDC572AE6261A /* Models.swift in Sources */,
 				84486A14FC7FE3C7780BC217 /* NearbyStore.swift in Sources */,
@@ -512,7 +549,10 @@
 				143AB989E0E835D81B0C489F /* RouteLearning.swift in Sources */,
 				8BBB22AF20C70DDBA7AE974B /* ShoppingActivity.swift in Sources */,
 				61FF233A3F3FE8641867013C /* ShoppingLiveActivity.swift in Sources */,
+				6328115A6540F7555AB7922F /* Spending.swift in Sources */,
+				0D9465032EEE5F6BC5D35C30 /* Stock.swift in Sources */,
 				9838038FB00F6D870873657E /* TripPlanner.swift in Sources */,
+				46B877F0AEC46445077AFC46 /* UnitPrice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -70,6 +70,22 @@ enum ReceiptParser {
         return entries
     }
 
+    /// The receipt's total, from its "TOTAL" line (not "SUBTOTAL"). Nil when none is found.
+    static func total(rows: [String]) -> Double? {
+        var found: Double?
+        for raw in rows {
+            let lower = raw.lowercased()
+            guard lower.contains("total"), !lower.contains("subtotal"), !lower.contains("sub total"),
+                  !lower.contains("savings"), !lower.contains("items") else { continue }
+            let range = NSRange(raw.startIndex..., in: raw)
+            if let m = pricePattern.firstMatch(in: raw, range: range), let r = Range(m.range(at: 1), in: raw),
+               let value = number(String(raw[r])), value > 0 {
+                found = value
+            }
+        }
+        return found
+    }
+
     static func titleCase(_ text: String) -> String {
         text.lowercased().split(separator: " ").map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
     }

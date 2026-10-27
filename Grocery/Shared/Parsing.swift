@@ -1,19 +1,46 @@
 import Foundation
 
-/// Turns "milk, 6 bananas, eggs x2" into items.
+/// Turns "milk, 6 bananas, eggs x2" into items. With `spoken`, also understands dictation:
+/// "two limes and a dozen eggs".
 enum QuickAdd {
     struct Entry: Equatable {
         var name: String
         var quantity: Int
     }
 
-    static func parse(_ text: String) -> [Entry] {
-        text.split(whereSeparator: { ",;\n".contains($0) }).compactMap { part in
+    private static let numberWords: [String: Int] = [
+        "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+        "ten": 10, "eleven": 11, "twelve": 12, "dozen": 12,
+    ]
+
+    /// Dictation puts "and" between items and often a leading "add"; written lists use commas.
+    static func normalizeSpoken(_ text: String) -> String {
+        var t = text.lowercased()
+        t = t.replacingOccurrences(of: #"^\s*(please\s+)?(add|put|get|buy|pick up)\s+"#, with: "", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"\s+(to|on|onto)\s+(my|the)\s+(grocery\s+)?list\b.*$"#, with: "", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"\s+and\s+"#, with: ", ", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"[.!?]"#, with: "", options: .regularExpression)
+        return t
+    }
+
+    static func parse(_ text: String, spoken: Bool = false) -> [Entry] {
+        let source = spoken ? normalizeSpoken(text) : text
+        return source.split(whereSeparator: { ",;\n".contains($0) }).compactMap { part in
             var words = part.split(separator: " ").map(String.init)
             var quantity = 1
 
+            // "a dozen eggs", "an apple" (spoken)
+            if spoken, words.count > 2, ["a", "an"].contains(words[0].lowercased()), words[1].lowercased() == "dozen" {
+                quantity = 12
+                words.removeFirst(2)
+            } else if spoken, words.count > 1, ["a", "an"].contains(words[0].lowercased()) {
+                words.removeFirst()
+            // "two limes", "twelve eggs" (spoken)
+            } else if spoken, words.count > 1, let n = numberWords[words[0].lowercased()], words[0].lowercased() != "dozen" {
+                quantity = n
+                words.removeFirst()
             // "6 bananas", "6x bananas"
-            if words.count > 1, let n = Int(words[0].trimmingCharacters(in: CharacterSet(charactersIn: "x×X"))), (1...99).contains(n) {
+            } else if words.count > 1, let n = Int(words[0].trimmingCharacters(in: CharacterSet(charactersIn: "x×X"))), (1...99).contains(n) {
                 quantity = n
                 words.removeFirst()
             // "bananas x6", "bananas ×6"
