@@ -103,6 +103,22 @@ enum ReceiptMatcher {
         return Double(shared) / Double(i.count)
     }
 
+    /// Words on a receipt that describe size or packaging rather than the product.
+    private static let ignorable: Set<String> = [
+        "gal", "oz", "lb", "lbs", "ct", "pk", "pack", "each", "ea", "org", "organic", "fresh", "lg", "sm", "med",
+        "large", "small", "bnls", "bnl", "boneless", "sknls", "sknl", "skinless", "brand", "family", "value",
+    ]
+
+    /// True when the receipt line says nothing more about the product than the list item does. A line
+    /// with extra descriptive words ("Peanut Butter" for "Butter") might be a different product, so
+    /// it is only suggested, never switched on for you.
+    static func isExact(_ receipt: String, _ item: String) -> Bool {
+        let itemTokens = tokens(item)
+        return tokens(receipt).allSatisfy { token in
+            ignorable.contains(token) || itemTokens.contains { same(token, $0) }
+        }
+    }
+
     /// The list item a receipt line is most likely for, if any is a good enough match.
     static func bestMatch(for entry: ReceiptEntry, in items: [GroceryItem]) -> GroceryItem? {
         items

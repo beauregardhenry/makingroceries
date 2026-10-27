@@ -13,7 +13,11 @@ struct GroceryApp: App {
         WindowGroup {
             ContentView()
                 .environment(store)
-                .task { ArrivalReminders.shared.syncRegions(store.shops) }
+                .task {
+                    ArrivalReminders.shared.syncRegions(store.shops)
+                    PhoneSession.shared.start(store: store)
+                }
+                .onChange(of: store.items) { _, _ in PhoneSession.shared.push() }
                 .onChange(of: store.shops) { _, shops in ArrivalReminders.shared.syncRegions(shops) }
         }
     }

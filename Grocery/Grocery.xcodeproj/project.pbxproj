@@ -19,9 +19,11 @@
 		2DDB9282F72EA268D95D785E /* GroceryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504E059EBD40D84873D6C1F3 /* GroceryApp.swift */; };
 		332EF6B3C07BACEE43EAEB82 /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		343E0B18912D4DDE9262FC5E /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
+		3755BAFBAB6A92FAEB282269 /* WatchSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FB05AD2C022503F3312ACE /* WatchSync.swift */; };
 		394E30AEB0EF8609BA144A6A /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		3F2CA4131B45FB76FA4A85A0 /* Planner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFB8D712FA685DD46F21593 /* Planner.swift */; };
 		43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4BBFEA4751E4D06061FAB /* Theme.swift */; };
+		494BCC90D304674BCE5BD6EA /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756CD976DC1541A0451A3238 /* WatchSnapshot.swift */; };
 		4D7CE6200B27B81B335E4C6D /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
 		4E94074FF4F875A0B76C9D19 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		50A26B163B8D9B5B1E8A46CF /* ShoppingActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA4CB59960F935691885649 /* ShoppingActivity.swift */; };
@@ -34,6 +36,7 @@
 		6595B12879B1E5EAAE63353B /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		69D915FA54863CB6E401D5A8 /* ReceiptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A2611C6625D05974C3C3E3 /* ReceiptView.swift */; };
 		6D6401D4BD43C3A633AED718 /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
+		74308CB96600897550232A4B /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756CD976DC1541A0451A3238 /* WatchSnapshot.swift */; };
 		7C5DBDBAB34CDD46EE3C1F06 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
 		7D7B96B189C4AC949D6647C9 /* Pricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */; };
 		7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */; };
@@ -49,6 +52,7 @@
 		B70FCB828727F7E1D4929CB3 /* Shops.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF29D61E22236EF73E84558 /* Shops.swift */; };
 		B7E6A80D8CB40B374CC268F9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		BB6C69D08BBD77C9CD04A46A /* NearbyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE29826DDB1BA8F31D229F /* NearbyStore.swift */; };
+		BBE9DAEE3C21D0F636E8F611 /* GroceryWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B5DCEE4D17F076C081FFAA /* GroceryWatchApp.swift */; };
 		BC5A0EF2693FEF3D7ED3F420 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		BED320D51D869299632784F3 /* TripPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */; };
 		BEE6B860BE22546840579D61 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
@@ -59,6 +63,8 @@
 		D0F0CA9086CFACB51D141D5F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CA078D797036AB2313A5227 /* Assets.xcassets */; };
 		D1882265C58037F2EC749889 /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
 		D5BF9433A776E4968A981278 /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
+		D68ED53A9C354D63269E1F85 /* WatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF7115579F71E22F29E30AE /* WatchListView.swift */; };
+		D71ADD46EEA7744664B5D804 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */; };
 		DB538CB702CCB07669B957D9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65588F8D169654D2847F9EA9 /* ItemDetail.swift */; };
 		E0622C12FA9382137329EA06 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */; };
@@ -108,13 +114,16 @@
 		030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Receipt.swift; sourceTree = "<group>"; };
 		031CE2AE19C066140118EE8D /* ProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductLookup.swift; sourceTree = "<group>"; };
 		037FD404E088F37C6CAFE4DF /* Meals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meals.swift; sourceTree = "<group>"; };
+		04FB05AD2C022503F3312ACE /* WatchSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSync.swift; sourceTree = "<group>"; };
 		0F92713BF9E92A55808D429E /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1388B3BE5B5BB9A90385765B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1B01D880BC233A48201117CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3A1348E8201C220BA2C17B9E /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		3FFB8D712FA685DD46F21593 /* Planner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Planner.swift; sourceTree = "<group>"; };
 		40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usual.swift; sourceTree = "<group>"; };
 		44DD299310384FBC887FBD35 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		4CC858F1DBEB1FDB8F628DED /* GroceryWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GroceryWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504E059EBD40D84873D6C1F3 /* GroceryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryApp.swift; sourceTree = "<group>"; };
 		59A2611C6625D05974C3C3E3 /* ReceiptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptView.swift; sourceTree = "<group>"; };
 		5D940F2136F269FF8EA91399 /* Grocery.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Grocery.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +133,7 @@
 		69D78A5C9275B720C9B3373E /* GroceryIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryIntents.swift; sourceTree = "<group>"; };
 		69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
 		7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlanView.swift; sourceTree = "<group>"; };
+		756CD976DC1541A0451A3238 /* WatchSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSnapshot.swift; sourceTree = "<group>"; };
 		7FA4CB59960F935691885649 /* ShoppingActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingActivity.swift; sourceTree = "<group>"; };
 		8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8CA078D797036AB2313A5227 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -135,8 +145,11 @@
 		A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GroceryWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWidget.swift; sourceTree = "<group>"; };
 		AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeOCR.swift; sourceTree = "<group>"; };
+		AEF7115579F71E22F29E30AE /* WatchListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchListView.swift; sourceTree = "<group>"; };
+		B82FFFBE982906B84A717F9C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BB705D847A427E040B53B7AE /* TripPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlanner.swift; sourceTree = "<group>"; };
 		BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
+		C7B5DCEE4D17F076C081FFAA /* GroceryWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWatchApp.swift; sourceTree = "<group>"; };
 		CCD4BBFEA4751E4D06061FAB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CCF0E94081431EAC5A452362 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFetcher.swift; sourceTree = "<group>"; };
@@ -158,6 +171,8 @@
 				7C4DA0B874164EEAFA746E98 /* Shared */,
 				50343716933215689630855B /* ShareExtension */,
 				47349F444530E22545733956 /* Sources */,
+				50087B3602F402906BE96E28 /* Watch */,
+				757B99D39FED6007FC697537 /* WatchShared */,
 				6073D35FE65382F7FE0BFFE5 /* Widget */,
 				149A6913ABFCB6444F3F1C5A /* Products */,
 			);
@@ -167,6 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				5D940F2136F269FF8EA91399 /* Grocery.app */,
+				4CC858F1DBEB1FDB8F628DED /* GroceryWatch.app */,
 				A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */,
 				0F92713BF9E92A55808D429E /* ShareExtension.appex */,
 			);
@@ -196,8 +212,20 @@
 				CCD4BBFEA4751E4D06061FAB /* Theme.swift */,
 				7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */,
 				40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */,
+				04FB05AD2C022503F3312ACE /* WatchSync.swift */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		50087B3602F402906BE96E28 /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */,
+				C7B5DCEE4D17F076C081FFAA /* GroceryWatchApp.swift */,
+				B82FFFBE982906B84A717F9C /* Info.plist */,
+				AEF7115579F71E22F29E30AE /* WatchListView.swift */,
+			);
+			path = Watch;
 			sourceTree = "<group>";
 		};
 		50343716933215689630855B /* ShareExtension */ = {
@@ -220,6 +248,14 @@
 				F6E44DC10CE6E228ABB59186 /* ShoppingLiveActivity.swift */,
 			);
 			path = Widget;
+			sourceTree = "<group>";
+		};
+		757B99D39FED6007FC697537 /* WatchShared */ = {
+			isa = PBXGroup;
+			children = (
+				756CD976DC1541A0451A3238 /* WatchSnapshot.swift */,
+			);
+			path = WatchShared;
 			sourceTree = "<group>";
 		};
 		7C4DA0B874164EEAFA746E98 /* Shared */ = {
@@ -300,6 +336,24 @@
 			productReference = A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		88B546C314D539C446AB577A /* GroceryWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDE350E09B363C6C9779A255 /* Build configuration list for PBXNativeTarget "GroceryWatch" */;
+			buildPhases = (
+				1E04CFF06A13A22C1983717A /* Sources */,
+				9F40D295C494560C4E4A6748 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GroceryWatch;
+			packageProductDependencies = (
+			);
+			productName = GroceryWatch;
+			productReference = 4CC858F1DBEB1FDB8F628DED /* GroceryWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -321,6 +375,10 @@
 						DevelopmentTeam = 8K5724Q6WR;
 						ProvisioningStyle = Automatic;
 					};
+					88B546C314D539C446AB577A = {
+						DevelopmentTeam = 8K5724Q6WR;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = CC65D7E002C61A01E199AEA8 /* Build configuration list for PBXProject "Grocery" */;
@@ -339,6 +397,7 @@
 			targets = (
 				48CCE2EECFDB1EFA030FBAB5 /* Grocery */,
 				77F4DD046872DC8DA1DF65CB /* GroceryWidget */,
+				88B546C314D539C446AB577A /* GroceryWatch */,
 				3B13448FE31B3001B4D592F4 /* ShareExtension */,
 			);
 		};
@@ -353,9 +412,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9F40D295C494560C4E4A6748 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D71ADD46EEA7744664B5D804 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1E04CFF06A13A22C1983717A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBE9DAEE3C21D0F636E8F611 /* GroceryWatchApp.swift in Sources */,
+				D68ED53A9C354D63269E1F85 /* WatchListView.swift in Sources */,
+				494BCC90D304674BCE5BD6EA /* WatchSnapshot.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		50DFC1AF2C7F8999364B5C12 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -391,6 +468,8 @@
 				BED320D51D869299632784F3 /* TripPlanView.swift in Sources */,
 				E0636B6C892669E373BEBCF1 /* TripPlanner.swift in Sources */,
 				7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */,
+				74308CB96600897550232A4B /* WatchSnapshot.swift in Sources */,
+				3755BAFBAB6A92FAEB282269 /* WatchSync.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -513,7 +592,6 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -580,6 +658,21 @@
 			};
 			name = Release;
 		};
+		1E8371DE601425E062161160 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Watch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beauregardhenry.makingroceries.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 		1EED44AE8626B1B615A650C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -621,6 +714,21 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		C1CBA7DF82B497ED3703241B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Watch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beauregardhenry.makingroceries.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
 		};
 		D87530BE41D93DF8E397EE59 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -693,7 +801,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -735,6 +842,15 @@
 			buildConfigurations = (
 				014BB0D019AA323E8AF5C6A7 /* Debug */,
 				FBEDA628D67C68235396AE40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CDE350E09B363C6C9779A255 /* Build configuration list for PBXNativeTarget "GroceryWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1CBA7DF82B497ED3703241B /* Debug */,
+				1E8371DE601425E062161160 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

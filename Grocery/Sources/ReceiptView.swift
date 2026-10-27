@@ -12,6 +12,8 @@ struct ReceiptView: View {
         var entry: ReceiptEntry
         var item: GroceryItem?
         var include: Bool
+        /// False when the receipt line has extra words, so the match needs a look.
+        var certain = true
     }
 
     @State private var shopID: UUID?
@@ -117,6 +119,10 @@ struct ReceiptView: View {
                 if lines[i].item != nil {
                     Text("Receipt: \(lines[i].entry.name)" + (lines[i].entry.quantity > 1 ? " · \(lines[i].entry.quantity) at \(Price.format(lines[i].entry.unitPrice))" : ""))
                         .font(.caption).foregroundStyle(.secondary)
+                    if !lines[i].certain {
+                        Text("Check this one: the receipt says more than your list does")
+                            .font(.caption).foregroundStyle(.orange)
+                    }
                 }
             }
         }
@@ -148,10 +154,13 @@ struct ReceiptView: View {
         let candidates = store.items.filter { shopID == nil || $0.shopID == shopID || $0.shopID == nil }
         lines = entries.map { entry in
             let item = ReceiptMatcher.bestMatch(for: entry, in: candidates)
-            return Line(entry: entry, item: item, include: item != nil)
+            let certain = item.map { ReceiptMatcher.isExact(entry.name, $0.name) } ?? true
+            return Line(entry: entry, item: item, include: item != nil && certain, certain: certain)
         }
         let known = lines.filter { $0.item != nil }.count
-        message = "Found \(entries.count) items, \(known) on your list. Check the matches before saving."
+        let unsure = lines.filter { $0.item != nil && !$0.certain }.count
+        message = "Found \(entries.count) items, \(known) on your list."
+            + (unsure > 0 ? " \(unsure) need a look before you turn them on." : "")
     }
 
     private func save() {
