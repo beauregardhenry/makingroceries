@@ -169,7 +169,7 @@ struct Backup: Codable {
 }
 
 enum Storage {
-    static let groupID = "group.com.example.grocery"
+    static let groupID = "group.com.beauregardhenry.makingroceries"
     static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring"]
 
     /// The app group container when there is one, so widgets and Siri see the same data;
