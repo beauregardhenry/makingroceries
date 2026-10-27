@@ -51,3 +51,29 @@ jobs:
           name: test-results
           path: .build/TestResults.xcresult
           retention-days: 7
+
+  ui-tests:
+    name: UI smoke tests
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Select the newest Xcode 26
+        run: |
+          latest="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)"
+          if [ -z "$latest" ]; then
+            echo "::error::This runner has no Xcode 26, which the app needs (iOS 26 SDK)."
+            exit 1
+          fi
+          sudo xcode-select -s "$latest/Contents/Developer"
+      - name: Verify the checked-in project matches the sources
+        run: ./scripts/verify-xcode-project.sh
+      - name: Run the UI smoke tests
+        run: ./scripts/ui-test.sh
+      - name: Keep the UI test results when something fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: .build/UITestResults.xcresult
+          retention-days: 7

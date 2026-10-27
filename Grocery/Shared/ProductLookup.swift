@@ -25,14 +25,16 @@ enum ProductLookup {
         var product: Product?
     }
 
-    static func product(for barcode: String) async throws -> ScannedProduct? {
+    static func product(for barcode: String, session: URLSession = .shared) async throws -> ScannedProduct? {
         guard barcode.allSatisfy(\.isNumber),
               var components = URLComponents(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json")
         else { return nil }
         components.queryItems = [URLQueryItem(name: "fields", value: "product_name,categories_tags,quantity,allergens_tags,ingredients_text")]
         guard let url = components.url else { return nil }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, response) = try await session.data(from: url)
+        // Open Food Facts answers 404 for a barcode it doesn't know.
+        if let http = response as? HTTPURLResponse, http.statusCode == 404 { return nil }
         let product = try JSONDecoder().decode(Response.self, from: data).product
         guard let name = product?.product_name?.trimmingCharacters(in: .whitespacesAndNewlines),
               !name.isEmpty

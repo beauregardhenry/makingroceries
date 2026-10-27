@@ -119,10 +119,11 @@ The Watch app is included in the repo but isn't embedded in the iPhone app by de
 ## Development and CI
 
 ```bash
-./scripts/test.sh   # build everything and run the unit tests on an iPhone simulator
+./scripts/test.sh      # build everything and run the unit tests on an iPhone simulator
+./scripts/ui-test.sh   # drive the real app through the main screens (a few minutes)
 ```
 
-Every pull request and push to `main` runs the same tests in GitHub Actions, plus four more checks: zero tolerance for `as!`, `fatalError(`, `print(` and `TODO`/`FIXME` in the app sources; a test-count floor and a coverage floor that can only rise (the numbers live in `test-count-baseline.txt` and `coverage-baseline.txt` and are raised automatically after merges); and a check that the checked-in Xcode project hasn't drifted from the sources. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Every pull request and push to `main` runs both in GitHub Actions, plus four more checks: zero tolerance for `as!`, `fatalError(`, `print(` and `TODO`/`FIXME` in the app sources; test-count floors and a coverage floor that can only rise (the numbers live in `test-count-baseline.txt` and `coverage-baseline.txt` and are raised automatically after merges); and a check that the checked-in Xcode project hasn't drifted from the sources. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Layout
 
@@ -133,7 +134,7 @@ Every pull request and push to `main` runs the same tests in GitHub Actions, plu
 | `Grocery/Widget` | The widget |
 | `Grocery/ShareExtension` | The Safari Share sheet extension |
 | `Grocery/Watch` | The Apple Watch app |
-| `Grocery/Tests` | Unit tests for everything in `Shared` |
+| `Grocery/Tests` | Unit tests for everything in `Shared`, and UI smoke tests for the screens |
 | `scripts` | Test, coverage and CI check scripts |
 | `.github/workflows` | CI and the baseline ratchets |
 | `docs/screenshots` | The README's pictures |

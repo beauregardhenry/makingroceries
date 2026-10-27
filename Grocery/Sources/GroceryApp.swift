@@ -7,6 +7,10 @@ struct GroceryApp: App {
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
 
     init() {
+        if Storage.isUITesting, let id = Bundle.main.bundleIdentifier {
+            // Start every UI test with default settings too.
+            UserDefaults.standard.removePersistentDomain(forName: id)
+        }
         Theme.migrateLegacyAppearance()
         // Created at launch so iOS can wake the app for a store arrival.
         _ = ArrivalReminders.shared
