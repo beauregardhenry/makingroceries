@@ -297,6 +297,14 @@ struct ContentView: View {
                 }
             }
             .modifier(ShoppingFeedback(finishedAisles: finishedAisles, key: activityKey, sync: syncShoppingActivity))
+            .alert("Some Saved Data Couldn't Be Read", isPresented: Binding(
+                get: { !store.loadProblems.isEmpty },
+                set: { if !$0 { store.loadProblems = [] } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("A copy of \(LoadProblem.describe(store.loadProblems)) was kept in the app's Recovered folder before anything was saved over it. Everything else loaded normally.")
+            }
             .alert("Set Price", isPresented: Binding(get: { pricingItem != nil },
                                                      set: { if !$0 { pricingItem = nil } }),
                    presenting: pricingItem) { item in
@@ -309,6 +317,18 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(theme.wrappedValue.scheme)
+    }
+}
+
+enum LoadProblem {
+    private static let names = [
+        "grocery": "your list", "shops": "your stores", "favorites": "your usual items", "meals": "your meals",
+        "history": "your item history", "recurring": "your repeating items", "plan": "your meal plan",
+        "stock": "what's at home", "spending": "your spending",
+    ]
+
+    static func describe(_ files: [String]) -> String {
+        files.map { names[$0] ?? $0 }.formatted(.list(type: .and))
     }
 }
 
