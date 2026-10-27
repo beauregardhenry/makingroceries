@@ -183,11 +183,12 @@ struct Backup: Codable {
     var meals: [Meal]
     var history: [PastItem]
     var recurring: [RecurringItem]
+    var plan: [PlannedMeal]? = nil
 }
 
 enum Storage {
     static let groupID = "group.com.beauregardhenry.makingroceries"
-    static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring"]
+    static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring", "plan"]
 
     /// The app group container when there is one, so widgets and Siri see the same data;
     /// otherwise Documents. Files from earlier versions are copied across once.
@@ -241,6 +242,10 @@ final class GroceryStore {
         didSet { write(recurring, to: Storage.url("recurring")) }
     }
 
+    var plan: [PlannedMeal] = [] {
+        didSet { write(plan, to: Storage.url("plan")) }
+    }
+
     init() {
         load()
         if read([PastItem].self, from: Storage.url("history")) == nil {
@@ -267,6 +272,7 @@ final class GroceryStore {
         meals = read([Meal].self, from: Storage.url("meals")) ?? []
         history = read([PastItem].self, from: Storage.url("history")) ?? []
         recurring = read([RecurringItem].self, from: Storage.url("recurring")) ?? []
+        plan = read([PlannedMeal].self, from: Storage.url("plan")) ?? []
     }
 
     // MARK: Items
@@ -296,8 +302,25 @@ final class GroceryStore {
             items[i].quantity += quantity
             return
         }
-        add(name: trimmed, quantity: quantity, aisle: aisle ?? resolveAisle(for: trimmed),
+        let chosen = aisle ?? resolveAisle(for: trimmed)
+        add(name: trimmed, quantity: quantity, aisle: chosen,
             shopID: shop, price: price ?? past?.price, note: note)
+        // Nothing recognised it, so ask the on-device model, if this phone has one.
+        if aisle == nil, past == nil, chosen == .other, AisleAI.isAvailable {
+            Task { @MainActor in await refineAisle(forItemNamed: trimmed) }
+        }
+    }
+
+    /// Files an item the keyword list couldn't place, using the on-device model, and remembers the answer.
+    @MainActor
+    func refineAisle(forItemNamed name: String) async {
+        guard let guess = await AisleAI.aisle(for: name), guess != .other else { return }
+        for i in items.indices where Self.same(items[i].name, name) && items[i].aisle == .other && !items[i].isChecked {
+            items[i].aisle = guess
+        }
+        if let h = history.firstIndex(where: { Self.same($0.name, name) }), history[h].aisle == .other {
+            history[h].aisle = guess
+        }
     }
 
     func toggle(_ item: GroceryItem) {
@@ -636,7 +659,7 @@ final class GroceryStore {
     // MARK: Backup
 
     func makeBackup() -> Backup {
-        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring)
+        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan)
     }
 
     func restore(_ backup: Backup) {
@@ -646,6 +669,7 @@ final class GroceryStore {
         meals = backup.meals
         history = backup.history
         recurring = backup.recurring
+        plan = backup.plan ?? []
     }
 
     // MARK: Storage

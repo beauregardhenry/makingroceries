@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var showingBackup = false
     @State private var showingReceipt = false
     @State private var showingTrip = false
+    @State private var showingPlanner = false
     @State private var detailItem: GroceryItem?
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("shoppingMode") private var shoppingMode = false
@@ -92,6 +93,24 @@ struct ContentView: View {
             let items = visibleItems.filter { $0.aisle == aisle }
             return items.isEmpty ? nil : (aisle, items)
         }
+    }
+
+    /// How many aisles on screen have everything checked off, for the finished-an-aisle buzz.
+    private var finishedAisles: Int {
+        Dictionary(grouping: visibleItems, by: \.aisle).values.filter { $0.allSatisfy(\.isChecked) }.count
+    }
+
+    private var remainingCount: Int { visibleItems.filter { !$0.isChecked }.count }
+
+    /// Changes whenever the Live Activity needs to be brought up to date.
+    private var activityKey: String { "\(shoppingMode)|\(selectedShopRaw)|\(remainingCount)|\(visibleItems.count)" }
+
+    private func syncShoppingActivity() {
+        #if os(iOS)
+        let next = displaySections.lazy.flatMap(\.items).first { !$0.isChecked }?.name
+        let (remaining, total, name, active) = (remainingCount, visibleItems.count, navigationTitle, shoppingMode)
+        Task { await ShoppingActivity.sync(storeName: name, remaining: remaining, total: total, next: next, active: active) }
+        #endif
     }
 
     private struct DisplaySection: Identifiable {
@@ -228,6 +247,7 @@ struct ContentView: View {
                         Button("Usual & Buy Again", systemImage: "star") { showingUsual = true }
                         Button("Pantry Check", systemImage: "checklist") { showingPantry = true }
                         Button("Meals", systemImage: "fork.knife") { showingMeals = true }
+                        Button("Meal Plan", systemImage: "calendar") { showingPlanner = true }
                         Button("Totals by Store", systemImage: "dollarsign.circle") { showingTotals = true }
                         Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { showingTrip = true }
                         Button("Scan Receipt", systemImage: "receipt") { showingReceipt = true }
@@ -258,12 +278,17 @@ struct ContentView: View {
             .sheet(isPresented: $showingBackup) { BackupView() }
             .sheet(isPresented: $showingReceipt) { ReceiptView(shopID: newItemShopID) }
             .sheet(isPresented: $showingTrip) { TripPlanView() }
+            .sheet(isPresented: $showingPlanner) { PlannerView(shopID: newItemShopID) }
             .sheet(item: $detailItem) { item in
                 ItemDetailView(item: item, repeatDays: store.recurrence(for: item)?.everyDays ?? 0)
             }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active { store.reload() }
+                if phase == .active {
+                    store.reload()
+                    Task { await ArrivalReminders.shared.refreshNearestStore(among: store.shops) }
+                }
             }
+            .modifier(ShoppingFeedback(finishedAisles: finishedAisles, key: activityKey, sync: syncShoppingActivity))
             .alert("Set Price", isPresented: Binding(get: { pricingItem != nil },
                                                      set: { if !$0 { pricingItem = nil } }),
                    presenting: pricingItem) { item in
@@ -345,6 +370,7 @@ struct ItemRow: View {
             .padding(.vertical, large ? 8 : 0)
         }
         .buttonStyle(.plain)
+        .sensoryFeedback(.impact(weight: .light), trigger: item.isChecked)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(spokenSummary)
         .accessibilityHint(item.isChecked ? "Double tap to put it back on the list" : "Double tap to mark it bought")
@@ -459,5 +485,18 @@ struct UndoBanner: View {
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
         .background(.regularMaterial, in: Capsule())
+    }
+}
+
+/// The finished-an-aisle buzz, and keeping the lock screen Live Activity current.
+private struct ShoppingFeedback: ViewModifier {
+    let finishedAisles: Int
+    let key: String
+    let sync: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .sensoryFeedback(trigger: finishedAisles) { old, new in new > old ? .success : nil }
+            .onChange(of: key) { _, _ in sync() }
     }
 }

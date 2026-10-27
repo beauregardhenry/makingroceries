@@ -8,6 +8,9 @@ struct SelectShopIntent: WidgetConfigurationIntent {
 
     @Parameter(title: "Store")
     var shop: ShopEntity?
+
+    @Parameter(title: "Switch to the store I'm at", default: false)
+    var followLocation: Bool
 }
 
 struct ListEntry: TimelineEntry {
@@ -19,7 +22,8 @@ struct ListEntry: TimelineEntry {
 struct ListProvider: AppIntentTimelineProvider {
     private func entry(for configuration: SelectShopIntent) -> ListEntry {
         let store = GroceryStore()
-        let shop = store.shop(for: configuration.shop?.id)
+        let nearbyID = configuration.followLocation ? NearbyStore.currentShopID(among: store.shops) : nil
+        let shop = store.shop(for: nearbyID ?? configuration.shop?.id)
         return ListEntry(date: Date(), title: shop?.name ?? "Groceries",
                          items: store.widgetItems(shopID: shop?.id))
     }
@@ -120,5 +124,8 @@ struct ListWidget: Widget {
 
 @main
 struct GroceryWidgets: WidgetBundle {
-    var body: some Widget { ListWidget() }
+    var body: some Widget {
+        ListWidget()
+        ShoppingLiveActivity()
+    }
 }

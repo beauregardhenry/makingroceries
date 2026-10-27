@@ -1,5 +1,6 @@
 import CoreLocation
 import UserNotifications
+import WidgetKit
 
 /// Notifies you when you arrive at a store that has items on its list.
 /// Locations stay on the device; nothing is sent anywhere.
@@ -94,7 +95,20 @@ final class ArrivalReminders: NSObject, CLLocationManagerDelegate, UNUserNotific
         Task { @MainActor in notifyArrival(at: id) }
     }
 
+    /// When the app opens, notes which saved store you're standing near (if any) so the widget can
+    /// switch to it. Uses one location reading, only if location is already allowed.
+    func refreshNearestStore(among shops: [Shop]) async {
+        guard shops.contains(where: \.hasLocation) else { return }
+        let status = manager.authorizationStatus
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else { return }
+        guard let here = await currentLocation() else { return }
+        NearbyStore.record(NearbyStore.nearest(to: here.latitude, here.longitude, among: shops)?.id)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
     private func notifyArrival(at shopID: UUID) {
+        NearbyStore.record(shopID)
+        WidgetCenter.shared.reloadAllTimelines()
         let store = GroceryStore()
         guard let shop = store.shop(for: shopID), shop.remindOnArrival == true else { return }
         // At most once every two hours per store, so driving past isn't noisy.

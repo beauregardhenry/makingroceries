@@ -28,6 +28,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_CFBundleDisplayName: "Makin' Groceries"
         INFOPLIST_KEY_NSCameraUsageDescription: "Makin' Groceries uses the camera to scan product barcodes."
+        INFOPLIST_KEY_NSSupportsLiveActivities: YES
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Makin' Groceries uses your location to remember where a store is, so it can remind you of your list when you arrive."
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Makin' Groceries uses your location to remind you of your list when you arrive at a store you've set up, even when the app is closed. Your location stays on this device."
         SWIFT_VERSION: "5.0"
