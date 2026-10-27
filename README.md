@@ -16,7 +16,9 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
 - **Quick add**: type `milk, 6 bananas, eggs x2` to add several items at once, with autocomplete from past items.
 - **Barcode scanner** with a product name lookup from [Open Food Facts](https://world.openfoodfacts.org). Only the barcode number is sent.
 - A "usual items" list, a Buy Again list, and **Due** suggestions for things you buy at a steady pace.
-- **Meals**: save a list as a meal and add all its ingredients in one tap. Import ingredients from a pasted list or a recipe web page.
+- **Meals**: save a list as a meal and add all its ingredients in one tap, at ½×, 2×, 3× or 4× if you're cooking a different batch size. Measured ingredients ("2 cups flour") scale as an amount in the item's note; counted ones ("3 eggs") scale their quantity.
+- **Recipe import** from a pasted list, a recipe web page, a **photo or screenshot**, or the **document camera**. Photos are read on the device and never uploaded.
+- **Share from Safari**: choose Makin' Groceries in the Share sheet on a recipe page to save it as a meal or add it to your list.
 - **Pantry Check**: mark which usual items you're out of, then add them all.
 - Typos and plurals are caught ("tomatos" becomes "Tomatoes"), and adding something already on the list raises its quantity.
 
@@ -31,7 +33,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
 
 ## Privacy
 
-Everything is stored on your phone. The app has no account and no server. It contacts the internet only to look up a barcode (the number only) and to fetch a recipe page when you enter its address.
+Everything is stored on your phone. The app has no account and no server. It contacts the internet only to look up a barcode (the number only) and to fetch a recipe page when you enter its address or share it from Safari.
 
 ## Building it
 
@@ -46,8 +48,8 @@ open Grocery.xcodeproj
 
 To run on your own iPhone, change these in `Grocery/project.yml`:
 - `DEVELOPMENT_TEAM` to your Apple team ID
-- the two `PRODUCT_BUNDLE_IDENTIFIER` values (the widget's must start with the app's)
-- the app group name, in `project.yml`, both `.entitlements` files and `Grocery/Shared/Models.swift` (`Storage.groupID`)
+- the three `PRODUCT_BUNDLE_IDENTIFIER` values (the widget's and the share extension's must start with the app's)
+- the app group name, in `project.yml`, all three `.entitlements` files and `Grocery/Shared/Models.swift` (`Storage.groupID`)
 
 Then regenerate and press Run. A free Apple ID is enough, but builds expire after 7 days. If Xcode rejects the app group on a free account, remove it from both targets. The app then keeps its data inside itself, and the widget and Siri can't see your list.
 
@@ -58,6 +60,7 @@ Then regenerate and press Run. A free Apple ID is enough, but builds expire afte
 | `Grocery/Sources` | The app's screens |
 | `Grocery/Shared` | Data model, storage, parsing and Siri actions, used by the app and the widget |
 | `Grocery/Widget` | The widget |
+| `Grocery/ShareExtension` | The Safari Share sheet extension |
 | `tools/make_icon.py` | Draws the app icon: `python3 tools/make_icon.py` |
 
 ## Not done yet
