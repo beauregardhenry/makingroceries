@@ -16,6 +16,7 @@ targets:
     sources: [Sources, Shared]
     dependencies:
       - target: GroceryWidget
+      - target: ShareExtension
     entitlements:
       path: Sources/Grocery.entitlements
       properties:
@@ -50,12 +51,40 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.beauregardhenry.makingroceries.widget
         SWIFT_VERSION: "5.0"
         SKIP_INSTALL: YES
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ShareExtension
+      - path: Shared
+        excludes: [GroceryIntents.swift]
+    entitlements:
+      path: ShareExtension/ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.beauregardhenry.makingroceries]
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: "Makin' Groceries"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.beauregardhenry.makingroceries.share
+        SWIFT_VERSION: "5.0"
+        SKIP_INSTALL: YES
 schemes:
   Grocery:
     build:
       targets:
         Grocery: all
         GroceryWidget: all
+        ShareExtension: all
     run:
       config: Debug
     archive:

@@ -82,6 +82,18 @@ struct MealIngredient: Identifiable, Codable, Equatable {
     var name: String
     var quantity = 1
     var aisle: Aisle = .other
+    /// Measured ingredients, like "2 cups flour": the amount and its unit.
+    var amount: Double?
+    var unit: String?
+
+    /// What to put on the list for a bigger or smaller batch. Counted items scale their quantity
+    /// (never below 1); measured ones stay one item with the scaled amount as a note.
+    func scaled(by factor: Double) -> (quantity: Int, note: String?) {
+        if let amount, let unit {
+            return (1, factor == 1 ? Amount.text(amount, unit: unit) : Amount.text(amount * factor, unit: unit))
+        }
+        return (max(1, Int((Double(quantity) * factor - 0.0001).rounded(.up))), nil)
+    }
 }
 
 struct Meal: Identifiable, Codable, Equatable {
@@ -266,7 +278,7 @@ final class GroceryStore {
     /// a missing store comes from history too. Near-misses of a known name ("tomatos") are
     /// corrected to it.
     func addOrBump(name: String, quantity: Int = 1, aisle: Aisle? = nil, shopID: UUID?,
-                   price: Double? = nil, inferShop: Bool = false) {
+                   price: Double? = nil, inferShop: Bool = false, note: String? = nil) {
         let typed = name.trimmingCharacters(in: .whitespaces)
         guard !typed.isEmpty else { return }
         let trimmed = canonicalName(for: typed)
@@ -280,7 +292,7 @@ final class GroceryStore {
             return
         }
         add(name: trimmed, quantity: quantity, aisle: aisle ?? resolveAisle(for: trimmed),
-            shopID: shop, price: price ?? past?.price)
+            shopID: shop, price: price ?? past?.price, note: note)
     }
 
     func toggle(_ item: GroceryItem) {
@@ -495,11 +507,22 @@ final class GroceryStore {
 
     // MARK: Meals
 
-    func addToList(_ meal: Meal, shopID: UUID?) {
+    func addToList(_ meal: Meal, shopID: UUID?, scale: Double = 1) {
         for ingredient in meal.ingredients {
-            addOrBump(name: ingredient.name, quantity: ingredient.quantity, aisle: ingredient.aisle,
-                      shopID: shopID, inferShop: shopID == nil)
+            let scaled = ingredient.scaled(by: scale)
+            addOrBump(name: ingredient.name, quantity: scaled.quantity, aisle: ingredient.aisle,
+                      shopID: shopID, inferShop: shopID == nil, note: scaled.note)
         }
+    }
+
+    /// A meal from ingredient lines (pasted, photographed or from a web page).
+    func makeMeal(named name: String, fromLines lines: String) -> Meal {
+        let ingredients = RecipeParser.fromText(lines).map { line in
+            MealIngredient(name: line.name, quantity: line.quantity, aisle: resolveAisle(for: line.name),
+                           amount: line.amount, unit: line.unit)
+        }
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        return Meal(name: trimmed.isEmpty ? "Imported recipe" : trimmed, ingredients: ingredients)
     }
 
     // MARK: Repeating items

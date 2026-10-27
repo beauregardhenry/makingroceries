@@ -8,12 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		01A4C102574B8276021F151E /* Photos.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14032117470AF68E950FAAF /* Photos.swift */; };
+		0F89DFB51190597505693E16 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1348E8201C220BA2C17B9E /* ShareViewController.swift */; };
+		1353D5BA7623C67F265B708C /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		184C36CE7AE420FE09F8749B /* Backup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B189695D0B80057BC76D09 /* Backup.swift */; };
 		2DDB9282F72EA268D95D785E /* GroceryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504E059EBD40D84873D6C1F3 /* GroceryApp.swift */; };
+		332EF6B3C07BACEE43EAEB82 /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
+		343E0B18912D4DDE9262FC5E /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		394E30AEB0EF8609BA144A6A /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4BBFEA4751E4D06061FAB /* Theme.swift */; };
 		4E94074FF4F875A0B76C9D19 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
+		54C55493F4BC16AD975B9E35 /* RecipeOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */; };
+		5FB60923B494B4E2AC3EBD75 /* RecipeOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */; };
 		60DDDE0D04DDE17637FF79D3 /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
+		62113FFD93C262A8B35CF2D1 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0F92713BF9E92A55808D429E /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6595B12879B1E5EAAE63353B /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		7D7B96B189C4AC949D6647C9 /* Pricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */; };
 		7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */; };
 		8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
@@ -23,16 +31,20 @@
 		B3348D5ED3CEFAFA2B6F2094 /* GroceryWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B70FCB828727F7E1D4929CB3 /* Shops.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF29D61E22236EF73E84558 /* Shops.swift */; };
 		B7E6A80D8CB40B374CC268F9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
+		BC5A0EF2693FEF3D7ED3F420 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		BEE6B860BE22546840579D61 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		BF869CCAEED5BF704E53DDF9 /* Quick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */; };
 		C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */; };
 		CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9351DBAEF175CDA248781172 /* Arrival.swift */; };
 		D0F0CA9086CFACB51D141D5F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CA078D797036AB2313A5227 /* Assets.xcassets */; };
+		DB538CB702CCB07669B957D9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65588F8D169654D2847F9EA9 /* ItemDetail.swift */; };
+		E0622C12FA9382137329EA06 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */; };
 		E1EE5F13C79E3D7D69662958 /* Pantry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5540C70E607A8459DCCDAB9 /* Pantry.swift */; };
 		E66C9069C4B911EE0B982A6A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		EA142E242CB985235ABAD1CA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */; };
 		EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */; };
+		F11F07F6B77CCA5CDC7692B7 /* RecipeOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +54,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 77F4DD046872DC8DA1DF65CB;
 			remoteInfo = GroceryWidget;
+		};
+		A6BA3100855400E7CBE60639 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FF47BA8294BCCBCEAC1EB73 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B13448FE31B3001B4D592F4;
+			remoteInfo = ShareExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -53,6 +72,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				B3348D5ED3CEFAFA2B6F2094 /* GroceryWidget.appex in Embed Foundation Extensions */,
+				62113FFD93C262A8B35CF2D1 /* ShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -62,9 +82,12 @@
 /* Begin PBXFileReference section */
 		031CE2AE19C066140118EE8D /* ProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductLookup.swift; sourceTree = "<group>"; };
 		037FD404E088F37C6CAFE4DF /* Meals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meals.swift; sourceTree = "<group>"; };
+		0F92713BF9E92A55808D429E /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1388B3BE5B5BB9A90385765B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		1B01D880BC233A48201117CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3A1348E8201C220BA2C17B9E /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usual.swift; sourceTree = "<group>"; };
+		44DD299310384FBC887FBD35 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		504E059EBD40D84873D6C1F3 /* GroceryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryApp.swift; sourceTree = "<group>"; };
 		5D940F2136F269FF8EA91399 /* Grocery.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Grocery.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F4FABF22DF964392BCB1339 /* GroceryWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GroceryWidget.entitlements; sourceTree = "<group>"; };
@@ -79,7 +102,11 @@
 		A14032117470AF68E950FAAF /* Photos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photos.swift; sourceTree = "<group>"; };
 		A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GroceryWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWidget.swift; sourceTree = "<group>"; };
+		AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeOCR.swift; sourceTree = "<group>"; };
+		BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
 		CCD4BBFEA4751E4D06061FAB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		CCF0E94081431EAC5A452362 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFetcher.swift; sourceTree = "<group>"; };
 		CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanner.swift; sourceTree = "<group>"; };
 		D9EF2A8057BCF9A88E835685 /* Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parsing.swift; sourceTree = "<group>"; };
 		E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryShortcuts.swift; sourceTree = "<group>"; };
@@ -93,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				7C4DA0B874164EEAFA746E98 /* Shared */,
+				50343716933215689630855B /* ShareExtension */,
 				47349F444530E22545733956 /* Sources */,
 				6073D35FE65382F7FE0BFFE5 /* Widget */,
 				149A6913ABFCB6444F3F1C5A /* Products */,
@@ -104,6 +132,7 @@
 			children = (
 				5D940F2136F269FF8EA91399 /* Grocery.app */,
 				A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */,
+				0F92713BF9E92A55808D429E /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +161,17 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
+		50343716933215689630855B /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				CCF0E94081431EAC5A452362 /* Info.plist */,
+				44DD299310384FBC887FBD35 /* ShareExtension.entitlements */,
+				BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */,
+				3A1348E8201C220BA2C17B9E /* ShareViewController.swift */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
 		6073D35FE65382F7FE0BFFE5 /* Widget */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +189,8 @@
 				1388B3BE5B5BB9A90385765B /* Models.swift */,
 				D9EF2A8057BCF9A88E835685 /* Parsing.swift */,
 				031CE2AE19C066140118EE8D /* ProductLookup.swift */,
+				CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */,
+				AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -156,6 +198,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3B13448FE31B3001B4D592F4 /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7916C0EA0EE12B270EF6A16B /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				5F236B1AABB53C4A8DA4F032 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			packageProductDependencies = (
+			);
+			productName = ShareExtension;
+			productReference = 0F92713BF9E92A55808D429E /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		48CCE2EECFDB1EFA030FBAB5 /* Grocery */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 76D8C26626993BE3CE049955 /* Build configuration list for PBXNativeTarget "Grocery" */;
@@ -168,6 +227,7 @@
 			);
 			dependencies = (
 				E17F78572E3433D2DF37E835 /* PBXTargetDependency */,
+				E327DBB03DFA29CF498A9E76 /* PBXTargetDependency */,
 			);
 			name = Grocery;
 			packageProductDependencies = (
@@ -202,6 +262,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					3B13448FE31B3001B4D592F4 = {
+						DevelopmentTeam = 8K5724Q6WR;
+						ProvisioningStyle = Automatic;
+					};
 					48CCE2EECFDB1EFA030FBAB5 = {
 						DevelopmentTeam = 8K5724Q6WR;
 						ProvisioningStyle = Automatic;
@@ -228,6 +292,7 @@
 			targets = (
 				48CCE2EECFDB1EFA030FBAB5 /* Grocery */,
 				77F4DD046872DC8DA1DF65CB /* GroceryWidget */,
+				3B13448FE31B3001B4D592F4 /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -264,9 +329,25 @@
 				7D7B96B189C4AC949D6647C9 /* Pricing.swift in Sources */,
 				394E30AEB0EF8609BA144A6A /* ProductLookup.swift in Sources */,
 				BF869CCAEED5BF704E53DDF9 /* Quick.swift in Sources */,
+				6595B12879B1E5EAAE63353B /* RecipeFetcher.swift in Sources */,
+				F11F07F6B77CCA5CDC7692B7 /* RecipeOCR.swift in Sources */,
 				B70FCB828727F7E1D4929CB3 /* Shops.swift in Sources */,
 				43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */,
 				7FEB0401EFA0B28BDFCE642F /* Usual.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F236B1AABB53C4A8DA4F032 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC5A0EF2693FEF3D7ED3F420 /* Models.swift in Sources */,
+				1353D5BA7623C67F265B708C /* Parsing.swift in Sources */,
+				DB538CB702CCB07669B957D9 /* ProductLookup.swift in Sources */,
+				332EF6B3C07BACEE43EAEB82 /* RecipeFetcher.swift in Sources */,
+				54C55493F4BC16AD975B9E35 /* RecipeOCR.swift in Sources */,
+				E0622C12FA9382137329EA06 /* ShareView.swift in Sources */,
+				0F89DFB51190597505693E16 /* ShareViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +360,8 @@
 				A840AB6FECFCDC572AE6261A /* Models.swift in Sources */,
 				BEE6B860BE22546840579D61 /* Parsing.swift in Sources */,
 				B7E6A80D8CB40B374CC268F9 /* ProductLookup.swift in Sources */,
+				343E0B18912D4DDE9262FC5E /* RecipeFetcher.swift in Sources */,
+				5FB60923B494B4E2AC3EBD75 /* RecipeOCR.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +372,11 @@
 			isa = PBXTargetDependency;
 			target = 77F4DD046872DC8DA1DF65CB /* GroceryWidget */;
 			targetProxy = 2097069F454F8A5106B2110A /* PBXContainerItemProxy */;
+		};
+		E327DBB03DFA29CF498A9E76 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B13448FE31B3001B4D592F4 /* ShareExtension */;
+			targetProxy = A6BA3100855400E7CBE60639 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -401,6 +489,24 @@
 			};
 			name = Debug;
 		};
+		0A3646DD0E6781ADF9451C7A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.beauregardhenry.makingroceries.share;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		1EED44AE8626B1B615A650C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -441,6 +547,24 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		D87530BE41D93DF8E397EE59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.beauregardhenry.makingroceries.share;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		FBEDA628D67C68235396AE40 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -519,6 +643,15 @@
 			buildConfigurations = (
 				0411D3BC381B56832D25CE65 /* Debug */,
 				77C22AB5874B4B796A2C5DEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7916C0EA0EE12B270EF6A16B /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D87530BE41D93DF8E397EE59 /* Debug */,
+				0A3646DD0E6781ADF9451C7A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
