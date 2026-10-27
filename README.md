@@ -4,6 +4,28 @@ An iPhone grocery list built around how you actually shop: separate lists for ea
 
 Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencies.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/store-list.png" width="230" alt="A store's list in its aisle order"><br><sub><b>A store's list</b><br>in the order you walk it, with aisle labels, prices and notes</sub></td>
+    <td align="center"><img src="docs/screenshots/all-stores.png" width="230" alt="All stores in one list"><br><sub><b>All stores</b><br>everything together, each item tagged with its store</sub></td>
+    <td align="center"><img src="docs/screenshots/aisle-map.png" width="230" alt="Editing a store's aisle map"><br><sub><b>Aisle map</b><br>drag aisles into your route, add labels like "Aisle 4"</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with larger rows"><br><sub><b>Shopping Mode</b><br>bigger text and rows; checked items drop to the cart</sub></td>
+    <td align="center"><img src="docs/screenshots/meal-scaling.png" width="230" alt="A meal scaled to a double batch"><br><sub><b>Meals and scaling</b><br>a 2x batch doubles counted and measured ingredients</sub></td>
+    <td align="center"><img src="docs/screenshots/recipe-photo-import.png" width="230" alt="Ingredients read from a photo of a recipe"><br><sub><b>Recipe from a photo</b><br>ingredients are read on the phone from a picture or screenshot</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/menu.png" width="230" alt="The more menu"><br><sub><b>The menu</b><br>usual items, pantry check, meals, totals, sharing and backup</sub></td>
+    <td align="center"><img src="docs/screenshots/stores.png" width="230" alt="Managing stores"><br><sub><b>Stores</b><br>add your own, or pick a popular one</sub></td>
+    <td></td>
+  </tr>
+</table>
+
+The screenshots use made-up demo data. Regenerate them after a visible change, in light mode, so they stay accurate.
+
 ## What it does
 
 **Lists and stores**
@@ -61,6 +83,7 @@ Then regenerate and press Run. A free Apple ID is enough, but builds expire afte
 | `Grocery/Shared` | Data model, storage, parsing and Siri actions, used by the app and the widget |
 | `Grocery/Widget` | The widget |
 | `Grocery/ShareExtension` | The Safari Share sheet extension |
+| `docs/screenshots` | The README's pictures |
 | `tools/make_icon.py` | Draws the app icon: `python3 tools/make_icon.py` |
 
 ## Not done yet
