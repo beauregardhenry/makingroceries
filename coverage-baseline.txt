@@ -1,0 +1,5 @@
+# Line coverage floor for the app's logic (Grocery/Shared; screens and system-only files are excluded,
+# see scripts/check-coverage.sh). Raised automatically by .github/workflows/coverage-ratchet.yml on
+# every push to main; don't bump it from a feature branch. Lower it only deliberately, with a reason
+# in the commit.
+coverage=83.38
