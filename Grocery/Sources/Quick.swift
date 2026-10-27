@@ -71,6 +71,7 @@ struct QuickAddBar: View {
             }
             HStack(spacing: 8) {
                 TextField("Add items: milk, eggs, 6 bananas", text: $text)
+                    .accessibilityIdentifier("quickAddField")
                     .focused($focused)
                     .submitLabel(.done)
                     .textInputAutocapitalization(.sentences)

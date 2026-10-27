@@ -106,6 +106,18 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         # The test bundle runs the shared logic on its own, with no app around it.
         CODE_SIGNING_ALLOWED: NO
+  GroceryUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Tests/GroceryUITests]
+    dependencies:
+      - target: Grocery
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.beauregardhenry.makingroceries.uitests
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Grocery
   ShareExtension:
     type: app-extension
     platform: iOS
@@ -150,6 +162,17 @@ schemes:
         - name: GroceryTests
     archive:
       config: Release
+  GroceryUITests:
+    build:
+      targets:
+        Grocery: all
+        GroceryWidget: all
+        ShareExtension: all
+        GroceryUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - name: GroceryUITests
   GroceryWatch:
     build:
       targets:

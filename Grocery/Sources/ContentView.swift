@@ -252,7 +252,7 @@ struct ContentView: View {
                         Button("Pantry Check", systemImage: "checklist") { sheet = .pantry }
                         Button("At Home", systemImage: "refrigerator") { sheet = .atHome }
                         Menu("Meals", systemImage: "fork.knife") {
-                            Button("Meals", systemImage: "fork.knife") { sheet = .meals }
+                            Button("Saved Meals", systemImage: "fork.knife") { sheet = .meals }
                             Button("Meal Plan", systemImage: "calendar") { sheet = .planner }
                         }
                         Menu("Money", systemImage: "dollarsign.circle") {
@@ -408,11 +408,14 @@ struct ItemRow: View {
                 }
             }
             .padding(.vertical, large ? 8 : 0)
+            // A plain button only reacts to its text and icons; make the blank middle of the row tappable too.
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.impact(weight: .light), trigger: item.isChecked)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(spokenSummary)
+        .accessibilityIdentifier("item-\(item.name)")
         .accessibilityHint(item.isChecked ? "Double tap to put it back on the list" : "Double tap to mark it bought")
         .accessibilityAction(named: "Edit details") { onEdit(item) }
         .accessibilityAction(named: "Set price") { onSetPrice(item) }
