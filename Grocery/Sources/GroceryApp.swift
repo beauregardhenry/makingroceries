@@ -5,6 +5,7 @@ struct GroceryApp: App {
     @State private var store = GroceryStore()
 
     init() {
+        Theme.migrateLegacyAppearance()
         // Created at launch so iOS can wake the app for a store arrival.
         _ = ArrivalReminders.shared
     }

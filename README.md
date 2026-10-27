@@ -64,7 +64,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - **Apple Watch app** (optional, see below): your lists in walking order, with check-off from your wrist.
 - **Siri and Shortcuts**: "Add to my list in Makin' Groceries", "Read my grocery list in Makin' Groceries".
 - **Arrival reminders**: save a store's location and get a notification listing what you need when you arrive. Locations stay on the device.
-- Share the list as text, undo Clear Done, back up and restore everything to a file, light and dark mode, and a color picker for the background.
+- Share the list as text, undo Clear Done, back up and restore everything to a file, a color picker for the background (grey, five tints, a custom color, or Dark). Colors sit on top of light mode, and Dark is the only choice that switches the whole app to dark mode.
 
 ## Privacy
 

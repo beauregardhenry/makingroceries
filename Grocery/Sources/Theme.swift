@@ -1,18 +1,22 @@
 import SwiftUI
 
-/// Background tint for the list screen. Grey is the system default, with no tint.
+/// How the app looks. Grey and the colors sit on top of light mode; Dark is the whole dark look.
 enum Theme: String, CaseIterable, Identifiable {
-    case grey, sage, sky, blush, butter, lavender, custom
+    case grey, sage, sky, blush, butter, lavender, dark, custom
 
     var id: String { rawValue }
     var name: String { rawValue.capitalized }
 
+    /// The swatches shown in the picker; the custom color has its own well.
     static let presets = allCases.filter { $0 != .custom }
+
+    /// Only Dark changes the look of the whole app; every other choice is light mode with a tint.
+    var scheme: ColorScheme { self == .dark ? .dark : .light }
 
     func tint(custom: Color) -> Color {
         switch self {
         case .custom: custom
-        case .grey: .clear
+        case .grey, .dark: .clear
         case .sage: .green
         case .sky: .blue
         case .blush: .pink
@@ -21,8 +25,23 @@ enum Theme: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Swatch shown in the picker; grey has no tint so it needs its own color.
-    var swatch: Color { self == .grey ? Color(.systemGray3) : tint(custom: .clear).opacity(0.55) }
+    /// Swatch shown in the picker; grey and dark have no tint so they need their own colors.
+    var swatch: Color {
+        switch self {
+        case .grey: Color(white: 0.82)
+        case .dark: Color(white: 0.13)
+        default: tint(custom: .clear).opacity(0.5)
+        }
+    }
+
+    /// Earlier versions kept dark mode as a separate setting. Carry a "dark" choice over to the new
+    /// Dark swatch, once.
+    static func migrateLegacyAppearance() {
+        let defaults = UserDefaults.standard
+        guard let old = defaults.string(forKey: "appearance") else { return }
+        if old == "dark" { defaults.set(Theme.dark.rawValue, forKey: "theme") }
+        defaults.removeObject(forKey: "appearance")
+    }
 }
 
 extension Color {
@@ -40,52 +59,31 @@ extension Color {
     }
 }
 
-enum Appearance: String, CaseIterable, Identifiable {
-    case system, light, dark
-
-    var id: String { rawValue }
-    var name: String { rawValue.capitalized }
-
-    /// Nil follows the device setting.
-    var scheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
-    }
-}
-
 struct ThemePicker: View {
     @Binding var selection: Theme
     @Binding var custom: Color
-    @Binding var appearance: Appearance
 
     var body: some View {
-        VStack(spacing: 16) {
-            swatches
-            Picker("Appearance", selection: $appearance) {
-                ForEach(Appearance.allCases) { Text($0.name).tag($0) }
-            }
-            .pickerStyle(.segmented)
-        }
-        .padding()
-        .frame(width: 340)
-        .presentationCompactAdaptation(.popover)
-    }
-
-    private var swatches: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 10) {
             ForEach(Theme.presets) { theme in
                 Button {
                     selection = theme
                 } label: {
+                    // Drawn as it looks on a light screen, so the colors read the same even when the
+                    // picker itself is showing in dark mode.
                     Circle()
-                        .fill(theme.swatch)
-                        .frame(width: 34, height: 34)
+                        .fill(Color.white)
+                        .overlay(Circle().fill(theme.swatch))
+                        .environment(\.colorScheme, .light)
+                        .frame(width: 32, height: 32)
+                        .overlay {
+                            if theme == .dark {
+                                Image(systemName: "moon.fill").font(.footnote).foregroundStyle(.white.opacity(0.9))
+                            }
+                        }
                         .overlay {
                             if theme == selection {
-                                Image(systemName: "checkmark").font(.footnote.bold()).foregroundStyle(.white)
+                                Circle().strokeBorder(Color.accentColor, lineWidth: 3).padding(-4)
                             }
                         }
                 }
@@ -95,15 +93,18 @@ struct ThemePicker: View {
             }
             ColorPicker("Custom color", selection: $custom, supportsOpacity: false)
                 .labelsHidden()
-                .scaleEffect(1.25)
-                .frame(width: 34, height: 34)
+                .scaleEffect(1.2)
+                .frame(width: 32, height: 32)
                 .overlay {
                     if selection == .custom {
-                        Circle().strokeBorder(.primary.opacity(0.6), lineWidth: 2).frame(width: 42, height: 42)
+                        Circle().strokeBorder(Color.accentColor, lineWidth: 3).padding(-4)
                     }
                 }
                 .accessibilityLabel("Custom color")
                 .accessibilityAddTraits(selection == .custom ? .isSelected : [])
         }
+        .padding()
+        .frame(width: 370)
+        .presentationCompactAdaptation(.popover)
     }
 }

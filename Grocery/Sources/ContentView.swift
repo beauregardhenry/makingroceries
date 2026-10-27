@@ -3,7 +3,6 @@ import SwiftUI
 struct ContentView: View {
     @Environment(GroceryStore.self) private var store
     @State private var showingAdd = false
-    @Environment(\.colorScheme) private var systemScheme
     @State private var showingThemes = false
     @State private var showingShops = false
     @State private var showingUsual = false
@@ -22,15 +21,10 @@ struct ContentView: View {
     @State private var priceText = ""
     @AppStorage("selectedShop") private var selectedShopRaw = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
-    @AppStorage("appearance") private var appearanceName = Appearance.system.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
 
     private var theme: Binding<Theme> {
         Binding(get: { Theme(rawValue: themeName) ?? .grey }, set: { themeName = $0.rawValue })
-    }
-
-    private var appearance: Binding<Appearance> {
-        Binding(get: { Appearance(rawValue: appearanceName) ?? .system }, set: { appearanceName = $0.rawValue })
     }
 
     private var customColor: Binding<Color> {
@@ -38,11 +32,8 @@ struct ContentView: View {
                 set: { customHex = $0.hex; themeName = Theme.custom.rawValue })
     }
 
-    /// The tint is softer on dark backgrounds, where the same strength turns muddy.
-    private var tintOpacity: Double {
-        let dark = appearance.wrappedValue.scheme.map { $0 == .dark } ?? (systemScheme == .dark)
-        return dark ? 0.12 : 0.22
-    }
+    /// Colors sit on top of light mode, so the tint is the same strength for all of them.
+    private let tintOpacity = 0.22
 
     /// The chosen filter; falls back to "All" when the chosen store was deleted.
     private var filter: ShopFilter {
@@ -265,7 +256,7 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("More")
                     Button("Color", systemImage: "paintpalette") { showingThemes = true }
-                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor, appearance: appearance) }
+                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor) }
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
             }
@@ -300,7 +291,7 @@ struct ContentView: View {
                 Text("Price of one \(item.name)")
             }
         }
-        .preferredColorScheme(appearance.wrappedValue.scheme)
+        .preferredColorScheme(theme.wrappedValue.scheme)
     }
 }
 
