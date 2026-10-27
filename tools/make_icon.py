@@ -5,13 +5,14 @@ from PIL import Image, ImageDraw, ImageFilter
 
 # Color variants: background top, background bottom, fruit rind, fruit flesh, segments.
 VARIANTS = {
-    "orange":   ((255, 168, 46), (240, 92, 0),    (255, 122, 0),  (255, 150, 20),  (255, 238, 205)),
+    "orange":   ((255, 168, 46), (240, 92, 0),    (90, 190, 35),  (160, 225, 60),  (236, 250, 200)),
     "lime":     ((184, 230, 80), (64, 160, 30),   (110, 190, 40), (160, 220, 60),  (240, 252, 210)),
     "berry":    ((150, 150, 255), (70, 60, 200),  (190, 70, 190), (225, 110, 215), (255, 225, 250)),
     "midnight": ((70, 70, 84), (14, 14, 20),      (255, 122, 0),  (255, 150, 20),  (255, 238, 205)),
 }
 name = sys.argv[1] if len(sys.argv) > 1 else "orange"
 TOP, BOTTOM, RIND, FLESH, SEGMENT = VARIANTS[name]
+PITH = tuple(int(c + (255 - c) * 0.72) for c in RIND)
 
 S = 1024
 K = 4  # supersample factor
@@ -23,13 +24,16 @@ def lerp(a, b, t):
 
 
 # Background: vivid orange, lighter toward the top left
-bg = Image.new("RGB", (W, W))
-px = bg.load()
 top, bottom = TOP, BOTTOM
-for y in range(W):
-    for x in range(0, W, 1):
-        t = min(1.0, max(0.0, (y * 0.75 + x * 0.25) / W))
-        px[x, y] = lerp(top, bottom, t)
+# One pixel per diagonal step is enough; resize smooths it. (Much faster than per-pixel drawing.)
+N = 256
+small = Image.new("RGB", (N, N))
+sp = small.load()
+for y in range(N):
+    for x in range(N):
+        t = min(1.0, max(0.0, (y * 0.75 + x * 0.25) / N))
+        sp[x, y] = lerp(top, bottom, t)
+bg = small.resize((W, W), Image.BICUBIC)
 img = bg.convert("RGBA")
 
 
@@ -55,10 +59,10 @@ d.rounded_rectangle([s(270), s(372), s(754), s(430)], radius=s(18), fill=(255, 2
 for cx in (420, 604):
     d.arc([s(cx - 70), s(250), s(cx + 70), s(440)], 180, 360, fill=(255, 255, 255, 255), width=s(26))
 
-# Orange slice on the bag front
+# Fruit slice on the bag front
 cx, cy, r = 512, 650, 150
 d.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=RIND + (255,))
-d.ellipse([s(cx - r + 22), s(cy - r + 22), s(cx + r - 22), s(cy + r - 22)], fill=(255, 255, 255, 255))
+d.ellipse([s(cx - r + 22), s(cy - r + 22), s(cx + r - 22), s(cy + r - 22)], fill=PITH + (255,))
 d.ellipse([s(cx - r + 36), s(cy - r + 36), s(cx + r - 36), s(cy + r - 36)], fill=FLESH + (255,))
 for i in range(8):
     a = math.radians(i * 45 + 22.5)
@@ -66,25 +70,6 @@ for i in range(8):
     x2, y2 = cx + math.cos(a) * (r - 40), cy + math.sin(a) * (r - 40)
     d.line([s(x1), s(y1), s(x2), s(y2)], fill=SEGMENT + (255,), width=s(14))
 d.ellipse([s(cx - 22), s(cy - 22), s(cx + 22), s(cy + 22)], fill=SEGMENT + (255,))
-
-# Leaf sprouting from the bag top
-ld = d
-pts = []
-for i in range(0, 101):
-    t = i / 100
-    x = 0 + 150 * t
-    y = -math.sin(t * math.pi) * 62
-    pts.append((x, y))
-upper = pts
-lower = [(x, -y * 0.45) for x, y in reversed(pts)]
-shape = upper + lower
-ox, oy, ang = 520, 392, -38
-rot = math.radians(ang)
-shape = [
-    (ox + x * math.cos(rot) - y * math.sin(rot), oy + x * math.sin(rot) + y * math.cos(rot))
-    for x, y in shape
-]
-ld.polygon([(s(x), s(y)) for x, y in shape], fill=(76, 175, 80, 255))
 
 # Soft shadow from the artwork's own silhouette
 shadow = Image.new("RGBA", (W, W), (120, 40, 0, 0))
