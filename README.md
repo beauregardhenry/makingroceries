@@ -92,7 +92,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 
 ## Privacy
 
-Everything is stored on your phone. Receipts, recipe photos, dictation (where supported) and the on-device language model all run on the device. The app has no account and no server. It contacts the internet only to look up a barcode (the number only, which also returns allergens and size) and to fetch a recipe page when you enter its address or share it from Safari.
+Everything is stored on your phone. If a saved file ever can't be read, the app keeps a copy in a Recovered folder and tells you, rather than starting over, and changes made from the widget, Siri or the share sheet are merged with the app's instead of overwriting them. Receipts, recipe photos, dictation (where supported) and the on-device language model all run on the device. The app has no account and no server. It contacts the internet only to look up a barcode (the number only, which also returns allergens and size) and to fetch a recipe page when you enter its address or share it from Safari.
 
 ## Building it
 

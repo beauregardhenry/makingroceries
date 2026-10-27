@@ -35,7 +35,10 @@ final class PhoneSession: NSObject, WCSessionDelegate {
     private func apply(_ message: [String: Any]) {
         guard let id = message[WatchSnapshot.toggleKey] as? String else { return }
         DispatchQueue.main.async {
-            guard let store = self.store, let item = store.items.first(where: { $0.id.uuidString == id }) else { return }
+            guard let store = self.store else { return }
+            // The app may have been in the background while the widget or Siri changed the list.
+            store.reload()
+            guard let item = store.items.first(where: { $0.id.uuidString == id }) else { return }
             store.toggle(item)
             self.push()
         }
