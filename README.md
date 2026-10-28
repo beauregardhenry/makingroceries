@@ -82,7 +82,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - **Allergies & avoid list**: name the foods you avoid, and scanned or looked-up products that contain them are flagged. The data comes from Open Food Facts and can be wrong, so read labels if you have an allergy.
 - **At Home**: food you check off is tracked with a rough use-by date, with a quiet 9 am reminder the day before. Swipe to mark it used, buy it again, or toss it. The dates are guides, not food-safety advice.
 - **Auto-switch store**: arriving at a store you've saved a location for switches the list to it. Choosing another store by hand sticks until you arrive somewhere new.
-- **Alternate app icons**: orange, lime, berry or midnight.
+- **Alternate app icons**: the shopping cart icon in orange, lime, berry or midnight.
 - **Meal plan**: assign meals to days, then add everything planned for the next few days to the list in one tap.
 - Haptics when you check something off and a stronger one when you finish an aisle.
 - **Apple Watch app** (optional, see below): your lists in walking order, with check-off from your wrist.
@@ -138,7 +138,7 @@ Every pull request and push to `main` runs both in GitHub Actions, plus four mor
 | `scripts` | Test, coverage and CI check scripts |
 | `.github/workflows` | CI and the baseline ratchets |
 | `docs/screenshots` | The README's pictures |
-| `tools/make_icon.py` | Draws the app icon: `python3 tools/make_icon.py` |
+| `tools/make_icon.py` | Draws the shopping cart app icons, the alternates and the Watch icon: `python3 tools/make_icon.py` |
 
 ## Not done yet
 
