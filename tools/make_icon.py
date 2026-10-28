@@ -1,102 +1,113 @@
-"""Draws the app icon (1024x1024) with Pillow. Run: python3 tools/make_icon.py"""
-import math
+"""Draws the app icons (1024x1024) with Pillow: a shopping cart with crossed legs.
+
+Run from the repo root: python3 tools/make_icon.py          (every variant)
+                        python3 tools/make_icon.py berry    (just one)
+"""
+import os
 import sys
 from PIL import Image, ImageDraw, ImageFilter
 
-# Color variants: background top, background bottom, fruit rind, fruit flesh, segments.
+# Background top, background bottom, shadow tint, cart, wheels and grip, wheel hubs.
+DARK = (60, 60, 72)
+WHITE = (255, 255, 255)
 VARIANTS = {
-    "orange":   ((255, 168, 46), (240, 92, 0),    (90, 190, 35),  (160, 225, 60),  (236, 250, 200)),
-    "lime":     ((184, 230, 80), (64, 160, 30),   (110, 190, 40), (160, 220, 60),  (240, 252, 210)),
-    "berry":    ((150, 150, 255), (70, 60, 200),  (190, 70, 190), (225, 110, 215), (255, 225, 250)),
-    "midnight": ((70, 70, 84), (14, 14, 20),      (255, 122, 0),  (255, 150, 20),  (255, 238, 205)),
+    "orange":   ((255, 168, 46), (240, 92, 0),   (120, 40, 0),  WHITE,          DARK,            WHITE),
+    "lime":     ((184, 230, 80), (64, 160, 30),  (20, 70, 10),  WHITE,          DARK,            WHITE),
+    "berry":    ((150, 150, 255), (70, 60, 200), (30, 20, 100), WHITE,          DARK,            WHITE),
+    "midnight": ((70, 70, 84), (14, 14, 20),     (0, 0, 0),     (255, 122, 0),  (235, 235, 240), DARK),
 }
-name = sys.argv[1] if len(sys.argv) > 1 else "orange"
-TOP, BOTTOM, RIND, FLESH, SEGMENT = VARIANTS[name]
-PITH = tuple(int(c + (255 - c) * 0.72) for c in RIND)
 
 S = 1024
 K = 4  # supersample factor
 W = S * K
 
 
-def lerp(a, b, t):
-    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
-
-
-# Background: vivid orange, lighter toward the top left
-top, bottom = TOP, BOTTOM
-# One pixel per diagonal step is enough; resize smooths it. (Much faster than per-pixel drawing.)
-N = 256
-small = Image.new("RGB", (N, N))
-sp = small.load()
-for y in range(N):
-    for x in range(N):
-        t = min(1.0, max(0.0, (y * 0.75 + x * 0.25) / N))
-        sp[x, y] = lerp(top, bottom, t)
-bg = small.resize((W, W), Image.BICUBIC)
-img = bg.convert("RGBA")
-
-
 def s(v):
     return int(v * K)
 
 
-def layer():
-    return Image.new("RGBA", (W, W), (0, 0, 0, 0))
+def gradient(top, bottom):
+    # One pixel per diagonal step is enough; resize smooths it. (Much faster than per-pixel drawing.)
+    n = 256
+    small = Image.new("RGB", (n, n))
+    px = small.load()
+    for y in range(n):
+        for x in range(n):
+            t = min(1.0, max(0.0, (y * 0.75 + x * 0.25) / n))
+            px[x, y] = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
+    return small.resize((W, W), Image.BICUBIC).convert("RGBA")
 
 
-art = layer()
-d = ImageDraw.Draw(art)
+def draw_cart(ink, wheel, hub):
+    art = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d = ImageDraw.Draw(art)
+    dx, dy = 26, -55  # centres the cart on the icon
+    ink, wheel, hub = ink + (255,), wheel + (255,), hub + (255,)
 
-# Bag body with rounded bottom corners
-d.rounded_rectangle([s(272), s(400), s(752), s(880)], radius=s(46), fill=(255, 255, 255, 255))
-d.rectangle([s(272), s(400), s(752), s(600)], fill=(255, 255, 255, 255))
+    def P(*p):
+        return [(s(x + dx), s(y + dy)) for x, y in p]
 
-# Folded top lip, warm cream
-d.rounded_rectangle([s(270), s(372), s(754), s(430)], radius=s(18), fill=(255, 240, 220, 255))
+    def dot(x, y, r, fill):
+        d.ellipse([s(x + dx - r), s(y + dy - r), s(x + dx + r), s(y + dy + r)], fill=fill)
 
-# Handles
-for cx in (420, 604):
-    d.arc([s(cx - 70), s(250), s(cx + 70), s(440)], 180, 360, fill=(255, 255, 255, 255), width=s(26))
+    # Basket: an outline with a wire grid and a light wash inside.
+    basket = P((220, 330), (850, 330), (780, 610), (300, 610))
+    d.polygon(basket, fill=(255, 255, 255, 110))
+    for x0, x1 in ((378, 420), (535, 540), (692, 660)):
+        d.line(P((x0, 330), (x1, 610)), fill=ink, width=s(24))
+    d.line(P((240, 470), (815, 470)), fill=ink, width=s(24))
+    d.line(basket + [basket[0]], fill=ink, width=s(44), joint="curve")
+    # Handle, with a rubber grip on the bar you hold.
+    d.line(P((120, 225), (190, 225), (220, 330)), fill=ink, width=s(44), joint="curve")
+    d.line(P((120, 225), (172, 225)), fill=wheel, width=s(52))
+    dot(120, 225, 26, wheel)
+    dot(172, 225, 26, wheel)
+    # Old-school crossed legs, a wheel at the foot of each.
+    d.line(P((340, 610), (720, 850)), fill=ink, width=s(40))
+    d.line(P((740, 610), (360, 850)), fill=ink, width=s(40))
+    dot(540, 734, 16, wheel)
+    for x in (360, 720):
+        dot(x, 868, 74, wheel)
+        dot(x, 868, 26, hub)
+    return art
 
-# Fruit slice on the bag front
-cx, cy, r = 512, 650, 150
-d.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=RIND + (255,))
-d.ellipse([s(cx - r + 22), s(cy - r + 22), s(cx + r - 22), s(cy + r - 22)], fill=PITH + (255,))
-d.ellipse([s(cx - r + 36), s(cy - r + 36), s(cx + r - 36), s(cy + r - 36)], fill=FLESH + (255,))
-for i in range(8):
-    a = math.radians(i * 45 + 22.5)
-    x1, y1 = cx + math.cos(a) * 20, cy + math.sin(a) * 20
-    x2, y2 = cx + math.cos(a) * (r - 40), cy + math.sin(a) * (r - 40)
-    d.line([s(x1), s(y1), s(x2), s(y2)], fill=SEGMENT + (255,), width=s(14))
-d.ellipse([s(cx - 22), s(cy - 22), s(cx + 22), s(cy + 22)], fill=SEGMENT + (255,))
 
-# Soft shadow from the artwork's own silhouette
-shadow = Image.new("RGBA", (W, W), (120, 40, 0, 0))
-shadow.putalpha(art.getchannel("A").point(lambda a: int(a * 0.38)))
-shadow = shadow.filter(ImageFilter.GaussianBlur(s(24)))
+def draw(name):
+    top, bottom, shade, ink, wheel, hub = VARIANTS[name]
+    img = gradient(top, bottom)
+    art = draw_cart(ink, wheel, hub)
+    # Soft shadow from the artwork's own silhouette.
+    shadow = Image.new("RGBA", (W, W), shade + (0,))
+    shadow.putalpha(art.getchannel("A").point(lambda a: int(a * 0.35)))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(s(20)))
+    img = Image.alpha_composite(img, shadow.transform((W, W), Image.AFFINE, (1, 0, 0, 0, 1, -s(18))))
+    img = Image.alpha_composite(img, art)
+    return img.resize((S, S), Image.LANCZOS).convert("RGB")
 
-# Enlarge about the centre of the artwork (x 258-766, y 250-880) and centre it on the canvas
-scale, art_cx, art_cy = 1.14, 512, 560
-def place(layer_img):
-    m = (1 / scale, 0, art_cx - 512 / scale, 0, 1 / scale, art_cy - 512 / scale)
-    return layer_img.transform(layer_img.size, Image.AFFINE, tuple(v if i in (0, 4) else v * K for i, v in enumerate(m)),
-                               resample=Image.BICUBIC)
-img = Image.alpha_composite(img, place(shadow).transform((W, W), Image.AFFINE, (1, 0, 0, 0, 1, -s(22))))
-img = Image.alpha_composite(img, place(art))
 
-out = img.resize((S, S), Image.LANCZOS).convert("RGB")
-import os
-folder = "AppIcon" if name == "orange" else "AppIcon-" + name.capitalize()
-dest = f"Grocery/Sources/Assets.xcassets/{folder}.appiconset"
-os.makedirs(dest, exist_ok=True)
-out.save(f"{dest}/icon-1024.png")
-with open(f"{dest}/Contents.json", "w") as f:
-    f.write('{ "images" : [ { "filename" : "icon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" } ], "info" : { "author" : "xcode", "version" : 1 } }')
-# a small preview for the in-app picker
-prev = f"Grocery/Sources/Assets.xcassets/IconPreview-{name.capitalize()}.imageset"
-os.makedirs(prev, exist_ok=True)
-out.resize((240, 240), Image.LANCZOS).save(f"{prev}/preview.png")
-with open(f"{prev}/Contents.json", "w") as f:
-    f.write('{ "images" : [ { "filename" : "preview.png", "idiom" : "universal" } ], "info" : { "author" : "xcode", "version" : 1 } }')
-print("saved", name)
+def save_icon(out, dest):
+    os.makedirs(dest, exist_ok=True)
+    out.save(f"{dest}/icon-1024.png")
+    with open(f"{dest}/Contents.json", "w") as f:
+        f.write('{ "images" : [ { "filename" : "icon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" } ], "info" : { "author" : "xcode", "version" : 1 } }')
+
+
+def make(name):
+    out = draw(name)
+    assets = "Grocery/Sources/Assets.xcassets"
+    save_icon(out, f"{assets}/{'AppIcon' if name == 'orange' else 'AppIcon-' + name.capitalize()}.appiconset")
+    # A small preview for the in-app picker.
+    prev = f"{assets}/IconPreview-{name.capitalize()}.imageset"
+    os.makedirs(prev, exist_ok=True)
+    out.resize((240, 240), Image.LANCZOS).save(f"{prev}/preview.png")
+    with open(f"{prev}/Contents.json", "w") as f:
+        f.write('{ "images" : [ { "filename" : "preview.png", "idiom" : "universal" } ], "info" : { "author" : "xcode", "version" : 1 } }')
+    if name == "orange":
+        # The Watch app uses the main icon; keep its existing Contents.json.
+        out.save("Grocery/Watch/Assets.xcassets/AppIcon.appiconset/icon-1024.png")
+    print("saved", name)
+
+
+if __name__ == "__main__":
+    for n in sys.argv[1:] or VARIANTS:
+        make(n)
