@@ -434,3 +434,191 @@ final class WatchSnapshotTests: StoreTestCase {
         XCTAssertEqual(snapshot.groups[0].items.count, WatchSnapshot.maxItemsPerGroup)
     }
 }
+
+final class ItemEditingTests: StoreTestCase {
+    func testMovingAndPricingAnItem() {
+        let kroger = store.addShop(named: "Kroger")!
+        store.add(name: "Milk", quantity: 1, aisle: .dairy)
+        store.move(store.items[0], to: kroger.id)
+        XCTAssertEqual(store.items[0].shopID, kroger.id)
+        store.setPrice(3.49, for: store.items[0])
+        XCTAssertEqual(store.items[0].price, 3.49)
+        // A price change is remembered but isn't another use of the item.
+        XCTAssertEqual(store.pastItem(named: "Milk")?.price, 3.49)
+        XCTAssertEqual(store.pastItem(named: "Milk")?.count, 1)
+    }
+
+    func testDetailEditsSaveTheSizeAndDropTheOldPhoto() throws {
+        let photo = "old-\(UUID().uuidString).jpg"
+        let file = Storage.photos.appending(path: photo)
+        try Data([1, 2, 3]).write(to: file)
+        store.add(name: "Peanut butter", quantity: 1, aisle: .pantry)
+        store.items[0].photo = photo
+        var edited = store.items[0]
+        edited.photo = nil
+        edited.sizeAmount = 16
+        edited.sizeUnit = "oz"
+        store.update(edited)
+        XCTAssertNil(store.items[0].photo)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        XCTAssertEqual(store.pastItem(named: "Peanut butter")?.sizeAmount, 16)
+        XCTAssertEqual(store.pastItem(named: "Peanut butter")?.sizeUnit, "oz")
+    }
+
+    func testAPhotoAnotherItemStillUsesIsKept() throws {
+        let photo = "shared-\(UUID().uuidString).jpg"
+        let file = Storage.photos.appending(path: photo)
+        try Data([1]).write(to: file)
+        store.items = [GroceryItem(name: "Apples", photo: photo), GroceryItem(name: "Pears", photo: photo)]
+        store.delete(store.items[0])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
+        store.delete(store.items[0])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+    }
+
+    func testAddingAgainUsesTheStoreItWasBoughtAtLastTime() {
+        let kroger = store.addShop(named: "Kroger")!
+        store.history = [PastItem(name: "Coffee", aisle: .drinks, shopID: kroger.id, price: 8.99)]
+        store.addOrBump(name: "Coffee", shopID: nil, inferShop: true)
+        XCTAssertEqual(store.items[0].shopID, kroger.id)
+        XCTAssertEqual(store.items[0].price, 8.99)
+        // Without inferShop, or once that store is gone, it stays unassigned.
+        store.items = []
+        store.addOrBump(name: "Coffee", shopID: nil)
+        XCTAssertNil(store.items[0].shopID)
+        store.items = []
+        store.deleteShop(kroger)
+        store.addOrBump(name: "Coffee", shopID: nil, inferShop: true)
+        XCTAssertNil(store.items[0].shopID)
+    }
+
+    func testReceiptLinesWithNoListItemStillRecordAPrice() {
+        let kroger = store.addShop(named: "Kroger")!
+        let entry = ReceiptEntry(name: "Bananas", unitPrice: 0.59, total: 0.59)
+        XCTAssertEqual(store.applyReceipt([(entry: entry, item: nil)], shopID: kroger.id), 1)
+        XCTAssertTrue(store.items.isEmpty)
+        XCTAssertEqual(store.latestPrices(for: "Bananas")[kroger.id], 0.59)
+    }
+
+    func testWidgetItemsFollowTheStoreWalkingOrder() {
+        let kroger = store.addShop(named: "Kroger")!
+        store.shops[0].aisleOrder = [.bakery, .dairy, .produce]
+        store.items = [
+            GroceryItem(name: "Spinach", aisle: .produce, shopID: kroger.id),
+            GroceryItem(name: "Milk", aisle: .dairy, shopID: kroger.id),
+            GroceryItem(name: "Bread", aisle: .bakery, shopID: kroger.id),
+            GroceryItem(name: "Eggs", aisle: .dairy, isChecked: true, shopID: kroger.id),
+            GroceryItem(name: "Soap", aisle: .household),
+        ]
+        XCTAssertEqual(store.widgetItems(shopID: kroger.id).map(\.name), ["Bread", "Milk", "Spinach"])
+        XCTAssertEqual(store.widgetItems(shopID: nil).count, 4)
+    }
+}
+
+final class UsualAndRepeatTests: StoreTestCase {
+    func testUsualItemsAreUniqueAndGoOnTheList() {
+        store.history = [PastItem(name: "Oat milk", aisle: .dairy, shopID: nil, price: nil)]
+        store.addFavorite(name: "  Oat milk ", quantity: 2)
+        store.addFavorite(name: "oat milk")
+        store.addFavorite(name: " ")
+        XCTAssertEqual(store.favorites.map(\.name), ["Oat milk"])
+        XCTAssertEqual(store.favorites[0].aisle, .dairy)
+        store.addToList(store.favorites[0], shopID: nil)
+        store.addToList(store.favorites[0], shopID: nil)
+        XCTAssertEqual(store.items.count, 1)
+        XCTAssertEqual(store.items[0].quantity, 4)
+    }
+
+    func testTurningARepeatOnAndOff() {
+        let item = GroceryItem(name: "Bread", aisle: .bakery)
+        store.setRepeat(for: item, everyDays: 7)
+        store.setRepeat(for: item, everyDays: 14)
+        XCTAssertEqual(store.recurring.count, 1)
+        XCTAssertEqual(store.recurrence(for: item)?.everyDays, 14)
+        XCTAssertGreaterThan(store.recurring[0].nextDue, day(13))
+        store.setRepeat(for: item, everyDays: nil)
+        XCTAssertNil(store.recurrence(for: item))
+    }
+
+    func testRestoringABackupReplacesEverything() throws {
+        store.add(name: "Milk", quantity: 2, aisle: .dairy)
+        _ = store.addShop(named: "Kroger")
+        store.addFavorite(name: "Coffee")
+        store.recordSpend(amount: 10, shopID: nil)
+        let data = try JSONEncoder().encode(store.makeBackup())
+
+        store.items = [GroceryItem(name: "Something else")]
+        store.shops = []
+        store.favorites = []
+        store.spending = []
+        store.restore(try JSONDecoder().decode(Backup.self, from: data))
+        XCTAssertEqual(store.items.map(\.name), ["Milk"])
+        XCTAssertEqual(store.shops.map(\.name), ["Kroger"])
+        XCTAssertEqual(store.favorites.map(\.name), ["Coffee"])
+        XCTAssertEqual(store.spending.count, 1)
+    }
+
+    func testRestoringAnOldBackupClearsNewerData() throws {
+        store.recordSpend(amount: 10, shopID: nil)
+        let old = #"{"version":1,"items":[],"shops":[],"favorites":[],"meals":[],"history":[],"recurring":[]}"#.data(using: .utf8)!
+        store.restore(try JSONDecoder().decode(Backup.self, from: old))
+        XCTAssertTrue(store.spending.isEmpty)
+        XCTAssertTrue(store.plan.isEmpty)
+        XCTAssertTrue(store.stock.isEmpty)
+    }
+}
+
+final class SuggestionTests: StoreTestCase {
+    private func past(_ name: String, count: Int, daysAgo: Int) -> PastItem {
+        var item = PastItem(name: name, aisle: .other, shopID: nil, price: nil)
+        item.count = count
+        item.lastUsed = day(-daysAgo)
+        return item
+    }
+
+    func testAutocompleteRanksByUseAndSkipsWhatsOnTheList() {
+        store.history = [past("Cheddar", count: 2, daysAgo: 1), past("Cherries", count: 5, daysAgo: 9),
+                         past("Chips", count: 2, daysAgo: 3), past("Che", count: 9, daysAgo: 0), past("Milk", count: 9, daysAgo: 0)]
+        store.items = [GroceryItem(name: "Chips")]
+        XCTAssertEqual(store.suggestions(for: " CHE").map(\.name), ["Cherries", "Cheddar"])
+        XCTAssertEqual(store.suggestions(for: "ch", limit: 1).map(\.name), ["Che"])
+        XCTAssertTrue(store.suggestions(for: "  ").isEmpty)
+    }
+
+    func testBuyAgainIsNewestFirstAndSkipsWhatsOnTheList() {
+        store.history = [past("Rice", count: 1, daysAgo: 5), past("Eggs", count: 1, daysAgo: 1), past("Milk", count: 1, daysAgo: 2)]
+        store.items = [GroceryItem(name: "Milk")]
+        XCTAssertEqual(store.buyAgain().map(\.name), ["Eggs", "Rice"])
+        XCTAssertEqual(store.buyAgain(limit: 1).map(\.name), ["Eggs"])
+        // Checked-off items count as bought, so they come back here.
+        store.items[0].isChecked = true
+        XCTAssertEqual(store.buyAgain().map(\.name), ["Eggs", "Milk", "Rice"])
+    }
+}
+
+final class ModelTests: XCTestCase {
+    func testEveryAisleHasItsOwnSymbol() {
+        let symbols = Aisle.allCases.map(\.symbol)
+        XCTAssertFalse(symbols.contains(""))
+        XCTAssertEqual(Set(symbols).count, Aisle.allCases.count)
+    }
+
+    func testScalingIngredients() {
+        let flour = MealIngredient(name: "Flour", aisle: .pantry, amount: 2, unit: "cup")
+        XCTAssertEqual(flour.scaled(by: 1).quantity, 1)
+        XCTAssertNotEqual(flour.scaled(by: 1).note, flour.scaled(by: 1.5).note)
+        let eggs = MealIngredient(name: "Eggs", quantity: 3, aisle: .dairy)
+        XCTAssertEqual(eggs.scaled(by: 0.5).quantity, 2)
+        XCTAssertEqual(eggs.scaled(by: 0.1).quantity, 1)
+        XCTAssertEqual(eggs.scaled(by: 2).quantity, 6)
+        XCTAssertNil(eggs.scaled(by: 2).note)
+    }
+
+    func testAisleLabelsIgnoreBlanks() {
+        var shop = Shop(name: "Kroger")
+        shop.aisleLabels = [Aisle.dairy.rawValue: " Aisle 7 ", Aisle.produce.rawValue: "  "]
+        XCTAssertEqual(shop.label(for: .dairy), "Aisle 7")
+        XCTAssertNil(shop.label(for: .produce))
+        XCTAssertNil(shop.label(for: .meat))
+    }
+}
