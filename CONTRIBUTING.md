@@ -19,7 +19,7 @@ brew install xcodegen
 ./scripts/test.sh
 ```
 
-`scripts/test.sh` builds the app, widget and share extension and runs the unit tests on an iPhone simulator it finds on your machine. `scripts/ui-test.sh` runs the UI smoke tests, which drive the real app and take a few minutes. Set `SIMULATOR_ID` to a device's UDID to use a specific simulator.
+`scripts/test.sh` builds the app, widget and share extension and runs the unit tests on an iPhone simulator it finds on your machine. `scripts/ui-test.sh` runs the UI smoke tests, which drive the real app and take a few minutes. Set `SIMULATOR_ID` to a device's UDID to use a specific simulator. `scripts/build-watch.sh` builds the Apple Watch app, which the iPhone app doesn't embed yet, so `test.sh` never compiles it; it needs the watchOS platform installed in Xcode.
 
 Pull requests and pushes to `main` run the same tests in CI, plus the checks below. Run any of them yourself first:
 
@@ -28,6 +28,7 @@ Pull requests and pushes to `main` run the same tests in CI, plus the checks bel
 ./scripts/check-test-count.sh
 ./scripts/verify-xcode-project.sh
 ./scripts/check-coverage.sh
+./scripts/build-watch.sh
 ```
 
 ## Where the tests live

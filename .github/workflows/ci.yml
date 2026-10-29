@@ -44,6 +44,8 @@ jobs:
         run: ./scripts/test.sh
       - name: Check the coverage ratchet
         run: ./scripts/check-coverage.sh --from-results
+      - name: Build the Apple Watch app
+        run: ./scripts/build-watch.sh
       - name: Keep the test results when something fails
         if: failure()
         uses: actions/upload-artifact@v4
