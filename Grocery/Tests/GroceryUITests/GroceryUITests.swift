@@ -85,19 +85,28 @@ final class GroceryUITests: XCTestCase {
 
     private typealias Screen = (entry: String, submenu: String?, title: String)
 
+    /// Taps a More menu entry, inside `submenu` if given. On a slow simulator a tap on More sometimes
+    /// lands before the screen is ready and the menu never opens, so it taps More once more if needed.
+    private func chooseFromMore(_ entry: String, in submenu: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        let first = app.buttons[submenu ?? entry].firstMatch
+        app.buttons["More"].tap()
+        if !first.waitForExistence(timeout: 5) {
+            app.buttons["More"].tap()
+        }
+        XCTAssertTrue(first.waitForExistence(timeout: 5), "\(submenu ?? entry) in the More menu", file: file, line: line)
+        first.tap()
+        if let submenu {
+            let item = app.buttons[entry].firstMatch
+            XCTAssertTrue(item.waitForExistence(timeout: 5), "\(entry) in the \(submenu) submenu", file: file, line: line)
+            item.tap()
+        }
+    }
+
     /// Opens each screen from the More menu, checks its title, and closes it again.
     private func openAndClose(_ screens: [Screen]) {
         for screen in screens {
             XCTContext.runActivity(named: screen.entry) { _ in
-                app.buttons["More"].tap()
-                if let submenu = screen.submenu {
-                    let group = app.buttons[submenu].firstMatch
-                    XCTAssertTrue(group.waitForExistence(timeout: 5), "\(submenu) submenu")
-                    group.tap()
-                }
-                let entry = app.buttons[screen.entry].firstMatch
-                XCTAssertTrue(entry.waitForExistence(timeout: 5), "\(screen.entry) in the menu")
-                entry.tap()
+                chooseFromMore(screen.entry, in: screen.submenu)
                 XCTAssertTrue(app.navigationBars[screen.title].waitForExistence(timeout: 10), "\(screen.title) opens")
                 dismissSheet()
             }
@@ -134,9 +143,7 @@ final class GroceryUITests: XCTestCase {
     }
 
     func testImportingARecipeFromPastedText() {
-        app.buttons["More"].tap()
-        app.buttons["Meals"].firstMatch.tap()
-        app.buttons["Saved Meals"].tap()
+        chooseFromMore("Saved Meals", in: "Meals")
         let meals = app.navigationBars["Meals"]
         XCTAssertTrue(meals.waitForExistence(timeout: 10))
         meals.buttons["Add"].tap()
