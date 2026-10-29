@@ -17,4 +17,14 @@ extension GroceryStore {
         if !loose.isEmpty { groups.append(.init(id: "any", name: "Any Store", items: entries(loose, order: Aisle.allCases))) }
         return WatchSnapshot(groups: groups)
     }
+
+    /// Checks or unchecks the item a message from the watch names. Returns whether anything changed;
+    /// a message about an item that's since been deleted is ignored.
+    @discardableResult
+    func applyWatchMessage(_ message: [String: Any]) -> Bool {
+        guard let id = WatchSnapshot.toggledID(in: message),
+              let item = items.first(where: { $0.id.uuidString == id }) else { return false }
+        toggle(item)
+        return true
+    }
 }

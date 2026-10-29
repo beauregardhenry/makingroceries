@@ -435,6 +435,66 @@ final class WatchSnapshotTests: StoreTestCase {
     }
 }
 
+final class WatchSyncTests: StoreTestCase {
+    private var kroger: Shop!
+
+    override func setUp() {
+        super.setUp()
+        kroger = store.addShop(named: "Kroger")!
+        store.items = [
+            GroceryItem(name: "Milk", aisle: .dairy, shopID: kroger.id),
+            GroceryItem(name: "Bananas", aisle: .produce, shopID: kroger.id),
+            GroceryItem(name: "Salt", aisle: .pantry),
+        ]
+    }
+
+    func testTheListReachesTheWatchIntact() throws {
+        let sent = store.watchSnapshot()
+        XCTAssertEqual(WatchSnapshot(context: try sent.context()), sent)
+    }
+
+    func testTheWatchIgnoresContextsItCannotRead() {
+        XCTAssertNil(WatchSnapshot(context: [:]))
+        XCTAssertNil(WatchSnapshot(context: [WatchSnapshot.contextKey: "not data"]))
+        XCTAssertNil(WatchSnapshot(context: [WatchSnapshot.contextKey: Data("{}".utf8)]))
+    }
+
+    func testACheckOffOnTheWatchMatchesThePhone() throws {
+        var onWatch = try XCTUnwrap(WatchSnapshot(context: store.watchSnapshot().context()))
+        let milk = try XCTUnwrap(onWatch.groups[0].items.first { $0.name == "Milk" })
+        onWatch.toggle(entryID: milk.id)
+        XCTAssertEqual(onWatch.groups[0].remaining, 1)
+
+        XCTAssertTrue(store.applyWatchMessage(WatchSnapshot.toggleMessage(for: milk.id)))
+        XCTAssertTrue(store.items.first { $0.name == "Milk" }!.isChecked)
+        // The phone's next snapshot agrees with what the watch already shows.
+        XCTAssertEqual(store.watchSnapshot().groups, onWatch.groups)
+    }
+
+    func testUncheckingOnTheWatchPutsItBack() {
+        store.toggle(store.items[0])
+        let id = store.items[0].id.uuidString
+        XCTAssertTrue(store.applyWatchMessage(WatchSnapshot.toggleMessage(for: id)))
+        XCTAssertFalse(store.items[0].isChecked)
+    }
+
+    func testStaleOrMalformedMessagesChangeNothing() {
+        let before = store.items
+        // An item deleted on the phone before the watch's check-off arrived.
+        XCTAssertFalse(store.applyWatchMessage(WatchSnapshot.toggleMessage(for: UUID().uuidString)))
+        XCTAssertFalse(store.applyWatchMessage([:]))
+        XCTAssertFalse(store.applyWatchMessage([WatchSnapshot.toggleKey: 42]))
+        XCTAssertEqual(store.items, before)
+    }
+
+    func testTogglingAnUnknownEntryOnTheWatchIsHarmless() {
+        var snapshot = store.watchSnapshot()
+        let before = snapshot.groups
+        snapshot.toggle(entryID: "gone")
+        XCTAssertEqual(snapshot.groups, before)
+    }
+}
+
 final class ItemEditingTests: StoreTestCase {
     func testMovingAndPricingAnItem() {
         let kroger = store.addShop(named: "Kroger")!
