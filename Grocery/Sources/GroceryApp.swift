@@ -4,6 +4,9 @@ import SwiftUI
 struct GroceryApp: App {
     @State private var store = GroceryStore()
     @State private var incoming: IncomingList?
+    @State private var sync = HouseholdSync()
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("myName") private var myName = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
 
     init() {
@@ -20,11 +23,24 @@ struct GroceryApp: App {
         WindowGroup {
             ContentView()
                 .environment(store)
+                .environment(sync)
                 .task {
                     ArrivalReminders.shared.syncRegions(store.shops)
                     PhoneSession.shared.start(store: store)
+                    sync.start(store: store, name: myName)
+                    SpotlightIndex.update(from: store)
                 }
-                .onChange(of: store.items) { _, _ in PhoneSession.shared.push() }
+                .onChange(of: store.items) { _, _ in
+                    PhoneSession.shared.push()
+                    sync.itemsChanged()
+                    SpotlightIndex.update(from: store)
+                }
+                .onChange(of: store.meals) { _, _ in SpotlightIndex.update(from: store) }
+                .onChange(of: store.history) { _, _ in SpotlightIndex.update(from: store) }
+                .onChange(of: scenePhase) { _, phase in
+                    // Live sync only runs while the app is open; iOS stops it in the background anyway.
+                    if phase == .active { sync.start(store: store, name: myName) } else if phase == .background { sync.stop() }
+                }
                 .onOpenURL { url in
                     if let export = GroceryStore.readExport(from: url) { incoming = IncomingList(export: export) }
                 }

@@ -8,9 +8,9 @@ set -euo pipefail
 # Left out on purpose:
 #   - The SwiftUI screens in Grocery/Sources, Widget, ShareExtension and Watch. They are views, not logic,
 #     and the unit tests never reach them (the same split as excluding Views/ elsewhere).
-#   - Three files in Shared that only run inside the system and can't execute in a unit test:
-#     ShoppingActivity.swift (Live Activities), GroceryIntents.swift (Siri and the widget's App Intents)
-#     and AisleAI.swift (Apple Intelligence, which the test simulators don't have).
+#   - Files in Shared that only run inside the system and can't execute in a unit test:
+#     ShoppingActivity.swift (Live Activities), GroceryIntents.swift (Siri and the widget's App Intents),
+#     and AisleAI.swift and CookAI.swift (Apple Intelligence, which the test simulators don't have).
 #
 # Do NOT bump coverage-baseline.txt from a feature branch. The coverage-ratchet workflow re-measures
 # on every push to main and commits the raised number itself, so two PRs in flight never conflict
@@ -27,7 +27,7 @@ set -euo pipefail
 PROJECT_ROOT="${0:A:h:h}"
 BASELINE_FILE="$PROJECT_ROOT/coverage-baseline.txt"
 RESULTS="$PROJECT_ROOT/.build/TestResults.xcresult"
-EXCLUDE_REGEX='/(ShoppingActivity|GroceryIntents|AisleAI)\.swift$'
+EXCLUDE_REGEX='/(ShoppingActivity|GroceryIntents|AisleAI|CookAI)\.swift$'
 
 # How far coverage may drift below the baseline before the build fails, and how far above it has to
 # climb before the baseline is raised.

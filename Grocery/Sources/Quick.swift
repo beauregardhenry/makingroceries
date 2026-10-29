@@ -6,6 +6,10 @@ struct QuickAddBar: View {
     /// The store new items go to; nil leaves it to history.
     let shopID: UUID?
     let inferShop: Bool
+    /// Bumped by the list screen when a control asks to add items; the field then takes focus.
+    var focusRequest = 0
+    /// Typed into the field along with a focus request, when not empty.
+    var prefill = ""
     @State private var text = ""
     @State private var dictation = Dictation()
     @FocusState private var focused: Bool
@@ -102,6 +106,10 @@ struct QuickAddBar: View {
                     dictation.transcript = ""
                 }
             }
+        }
+        .onChange(of: focusRequest) { _, _ in
+            if !prefill.isEmpty { text = prefill }
+            focused = true
         }
     }
 

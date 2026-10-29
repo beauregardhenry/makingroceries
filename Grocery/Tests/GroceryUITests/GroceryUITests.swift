@@ -120,6 +120,7 @@ final class GroceryUITests: XCTestCase {
             ("At Home", nil, "At Home"),
             ("Scan to Check Off", nil, "Scan to Check Off"),
             ("Send List to Family", nil, "Send to Family"),
+            ("Live Sync", nil, "Live Sync"),
         ])
     }
 
@@ -127,8 +128,10 @@ final class GroceryUITests: XCTestCase {
         openAndClose([
             ("Saved Meals", "Meals", "Meals"),
             ("Meal Plan", "Meals", "Meal Plan"),
+            ("What Can I Cook?", "Meals", "What Can I Cook?"),
             ("Spending", "Money", "Spending"),
             ("Totals by Store", "Money", "Totals"),
+            ("Price History", "Money", "Price History"),
             ("Plan the Trip", "Money", "Plan the Trip"),
             ("Scan Receipt", "Money", "Scan Receipt"),
         ])

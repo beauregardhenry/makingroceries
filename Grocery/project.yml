@@ -23,6 +23,8 @@ targets:
     info:
       path: Sources/Info.plist
       properties:
+        NSLocalNetworkUsageDescription: Live Sync finds other phones in your household on this network to keep one grocery list.
+        NSBonjourServices: [_mkgroceries._tcp, _mkgroceries._udp]
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.beauregardhenry.makingroceries.list
             UTTypeDescription: Makin' Groceries List

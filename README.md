@@ -73,26 +73,31 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - **Spending**: receipts also record the trip total. A Spending screen shows this month against an optional budget, a week-by-week chart, and totals by store and by aisle. You can add a trip by hand too.
 - **Receipt scan**: photograph a receipt and prices fill in on matching items and in your price history. It's read on the device. Matches where the receipt says more than your list ("Peanut Butter" for "Butter") are shown but left off until you confirm them.
 - **Plan the Trip**: suggests buying an item at a cheaper store that's already on today's trip, so following it never adds a stop.
+- **Price history**: every item with a few prices gets a chart of what you've paid at each store, with your usual price marked. A Price History screen lists what's well under its usual price right now, and where each thing you buy often is cheapest on average.
 
 **Around the phone**
 - **Home and Lock Screen widget** with a store picker, check-off buttons, and an option to switch to the store you're at.
 - **Live Activity** on the lock screen and Dynamic Island while Shopping Mode is on: items left, a progress bar and what's next.
 - **Send a list to family without iCloud**: share your list as a small file by iMessage, AirDrop or email. When they open it in their copy of the app, new items are added, anything already bought is marked bought, and nothing is removed or added twice. It isn't live syncing, and needs no developer account.
+- **Live Sync**: phones in the same household keep one list while the app is open on each, directly over Wi-Fi or Bluetooth, with no iCloud or server. Pick a household code and type it on each phone. New items, check-offs, un-checks and deletions are shared, and clearing done items on one phone doesn't bring them back on the other.
 - **Scan to check off**: scan items as they go in the cart and each is checked off your list. The app remembers each barcode after the first scan.
 - **Allergies & avoid list**: name the foods you avoid, and scanned or looked-up products that contain them are flagged. The data comes from Open Food Facts and can be wrong, so read labels if you have an allergy.
 - **At Home**: food you check off is tracked with a rough use-by date, with a quiet 9 am reminder the day before. Swipe to mark it used, buy it again, or toss it. The dates are guides, not food-safety advice.
 - **Auto-switch store**: arriving at a store you've saved a location for switches the list to it. Choosing another store by hand sticks until you arrive somewhere new.
 - **Alternate app icons**: the shopping cart icon in orange, lime, berry or midnight.
 - **Meal plan**: assign meals to days, then add everything planned for the next few days to the list in one tap.
+- **What Can I Cook?**: your saved meals that use what's At Home, with the ones that use up food going off soonest first, and one tap to add only the missing ingredients. On phones with Apple Intelligence, the on-device model also suggests new dishes from what you have, which you can save and plan for today.
 - Haptics when you check something off and a stronger one when you finish an aisle.
 - **Apple Watch app** (optional, see below): your lists in walking order, with check-off from your wrist.
 - **Siri and Shortcuts**: "Add to my list in Makin' Groceries", "Read my grocery list in Makin' Groceries".
+- **Controls**: put **Add to List** or **Start Shopping** in Control Center, on the Lock Screen, or on the Action button. Add to List opens the app with the quick-add bar ready; Start Shopping opens Shopping Mode on the store you're at.
+- **Spotlight**: search from the Home Screen to find a saved meal, an item on your list, or something you've bought before. Tapping a past item opens the quick-add bar with it typed in.
 - **Arrival reminders**: save a store's location and get a notification listing what you need when you arrive. Locations stay on the device.
 - Share the list as text, undo Clear Done, back up and restore everything to a file, a color picker for the background (grey, five tints, a custom color, or Dark). Colors sit on top of light mode, and Dark is the only choice that switches the whole app to dark mode.
 
 ## Privacy
 
-Everything is stored on your phone. If a saved file ever can't be read, the app keeps a copy in a Recovered folder and tells you, rather than starting over, and changes made from the widget, Siri or the share sheet are merged with the app's instead of overwriting them. Receipts, recipe photos, dictation (where supported) and the on-device language model all run on the device. The app has no account and no server. It contacts the internet only to look up a barcode (the number only, which also returns allergens and size) and to fetch a recipe page when you enter its address or share it from Safari.
+Everything is stored on your phone. If a saved file ever can't be read, the app keeps a copy in a Recovered folder and tells you, rather than starting over, and changes made from the widget, Siri or the share sheet are merged with the app's instead of overwriting them. Receipts, recipe photos, dictation (where supported) and the on-device language model all run on the device. Live Sync talks only to phones on the same network that use your household code, encrypted, and the code itself is never broadcast. Spotlight entries stay in the phone's own search index. The app has no account and no server. It contacts the internet only to look up a barcode (the number only, which also returns allergens and size) and to fetch a recipe page when you enter its address or share it from Safari.
 
 ## Building it
 
