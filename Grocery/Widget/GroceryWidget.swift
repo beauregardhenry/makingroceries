@@ -127,5 +127,7 @@ struct GroceryWidgets: WidgetBundle {
     var body: some Widget {
         ListWidget()
         ShoppingLiveActivity()
+        QuickAddControl()
+        StartShoppingControl()
     }
 }

@@ -33,6 +33,13 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_mkgroceries._tcp</string>
+		<string>_mkgroceries._udp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Live Sync finds other phones in your household on this network to keep one grocery list.</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

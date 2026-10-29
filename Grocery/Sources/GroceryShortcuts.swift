@@ -22,5 +22,14 @@ struct GroceryShortcuts: AppShortcutsProvider {
             shortTitle: "Read List",
             systemImageName: "list.bullet"
         )
+        AppShortcut(
+            intent: StartShoppingIntent(),
+            phrases: [
+                "Start shopping in \(.applicationName)",
+                "I'm at the store in \(.applicationName)",
+            ],
+            shortTitle: "Start Shopping",
+            systemImageName: "cart"
+        )
     }
 }

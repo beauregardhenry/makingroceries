@@ -61,6 +61,13 @@ struct ItemDetailView: View {
                     Text((unit.map { "That's \($0). " } ?? "") + "Add a size to see the price per ounce, so different package sizes compare fairly. Notes show under the item, so a coupon or the exact brand is in front of you at the store.")
                 }
 
+                if let trend = store.priceTrend(for: draft.name) {
+                    Section("Price History") {
+                        PriceHistoryChart(trend: trend)
+                        PriceTrendSummary(trend: trend)
+                    }
+                }
+
                 Section("Photo") {
                     if let photo = draft.photo {
                         HStack {

@@ -1,3 +1,4 @@
+import CoreSpotlight
 import SwiftUI
 
 struct ContentView: View {
@@ -10,6 +11,10 @@ struct ContentView: View {
     @State private var clearedBatch: ClearedBatch?
     @State private var pricingItem: GroceryItem?
     @State private var priceText = ""
+    /// Changes when a control asks for the quick-add bar, which then takes focus.
+    @State private var quickAddRequest = 0
+    /// Text to put in the quick-add bar with that request, such as a name tapped in Spotlight.
+    @State private var quickAddPrefill = ""
     @AppStorage("selectedShop") private var selectedShopRaw = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
@@ -147,6 +152,42 @@ struct ContentView: View {
         withAnimation { clearedBatch = ClearedBatch(items: removed) }
     }
 
+    /// Does what a Control Center, Lock Screen or Action button control opened the app for.
+    private func handlePendingAction() {
+        switch PendingAction.take() {
+        case .quickAdd:
+            sheet = nil
+            quickAddPrefill = ""
+            quickAddRequest += 1
+        case .startShopping:
+            sheet = nil
+            if let id = NearbyStore.currentShopID(among: store.shops) { selectedShopRaw = ShopFilter.shop(id).raw }
+            shoppingMode = true
+        case nil:
+            break
+        }
+    }
+
+    /// Opens what was tapped in Spotlight: the item's details, the meals, or the list ready to add it.
+    private func openSpotlightResult(_ activity: NSUserActivity) {
+        guard let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+              let (kind, key) = SpotlightEntry.parse(id) else { return }
+        sheet = nil
+        switch kind {
+        case .item:
+            if let item = store.items.first(where: { $0.id.uuidString == key }) {
+                selectedShopRaw = ""
+                detailItem = item
+            }
+        case .meal:
+            sheet = .meals
+        case .past:
+            selectedShopRaw = ""
+            quickAddPrefill = key
+            quickAddRequest += 1
+        }
+    }
+
     private func beginPricing(_ item: GroceryItem) {
         priceText = Price.editText(item.price)
         pricingItem = item
@@ -171,6 +212,9 @@ struct ContentView: View {
         case .avoid: AvoidListView()
         case .icons: AppIconView()
         case .send: SendListView(shopID: newItemShopID)
+        case .cook: CookView(shopID: newItemShopID)
+        case .prices: PriceWatchView()
+        case .sync: HouseholdSyncView()
         }
     }
 
@@ -213,7 +257,7 @@ struct ContentView: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     TotalsBar(items: visibleItems) { sheet = .totals }
-                    QuickAddBar(shopID: newItemShopID, inferShop: filter == .all)
+                    QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, focusRequest: quickAddRequest, prefill: quickAddPrefill)
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -254,10 +298,12 @@ struct ContentView: View {
                         Menu("Meals", systemImage: "fork.knife") {
                             Button("Saved Meals", systemImage: "fork.knife") { sheet = .meals }
                             Button("Meal Plan", systemImage: "calendar") { sheet = .planner }
+                            Button("What Can I Cook?", systemImage: "frying.pan") { sheet = .cook }
                         }
                         Menu("Money", systemImage: "dollarsign.circle") {
                             Button("Spending", systemImage: "chart.bar") { sheet = .spending }
                             Button("Totals by Store", systemImage: "dollarsign.circle") { sheet = .totals }
+                            Button("Price History", systemImage: "chart.line.uptrend.xyaxis") { sheet = .prices }
                             Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { sheet = .trip }
                             Button("Scan Receipt", systemImage: "receipt") { sheet = .receipt }
                         }
@@ -268,6 +314,7 @@ struct ContentView: View {
                         Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
                         Divider()
                         Button("Send List to Family", systemImage: "person.2") { sheet = .send }
+                        Button("Live Sync", systemImage: "arrow.triangle.2.circlepath") { sheet = .sync }
                         ShareLink(item: shareText) {
                             Label("Share List as Text", systemImage: "square.and.arrow.up")
                         }
@@ -292,10 +339,14 @@ struct ContentView: View {
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
+                    handlePendingAction()
                     store.reload()
                     Task { await ArrivalReminders.shared.refreshNearestStore(among: store.shops) }
                 }
             }
+            .onAppear(perform: handlePendingAction)
+            .onContinueUserActivity(CSSearchableItemActionType, perform: openSpotlightResult)
+            .onReceive(NotificationCenter.default.publisher(for: PendingAction.requested)) { _ in handlePendingAction() }
             .modifier(ShoppingFeedback(finishedAisles: finishedAisles, key: activityKey, sync: syncShoppingActivity))
             .alert("Some Saved Data Couldn't Be Read", isPresented: Binding(
                 get: { !store.loadProblems.isEmpty },
@@ -334,7 +385,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send
+    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync
     var id: String { rawValue }
 }
 
