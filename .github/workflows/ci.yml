@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build-and-test:
     name: Unit tests and app build
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
@@ -54,7 +54,7 @@ jobs:
 
   ui-tests:
     name: UI smoke tests
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
