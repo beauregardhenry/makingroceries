@@ -125,6 +125,8 @@ The Watch app is included in the repo but isn't embedded in the iPhone app by de
 
 Every pull request and push to `main` runs both in GitHub Actions, plus four more checks: zero tolerance for `as!`, `fatalError(`, `print(` and `TODO`/`FIXME` in the app sources; test-count floors and a coverage floor that can only rise (the numbers live in `test-count-baseline.txt` and `coverage-baseline.txt` and are raised automatically after merges); and a check that the checked-in Xcode project hasn't drifted from the sources. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+CI runs on GitHub's macOS 26 runners with the newest Xcode 26 they have. If GitHub has no Mac free and cancels a run before any job starts, it is re-run automatically, up to three attempts.
+
 ## Layout
 
 | Folder | Contents |

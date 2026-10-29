@@ -1,0 +1,49 @@
+name: Re-run CI that never started
+
+# When GitHub has no Mac free, a CI job sits in the queue for about 15 minutes and is then cancelled
+# with "The job was not acquired by Runner of type hosted even after multiple attempts". Nothing ran,
+# so this re-runs it, up to three attempts in all. It runs on Linux, which is rarely short.
+#
+# It leaves alone runs that were cancelled for a reason: a newer push to the same branch (the CI
+# concurrency group cancels the older run), or a person pressing Cancel after a job had started.
+#
+# workflow_run only fires from the copy of this file on main, so it takes effect once merged.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  rerun:
+    name: Re-run CI jobs no runner picked up
+    if: github.event.workflow_run.conclusion == 'cancelled' && github.event.workflow_run.run_attempt < 3
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Re-run if no job ever reached a runner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          started="$(gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" \
+            --jq '[.jobs[] | select(.runner_name != null and .runner_name != "")] | length')"
+          if [ "$started" != "0" ]; then
+            echo "A job reached a runner, so this was a real cancel. Leaving it."
+            exit 0
+          fi
+          newest="$(gh run list --repo "$REPO" --workflow CI --branch "$BRANCH" --event "$EVENT" \
+            --limit 1 --json databaseId --jq '.[0].databaseId')"
+          if [ "$newest" != "$RUN_ID" ]; then
+            echo "Run $newest is newer on $BRANCH, so this one was replaced. Leaving it."
+            exit 0
+          fi
+          echo "No job in attempt $ATTEMPT reached a runner. Re-running run $RUN_ID."
+          gh run rerun "$RUN_ID" --repo "$REPO"
