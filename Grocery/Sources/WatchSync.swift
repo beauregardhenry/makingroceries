@@ -18,8 +18,8 @@ final class PhoneSession: NSObject, WCSessionDelegate {
     func push() {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated,
               WCSession.default.isPaired, WCSession.default.isWatchAppInstalled, let store,
-              let data = try? JSONEncoder().encode(store.watchSnapshot()) else { return }
-        try? WCSession.default.updateApplicationContext([WatchSnapshot.contextKey: data])
+              let context = try? store.watchSnapshot().context() else { return }
+        try? WCSession.default.updateApplicationContext(context)
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
@@ -33,14 +33,12 @@ final class PhoneSession: NSObject, WCSessionDelegate {
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) { apply(userInfo) }
 
     private func apply(_ message: [String: Any]) {
-        guard let id = message[WatchSnapshot.toggleKey] as? String else { return }
+        guard WatchSnapshot.toggledID(in: message) != nil else { return }
         DispatchQueue.main.async {
             guard let store = self.store else { return }
             // The app may have been in the background while the widget or Siri changed the list.
             store.reload()
-            guard let item = store.items.first(where: { $0.id.uuidString == id }) else { return }
-            store.toggle(item)
-            self.push()
+            if store.applyWatchMessage(message) { self.push() }
         }
     }
 }

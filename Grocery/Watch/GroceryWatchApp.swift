@@ -38,14 +38,10 @@ final class WatchModel: NSObject, WCSessionDelegate {
 
     func toggle(_ entry: WatchSnapshot.Entry) {
         // Show the change at once; the phone confirms it with a fresh snapshot.
-        for g in snapshot.groups.indices {
-            if let i = snapshot.groups[g].items.firstIndex(where: { $0.id == entry.id }) {
-                snapshot.groups[g].items[i].isChecked.toggle()
-            }
-        }
+        snapshot.toggle(entryID: entry.id)
         guard !Self.isDemo else { return }
         save()
-        let message = [WatchSnapshot.toggleKey: entry.id]
+        let message = WatchSnapshot.toggleMessage(for: entry.id)
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(message, replyHandler: nil) { _ in
                 WCSession.default.transferUserInfo(message)
@@ -60,8 +56,7 @@ final class WatchModel: NSObject, WCSessionDelegate {
     }
 
     private func receive(_ context: [String: Any]) {
-        guard let data = context[WatchSnapshot.contextKey] as? Data,
-              let fresh = try? JSONDecoder().decode(WatchSnapshot.self, from: data) else { return }
+        guard let fresh = WatchSnapshot(context: context) else { return }
         DispatchQueue.main.async {
             self.snapshot = fresh
             self.save()
