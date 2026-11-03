@@ -381,3 +381,38 @@ final class FirstLaunchSafetyTests: StoreTestCase {
         XCTAssertFalse(GroceryStore().isFirstRun, "stores and history are still there, so this isn't a fresh install")
     }
 }
+
+final class PharmacyAisleTests: StoreTestCase {
+    func testStoresSavedBeforePharmacyGetItJustBeforeOther() {
+        var shop = Shop(name: "Kroger")
+        shop.aisleOrder = [.bakery, .produce, .dairy, .meat, .pantry, .frozen, .drinks, .household, .other]
+        XCTAssertEqual(Array(shop.orderedAisles.suffix(3)), [.household, .pharmacy, .other])
+        XCTAssertEqual(shop.orderedAisles.count, Aisle.allCases.count)
+    }
+
+    func testAnOrderNotEndingInOtherStillGetsPharmacy() {
+        var shop = Shop(name: "Walmart")
+        shop.aisleOrder = [.other, .produce]
+        XCTAssertEqual(Array(shop.orderedAisles.prefix(2)), [.other, .produce])
+        XCTAssertTrue(shop.orderedAisles.contains(.pharmacy))
+        XCTAssertEqual(shop.orderedAisles.count, Aisle.allCases.count)
+    }
+
+    func testOldStoresStillDecodeAndNewOnesListPharmacy() throws {
+        let old = #"{"id":"6E13AA21-DC89-43D4-8946-D42B12D97A25","name":"Kroger","aisleOrder":["Produce","Household","Other"]}"#
+        let shop = try JSONDecoder().decode(Shop.self, from: Data(old.utf8))
+        XCTAssertEqual(Array(shop.orderedAisles.prefix(2)), [.produce, .household])
+        XCTAssertEqual(shop.orderedAisles.last, .other)
+        XCTAssertTrue(Shop(name: "New").orderedAisles.contains(.pharmacy))
+    }
+
+    func testMedicineAndToiletriesAreFiledInPharmacy() {
+        for name in ["Ibuprofen", "Vitamin D", "Toothpaste", "Band-aid bandages", "Sunscreen SPF 50", "Shampoo"] {
+            XCTAssertEqual(Aisle.guess(fromCategories: [name]), .pharmacy, name)
+        }
+        XCTAssertEqual(Aisle.guess(fromCategories: ["Pillsbury cookie dough"]), .pantry)
+        XCTAssertEqual(Aisle.guess(fromCategories: ["Orange juice"]), .drinks)
+        store.addOrBump(name: "Advil", shopID: nil)
+        XCTAssertEqual(store.items.first?.aisle, .pharmacy)
+    }
+}

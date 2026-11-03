@@ -9,6 +9,7 @@ enum Aisle: String, CaseIterable, Codable, Identifiable {
     case frozen = "Frozen"
     case drinks = "Drinks"
     case household = "Household"
+    case pharmacy = "Pharmacy"
     case other = "Other"
 
     var id: String { rawValue }
@@ -24,6 +25,7 @@ enum Aisle: String, CaseIterable, Codable, Identifiable {
         case .frozen: "snowflake"
         case .drinks: "waterbottle.fill"
         case .household: "bubbles.and.sparkles.fill"
+        case .pharmacy: "cross.case.fill"
         case .other: "bag.fill"
         }
     }
@@ -159,11 +161,17 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
         routeEvents = try c.decodeIfPresent([RouteEvent].self, forKey: .routeEvents)
     }
 
-    /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention.
+    /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention. A newer aisle
+    /// (like Pharmacy) goes just before Other when the saved order ends with Other, so Other stays last.
     var orderedAisles: [Aisle] {
         var seen = Set<Aisle>()
-        let saved = aisleOrder.filter { seen.insert($0).inserted }
-        return saved + Aisle.allCases.filter { !seen.contains($0) }
+        var saved = aisleOrder.filter { seen.insert($0).inserted }
+        let missing = Aisle.allCases.filter { !seen.contains($0) }
+        if saved.last == .other {
+            saved.insert(contentsOf: missing.filter { $0 != .other }, at: saved.count - 1)
+            return saved
+        }
+        return saved + missing
     }
 
     func label(for aisle: Aisle) -> String? {

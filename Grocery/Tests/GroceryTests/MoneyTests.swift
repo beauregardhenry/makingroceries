@@ -128,7 +128,7 @@ final class RouteLearningTests: XCTestCase {
         let learned = try XCTUnwrap(RouteLearning.order(current: Aisle.allCases, events: events))
         XCTAssertEqual(Array(learned.prefix(4)), [.bakery, .produce, .dairy, .meat])
         XCTAssertEqual(Set(learned), Set(Aisle.allCases))
-        XCTAssertEqual(Array(learned.suffix(5)), [.pantry, .frozen, .drinks, .household, .other])
+        XCTAssertEqual(Array(learned.suffix(6)), [.pantry, .frozen, .drinks, .household, .pharmacy, .other])
         XCTAssertNil(RouteLearning.order(current: learned, events: events))
     }
 
