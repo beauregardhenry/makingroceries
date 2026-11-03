@@ -37,7 +37,7 @@ struct TotalsView: View {
                     ForEach(store.shops) { shop in
                         row(shop.name, items: store.items.filter { $0.shopID == shop.id })
                     }
-                    row("Any Store", items: store.items.filter { $0.shopID == nil })
+                    row(Shop.noStoreName, items: store.items.filter { $0.shopID == nil })
                 }
                 Section {
                     let all = Totals(store.items)

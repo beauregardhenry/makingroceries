@@ -78,7 +78,7 @@ struct ContentView: View {
     private var navigationTitle: String {
         switch filter {
         case .all: "Groceries"
-        case .anyStore: "Any Store"
+        case .anyStore: Shop.noStoreName
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }
     }
@@ -136,6 +136,7 @@ struct ContentView: View {
         let id: String
         let title: String
         let symbol: String
+        var aisle: Aisle?
         let label: String?
         let items: [GroceryItem]
     }
@@ -144,7 +145,7 @@ struct ContentView: View {
     private var displaySections: [DisplaySection] {
         let order = mappedShop?.orderedAisles ?? Aisle.allCases
         func make(_ aisle: Aisle, _ items: [GroceryItem]) -> DisplaySection {
-            DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol,
+            DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol, aisle: aisle,
                            label: mappedShop?.label(for: aisle), items: items)
         }
         guard shoppingMode else { return sections.map { make($0.0, $0.1) } }
@@ -295,8 +296,13 @@ struct ContentView: View {
     }
 
     private func aisleHeader(_ section: DisplaySection) -> some View {
-        HStack {
-            Label(section.title, systemImage: section.symbol)
+        HStack(spacing: 10) {
+            if let aisle = section.aisle {
+                AisleBadge(aisle: aisle, size: shoppingMode ? 28 : 24)
+                Text(section.title)
+            } else {
+                Label(section.title, systemImage: section.symbol)
+            }
             Spacer()
             if let label = section.label {
                 Text(label).textCase(nil).font(.subheadline.weight(.semibold))
@@ -573,7 +579,7 @@ struct ItemRow: View {
                 ForEach(store.shops) { shop in
                     Button(shop.name) { store.move(item, to: shop.id) }
                 }
-                Button("Any Store") { store.move(item, to: nil) }
+                Button(Shop.noStoreName) { store.move(item, to: nil) }
             }
             Button("Delete", systemImage: "trash", role: .destructive) { store.delete(item) }
         }
@@ -612,7 +618,7 @@ struct AddItemView: View {
                     ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
                 }
                 Picker("Store", selection: $shopID) {
-                    Text("Any Store").tag(UUID?.none)
+                    Text(Shop.noStoreName).tag(UUID?.none)
                     ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                 }
             }

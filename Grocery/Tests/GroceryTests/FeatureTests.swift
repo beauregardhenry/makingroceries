@@ -344,3 +344,30 @@ final class ShoppingProgressTests: XCTestCase {
         XCTAssertEqual(empty.fraction, 0)
     }
 }
+
+final class FirstLaunchTests: StoreTestCase {
+    func testAFreshStoreIsAFirstRun() {
+        // StoreTestCase deletes every saved file before making the store.
+        XCTAssertTrue(store.isFirstRun)
+        store.items = [GroceryItem(name: "Milk")]
+        XCTAssertFalse(GroceryStore().isFirstRun, "once the list is saved, the next launch isn't")
+    }
+
+    func testSetupKeepsThePickedStoresInOrder() {
+        store.items = [GroceryItem(name: "Bananas")]
+        store.history = [PastItem(name: "Bananas", aisle: .produce, shopID: nil, price: nil)]
+        store.finishSetup(storeNames: ["Costco", " Aldi ", "costco", "", "Corner Shop"], keepSample: true)
+        XCTAssertEqual(store.shops.map(\.name), ["Costco", "Aldi", "Corner Shop"])
+        XCTAssertEqual(store.items.map(\.name), ["Bananas"])
+        XCTAssertFalse(store.isFirstRun)
+    }
+
+    func testStartingEmptyClearsTheSampleItems() {
+        store.items = [GroceryItem(name: "Bananas")]
+        store.history = [PastItem(name: "Bananas", aisle: .produce, shopID: nil, price: nil)]
+        store.finishSetup(storeNames: [], keepSample: false)
+        XCTAssertTrue(store.shops.isEmpty)
+        XCTAssertTrue(store.items.isEmpty)
+        XCTAssertTrue(store.history.isEmpty)
+    }
+}

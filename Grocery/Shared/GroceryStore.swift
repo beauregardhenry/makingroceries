@@ -49,6 +49,9 @@ final class GroceryStore {
     /// before anything was saved over it. The list screen tells you once, then clears this.
     var loadProblems: [String] = []
 
+    /// True on the very first launch, before anything was saved, so the app can offer a short setup.
+    var isFirstRun = false
+
     /// While loading, assignments update memory only; nothing is written back.
     @ObservationIgnored private var suppressWrites = false
     /// Each file's bytes as this copy last read or saved them, to notice when another process saved since.
@@ -90,7 +93,9 @@ final class GroceryStore {
         defer { suppressWrites = false }
         // Sample items only on a true first run. An unreadable list starts empty instead, so the sample
         // items can never be saved over a list that merely failed to load.
-        items = value(of: readFile([GroceryItem].self, "grocery"), ifMissing: Self.sampleItems)
+        let itemsFile = readFile([GroceryItem].self, "grocery")
+        if case .missing = itemsFile { isFirstRun = true }
+        items = value(of: itemsFile, ifMissing: Self.sampleItems)
         shops = value(of: readFile([Shop].self, "shops"), ifMissing: Shop.defaultNames.map { Shop(name: $0) })
         favorites = value(of: readFile([Favorite].self, "favorites"), ifMissing: [])
         meals = value(of: readFile([Meal].self, "meals"), ifMissing: [])

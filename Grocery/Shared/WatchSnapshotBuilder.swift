@@ -1,7 +1,7 @@
 import Foundation
 
 extension GroceryStore {
-    /// The lists as the watch shows them: one group per store with something on it, then "Any Store".
+    /// The lists as the watch shows them: one group per store with something on it, then "Anywhere" for items with no store.
     func watchSnapshot() -> WatchSnapshot {
         func entries(_ items: [GroceryItem], order: [Aisle]) -> [WatchSnapshot.Entry] {
             items.sorted { (order.firstIndex(of: $0.aisle) ?? 0) < (order.firstIndex(of: $1.aisle) ?? 0) }
@@ -14,7 +14,7 @@ extension GroceryStore {
             if !mine.isEmpty { groups.append(.init(id: shop.id.uuidString, name: shop.name, items: entries(mine, order: shop.orderedAisles))) }
         }
         let loose = items.filter { $0.shopID == nil }
-        if !loose.isEmpty { groups.append(.init(id: "any", name: "Any Store", items: entries(loose, order: Aisle.allCases))) }
+        if !loose.isEmpty { groups.append(.init(id: "any", name: Shop.noStoreName, items: entries(loose, order: Aisle.allCases))) }
         return WatchSnapshot(groups: groups)
     }
 

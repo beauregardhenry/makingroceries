@@ -4,6 +4,8 @@ import SwiftUI
 /// sit in the list's More menu, each with a glance at what matters now.
 struct RootView: View {
     @State private var tab = AppTab.list
+    @Environment(GroceryStore.self) private var store
+    @State private var showingWelcome = false
 
     var body: some View {
         TabView(selection: $tab) {
@@ -13,6 +15,8 @@ struct RootView: View {
             Tab("Money", systemImage: "dollarsign.circle", value: AppTab.money) { MoneyHub() }
         }
         .tint(.brand)
+        .onAppear { showingWelcome = store.isFirstRun && !Storage.isUITesting }
+        .sheet(isPresented: $showingWelcome) { WelcomeView() }
     }
 }
 

@@ -14,7 +14,7 @@ extension WatchSnapshot {
             Entry(id: "6", name: "Paper towels", quantity: 1, isChecked: false),
             Entry(id: "7", name: "Dish soap", quantity: 1, isChecked: false),
         ]),
-        Group(id: "any", name: "Any Store", items: [
+        Group(id: "any", name: "Anywhere", items: [
             Entry(id: "8", name: "Coffee", quantity: 1, isChecked: true),
         ]),
     ])

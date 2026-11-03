@@ -41,7 +41,7 @@ struct ReceiptView: View {
             Form {
                 Section {
                     Picker("Store", selection: $shopID) {
-                        Text("Any Store").tag(UUID?.none)
+                        Text(Shop.noStoreName).tag(UUID?.none)
                         ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                     }
                     if VNDocumentCameraViewController.isSupported {

@@ -13,17 +13,18 @@ enum Aisle: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
+    /// One filled symbol per aisle, drawn white on the aisle's color (see `Aisle.tint`).
     var symbol: String {
         switch self {
-        case .produce: "carrot"
-        case .dairy: "cup.and.saucer"
-        case .meat: "fish"
-        case .bakery: "birthday.cake"
-        case .pantry: "takeoutbag.and.cup.and.straw"
+        case .produce: "carrot.fill"
+        case .dairy: "drop.fill"
+        case .meat: "fish.fill"
+        case .bakery: "basket.fill"
+        case .pantry: "cabinet.fill"
         case .frozen: "snowflake"
-        case .drinks: "waterbottle"
-        case .household: "sparkles"
-        case .other: "cart"
+        case .drinks: "waterbottle.fill"
+        case .household: "bubbles.and.sparkles.fill"
+        case .other: "bag.fill"
         }
     }
 }
@@ -173,6 +174,8 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
     var hasLocation: Bool { latitude != nil && longitude != nil }
 
     static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery"]
+    /// What items with no store are called: they can be bought anywhere.
+    static let noStoreName = "Anywhere"
     static let presetNames = [
         "Kroger", "Walmart", "Chinese Grocery", "Costco", "Target", "Aldi", "Trader Joe's",
         "Whole Foods", "Publix", "Safeway", "Sam's Club", "Asian Market", "Farmers Market",
