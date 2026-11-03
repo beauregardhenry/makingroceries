@@ -11,8 +11,13 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
 <table>
   <tr>
     <td align="center"><img src="docs/screenshots/store-list.png" width="230" alt="A store's list in its aisle order"><br><sub><b>A store's list</b><br>in the order you walk it, with aisle labels, prices and notes</sub></td>
-    <td align="center"><img src="docs/screenshots/all-stores.png" width="230" alt="All stores in one list"><br><sub><b>All stores</b><br>everything together, each item tagged with its store</sub></td>
+    <td align="center"><img src="docs/screenshots/all-stores.png" width="230" alt="All stores in one list"><br><sub><b>All stores</b><br>everything together, with what's left and its cost under the title</sub></td>
     <td align="center"><img src="docs/screenshots/aisle-map.png" width="230" alt="Editing a store's aisle map"><br><sub><b>Aisle map</b><br>drag aisles into your route, add labels like "Aisle 4"</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/tab-meals.png" width="230" alt="The Meals tab"><br><sub><b>Meals tab</b><br>what's planned today, cooking ideas, saved meals and the plan</sub></td>
+    <td align="center"><img src="docs/screenshots/tab-kitchen.png" width="230" alt="The Kitchen tab"><br><sub><b>Kitchen tab</b><br>what to use soon, what's at home, pantry check and usual items</sub></td>
+    <td></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with larger rows"><br><sub><b>Shopping Mode</b><br>bigger text and rows; checked items drop to the cart</sub></td>
@@ -20,7 +25,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
     <td align="center"><img src="docs/screenshots/recipe-photo-import.png" width="230" alt="Ingredients read from a photo of a recipe"><br><sub><b>Recipe from a photo</b><br>ingredients are read on the phone from a picture or screenshot</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/menu.png" width="230" alt="The more menu"><br><sub><b>The menu</b><br>usual items, pantry check, meals, totals, sharing and backup</sub></td>
+    <td align="center"><img src="docs/screenshots/tab-money.png" width="230" alt="The Money tab"><br><sub><b>Money tab</b><br>this month against your budget, prices, totals and the trip plan</sub></td>
     <td align="center"><img src="docs/screenshots/stores.png" width="230" alt="Managing stores"><br><sub><b>Stores</b><br>add your own, or pick a popular one</sub></td>
     <td align="center"><img src="docs/screenshots/receipt-scan.png" width="230" alt="Prices read from a receipt"><br><sub><b>Receipt scan</b><br>prices read from a photo, matched to your list; uncertain matches stay off</sub></td>
   </tr>
@@ -48,6 +53,8 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 
 ## What it does
 
+Four tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kitchen**, for what's at home; and **Money**, for spending and prices. Each tab shows what matters now, like what to use soon or how much is left of your budget. Settings (list color, app icon, stores, allergies, Live Sync, backups) are under **⋯ › Settings**.
+
 **Lists and stores**
 - A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All** and **Any Store** views.
 - Per-store **aisle maps**: drag the aisles into the order you walk them and add labels like "Aisle 4". The list follows that order.
@@ -68,7 +75,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - Typos and plurals are caught ("tomatos" becomes "Tomatoes"), and adding something already on the list raises its quantity.
 
 **Prices**
-- Optional prices, a running total, totals by store, and a hint when an item was cheaper at another store you've priced it in.
+- Optional prices, with what's left to buy and its cost under the list's title, totals by store, and a hint when an item was cheaper at another store you've priced it in.
 - **Unit prices**: give an item a size ("16 oz", "1 lb", "12 ct") and the list shows the price per ounce, fluid ounce or piece, so different package sizes compare fairly. Barcode scans fill the size in when the product has one.
 - **Spending**: receipts also record the trip total. A Spending screen shows this month against an optional budget, a week-by-week chart, and totals by store and by aisle. You can add a trip by hand too.
 - **Receipt scan**: photograph a receipt and prices fill in on matching items and in your price history. It's read on the device. Matches where the receipt says more than your list ("Peanut Butter" for "Butter") are shown but left off until you confirm them.
@@ -93,7 +100,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 - **Controls**: put **Add to List** or **Start Shopping** in Control Center, on the Lock Screen, or on the Action button. Add to List opens the app with the quick-add bar ready; Start Shopping opens Shopping Mode on the store you're at.
 - **Spotlight**: search from the Home Screen to find a saved meal, an item on your list, or something you've bought before. Tapping a past item opens the quick-add bar with it typed in.
 - **Arrival reminders**: save a store's location and get a notification listing what you need when you arrive. Locations stay on the device.
-- Share the list as text, undo Clear Done, back up and restore everything to a file, a color picker for the background (grey, five tints, a custom color, or Dark). Colors sit on top of light mode, and Dark is the only choice that switches the whole app to dark mode.
+- Share the list as text, undo Clear Done, back up and restore everything to a file, a list color in Settings (grey, five tints, a custom color, or Dark). Colors sit on top of light mode, and Dark is the only choice that switches the whole app to dark mode.
 
 ## Privacy
 

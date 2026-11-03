@@ -72,7 +72,7 @@ struct MealsView: View {
                 }
                 .onDelete { store.meals.remove(atOffsets: $0) }
             }
-            .navigationTitle("Meals")
+            .navigationTitle("Saved Meals")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: UUID.self) { id in MealEditorView(mealID: id, shopID: shopID) }
             .sheet(isPresented: $showingImport) {

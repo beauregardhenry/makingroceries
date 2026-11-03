@@ -36,7 +36,7 @@ struct CookView: View {
                     if !soon.isEmpty {
                         Section("Use these first") {
                             Text(soon.map(\.name).formatted(.list(type: .and)))
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(Color.brand)
                         }
                     }
 
@@ -113,7 +113,7 @@ private struct MealMatchRow: View {
                 .font(.caption).foregroundStyle(.secondary)
             if !match.usesSoon.isEmpty {
                 Text("Uses up \(match.usesSoon.formatted(.list(type: .and)))")
-                    .font(.caption).foregroundStyle(.orange)
+                    .font(.caption).foregroundStyle(Color.brand)
             }
             if !match.missing.isEmpty {
                 Text("Need \(match.missing.map(\.name).formatted(.list(type: .and)))")
