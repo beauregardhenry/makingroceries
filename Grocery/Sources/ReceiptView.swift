@@ -84,7 +84,7 @@ struct ReceiptView: View {
                     }
                 }
                 if let done {
-                    Section { Label(done, systemImage: "checkmark.circle.fill").foregroundStyle(.green) }
+                    Section { Label(done, systemImage: "checkmark.circle.fill").foregroundStyle(Color.positive) }
                 }
             }
             .navigationTitle("Scan Receipt")
@@ -132,7 +132,7 @@ struct ReceiptView: View {
                         .font(.caption).foregroundStyle(.secondary)
                     if !lines[i].certain {
                         Text("Check this one: the receipt says more than your list does")
-                            .font(.caption).foregroundStyle(.orange)
+                            .font(.caption).foregroundStyle(Color.brand)
                     }
                 }
             }

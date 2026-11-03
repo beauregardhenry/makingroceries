@@ -116,7 +116,7 @@ struct MealEditorView: View {
                 Section {
                     ForEach($store.meals[i].ingredients) { $ingredient in
                         HStack {
-                            Image(systemName: ingredient.aisle.symbol).foregroundStyle(.secondary).frame(width: 24)
+                            AisleBadge(aisle: ingredient.aisle, size: 24)
                             TextField("Ingredient", text: $ingredient.name)
                             if let amount = ingredient.amount, let unit = ingredient.unit {
                                 Text(Amount.text(amount * batch.rawValue, unit: unit))

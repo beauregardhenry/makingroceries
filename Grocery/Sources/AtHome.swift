@@ -12,7 +12,7 @@ struct AtHomeView: View {
         return cal.dateComponents([.day], from: cal.startOfDay(for: Date()), to: cal.startOfDay(for: entry.expires)).day ?? 0
     }
 
-    private func color(_ days: Int) -> Color { days <= 1 ? .red : (days <= 3 ? .orange : .secondary) }
+    private func color(_ days: Int) -> Color { days <= 1 ? .red : (days <= 3 ? Color.brand : .secondary) }
 
     private func text(_ days: Int) -> String {
         switch days {

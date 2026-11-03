@@ -73,7 +73,7 @@ struct QuickAddBar: View {
             }
 
             if let message = dictation.message {
-                Text(message).font(.caption).foregroundStyle(.orange).frame(maxWidth: .infinity, alignment: .leading)
+                Text(message).font(.caption).foregroundStyle(Color.brand).frame(maxWidth: .infinity, alignment: .leading)
             }
             HStack(spacing: 8) {
                 TextField("Add items: milk, eggs, 6 bananas", text: $text)

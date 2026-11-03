@@ -166,8 +166,9 @@ struct ShopMapView: View {
 
                 Section {
                     ForEach(store.shops[i].orderedAisles) { aisle in
-                        HStack {
-                            Label(aisle.rawValue, systemImage: aisle.symbol)
+                        HStack(spacing: 12) {
+                            AisleBadge(aisle: aisle, size: 28)
+                            Text(aisle.rawValue)
                             Spacer()
                             TextField("Aisle", text: labelBinding(index: i, aisle: aisle))
                                 .multilineTextAlignment(.trailing)
