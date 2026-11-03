@@ -102,7 +102,7 @@ private struct MealMatchRow: View {
                 Spacer()
                 if match.missing.isEmpty {
                     Label("Ready", systemImage: "checkmark.circle.fill").labelStyle(.titleAndIcon)
-                        .font(.caption.weight(.semibold)).foregroundStyle(.green)
+                        .font(.caption.weight(.semibold)).foregroundStyle(Color.positive)
                 } else {
                     Button("Add \(match.missing.count)", action: onAdd)
                         .buttonStyle(.bordered).controlSize(.small)

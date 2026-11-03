@@ -10,6 +10,8 @@ struct QuickAddBar: View {
     var focusRequest = 0
     /// Typed into the field along with a focus request, when not empty.
     var prefill = ""
+    /// Whether to show the "Due" suggestions; Shopping Mode hides them to keep the screen on the trip.
+    var showsDue = true
     @State private var text = ""
     @State private var dictation = Dictation()
     @FocusState private var focused: Bool
@@ -29,7 +31,7 @@ struct QuickAddBar: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            let due = text.isEmpty ? store.dueItems() : []
+            let due = text.isEmpty && showsDue ? store.dueItems() : []
             if !due.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {

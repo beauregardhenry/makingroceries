@@ -20,7 +20,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
     <td></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with larger rows"><br><sub><b>Shopping Mode</b><br>bigger text and rows; checked items drop to the cart</sub></td>
+    <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with progress and the next aisle"><br><sub><b>Shopping Mode</b><br>progress, the next aisle, and big rows with nothing else in the way</sub></td>
     <td align="center"><img src="docs/screenshots/meal-scaling.png" width="230" alt="A meal scaled to a double batch"><br><sub><b>Meals and scaling</b><br>a 2x batch doubles counted and measured ingredients</sub></td>
     <td align="center"><img src="docs/screenshots/recipe-photo-import.png" width="230" alt="Ingredients read from a photo of a recipe"><br><sub><b>Recipe from a photo</b><br>ingredients are read on the phone from a picture or screenshot</sub></td>
   </tr>
@@ -59,7 +59,7 @@ Four tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kit
 - A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All** and **Any Store** views.
 - Per-store **aisle maps**: drag the aisles into the order you walk them and add labels like "Aisle 4". The list follows that order.
 - **Learns your route**: as you check things off, the app notices the order you walk a store in and updates its aisle map after a few trips. Dragging the aisles yourself turns this off for that store.
-- **Shopping Mode**: bigger text and rows, with checked items moved to an "In the cart" section.
+- **Shopping Mode**: made for the store. A card at the top shows how much is in the cart and which aisle to head to next ("Next: Dairy & Eggs, Aisle 9 · 2 items"). Rows get bigger and drop prices and store names, keeping notes and allergy warnings. Checked items tuck into a collapsed "In the cart" section, the screen stays on, and **Done Shopping** (or **Finish Shopping** once everything's in the cart) clears the cart off your list, with Undo.
 - Quantities, notes, photos, and items that **repeat** on their own every week, two weeks or month.
 
 **Fast entry**

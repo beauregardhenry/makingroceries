@@ -306,3 +306,41 @@ final class SpotlightTests: StoreTestCase {
         XCTAssertNil(SpotlightEntry.parse("nocolon"))
     }
 }
+
+final class ShoppingProgressTests: XCTestCase {
+    private func item(_ name: String, _ aisle: Aisle, checked: Bool = false) -> GroceryItem {
+        var item = GroceryItem(name: name, aisle: aisle)
+        item.isChecked = checked
+        return item
+    }
+
+    func testNextAisleFollowsTheWalkingOrder() {
+        let items = [item("Milk", .dairy), item("Eggs", .dairy), item("Bread", .bakery, checked: true), item("Apples", .produce)]
+        let progress = ShoppingProgress(items: items, order: [.bakery, .dairy, .produce],
+                                        label: { $0 == .dairy ? "Aisle 9" : nil })
+        XCTAssertEqual(progress.inCart, 1)
+        XCTAssertEqual(progress.total, 4)
+        XCTAssertEqual(progress.remaining, 3)
+        XCTAssertEqual(progress.fraction, 0.25)
+        XCTAssertEqual(progress.nextAisle, .dairy)
+        XCTAssertEqual(progress.leftInNextAisle, 2)
+        XCTAssertEqual(progress.nextText, "Next: Dairy & Eggs, Aisle 9 · 2 items")
+        XCTAssertFalse(progress.isDone)
+    }
+
+    func testAnAisleMissingFromTheOrderStillComesUp() {
+        let progress = ShoppingProgress(items: [item("Soap", .household)], order: [.produce])
+        XCTAssertEqual(progress.nextAisle, .household)
+        XCTAssertEqual(progress.nextText, "Next: Household · 1 item")
+    }
+
+    func testDoneOnlyWhenEverythingIsInTheCart() {
+        let done = ShoppingProgress(items: [item("Milk", .dairy, checked: true)], order: Aisle.allCases)
+        XCTAssertTrue(done.isDone)
+        XCTAssertNil(done.nextText)
+        XCTAssertEqual(done.fraction, 1)
+        let empty = ShoppingProgress(items: [], order: Aisle.allCases)
+        XCTAssertFalse(empty.isDone)
+        XCTAssertEqual(empty.fraction, 0)
+    }
+}

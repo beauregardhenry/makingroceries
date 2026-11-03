@@ -203,4 +203,19 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Test Meal"].waitForExistence(timeout: 10), "the new meal opens")
         XCTAssertTrue(app.staticTexts["2 cups"].exists, "amounts are kept")
     }
+
+    func testShoppingModeShowsProgressAndFinishes() {
+        chooseFromMore("Shopping Mode")
+        let done = app.navigationBars["Groceries"].buttons["Done Shopping"]
+        XCTAssertTrue(done.waitForExistence(timeout: 5), "Shopping Mode is on")
+        XCTAssertTrue(app.staticTexts["0 of 3 in the cart"].waitForExistence(timeout: 5), "progress shows")
+        item("Milk").tap()
+        XCTAssertTrue(app.staticTexts["1 of 3 in the cart"].waitForExistence(timeout: 5), "progress moves")
+        XCTAssertTrue(app.buttons["In the cart (1)"].waitForExistence(timeout: 5), "the cart is collapsed with a count")
+        XCTAssertFalse(item("Milk").exists, "checked items are tucked away")
+        done.tap()
+        XCTAssertTrue(app.navigationBars["Groceries"].buttons["Clear Done"].waitForExistence(timeout: 5), "back to the normal list")
+        XCTAssertFalse(item("Milk").exists, "what was in the cart is cleared")
+        XCTAssertTrue(app.buttons["Undo"].exists, "and can be undone")
+    }
 }

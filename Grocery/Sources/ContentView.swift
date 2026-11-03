@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var quickAddRequest = 0
     /// Text to put in the quick-add bar with that request, such as a name tapped in Spotlight.
     @State private var quickAddPrefill = ""
+    /// In Shopping Mode, whether the In the cart section is open. Closed keeps the screen on what's left.
+    @State private var cartExpanded = false
     @AppStorage("selectedShop") private var selectedShopRaw = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
@@ -101,6 +103,23 @@ struct ContentView: View {
     }
 
     private var remainingCount: Int { visibleItems.filter { !$0.isChecked }.count }
+
+    private var shoppingProgress: ShoppingProgress {
+        ShoppingProgress(items: visibleItems, order: mappedShop?.orderedAisles ?? Aisle.allCases,
+                         label: { mappedShop?.label(for: $0) })
+    }
+
+    /// Ends a trip: what's in the cart comes off the list (with Undo), and the list goes back to normal.
+    private func finishShopping() {
+        clearDone()
+        withAnimation { shoppingMode = false }
+        cartExpanded = false
+    }
+
+    /// Keeps the screen on while shopping, so it doesn't lock between aisles.
+    private func updateIdleTimer() {
+        UIApplication.shared.isIdleTimerDisabled = shoppingMode && scenePhase == .active
+    }
 
     /// Changes whenever the Live Activity needs to be brought up to date.
     private var activityKey: String { "\(shoppingMode)|\(selectedShopRaw)|\(remainingCount)|\(visibleItems.count)" }
@@ -235,51 +254,149 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder
+    private func sectionView(_ section: DisplaySection) -> some View {
+        let isCart = shoppingMode && section.id == "cart"
+        Section {
+            if !isCart || cartExpanded {
+                ForEach(section.items) { item in
+                    ItemRow(item: item, showShop: filter == .all, large: shoppingMode,
+                            onSetPrice: beginPricing, onEdit: { detailItem = $0 })
+                }
+                .onDelete { offsets in
+                    offsets.map { section.items[$0] }.forEach(store.delete)
+                }
+            }
+        } header: {
+            if isCart {
+                cartHeader(count: section.items.count)
+            } else {
+                aisleHeader(section)
+            }
+        }
+    }
+
+    private func cartHeader(count: Int) -> some View {
+        Button {
+            withAnimation { cartExpanded.toggle() }
+        } label: {
+            HStack {
+                Label("In the cart (\(count))", systemImage: "cart.fill")
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .rotationEffect(.degrees(cartExpanded ? 90 : 0))
+                    .accessibilityHidden(true)
+            }
+            .font(.headline)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(cartExpanded ? "Hides what's in the cart" : "Shows what's in the cart")
+    }
+
+    private func aisleHeader(_ section: DisplaySection) -> some View {
+        HStack {
+            Label(section.title, systemImage: section.symbol)
+            Spacer()
+            if let label = section.label {
+                Text(label).textCase(nil).font(.subheadline.weight(.semibold))
+            }
+        }
+        .font(shoppingMode ? .headline : nil)
+    }
+
+    private var finishSection: some View {
+        Section {
+            Button(action: finishShopping) {
+                Label("Finish Shopping", systemImage: "checkmark.circle.fill")
+                    .font(.title3.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.borderedProminent)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+        } footer: {
+            Text("Takes what's in the cart off your list. You can undo it.")
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var topBar: some View {
+        VStack(spacing: 0) {
+            ShopBar(selection: selectedShop) { sheet = .shops }
+            if shoppingMode && !visibleItems.isEmpty {
+                ShoppingHeader(progress: shoppingProgress)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+    }
+
+    private var bottomBar: some View {
+        VStack(spacing: 8) {
+            if let batch = clearedBatch {
+                UndoBanner(count: batch.items.count) {
+                    withAnimation {
+                        store.restore(batch.items)
+                        clearedBatch = nil
+                    }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, focusRequest: quickAddRequest, prefill: quickAddPrefill,
+                        showsDue: !shoppingMode)
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .background(.ultraThinMaterial)
+    }
+
+    @ToolbarContentBuilder
+    private var listToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            if shoppingMode {
+                Button("Done Shopping", action: finishShopping)
+            } else {
+                Button("Clear Done", action: clearDone)
+                    .disabled(!visibleItems.contains(where: \.isChecked))
+            }
+        }
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Menu {
+                Toggle(isOn: $shoppingMode) {
+                    Label("Shopping Mode", systemImage: "textformat.size")
+                }
+                Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
+                Divider()
+                Button("Send List to Family", systemImage: "person.2") { sheet = .send }
+                ShareLink(item: shareText) {
+                    Label("Share List as Text", systemImage: "square.and.arrow.up")
+                }
+                .disabled(visibleItems.isEmpty)
+                Divider()
+                Button("Settings", systemImage: "gearshape") { sheet = .settings }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .accessibilityLabel("More")
+            Button("Add", systemImage: "plus") { sheet = .add }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             List {
                 ForEach(displaySections) { section in
-                    Section {
-                        ForEach(section.items) { item in
-                            ItemRow(item: item, showShop: filter == .all, large: shoppingMode,
-                                    onSetPrice: beginPricing, onEdit: { detailItem = $0 })
-                        }
-                        .onDelete { offsets in
-                            offsets.map { section.items[$0] }.forEach(store.delete)
-                        }
-                    } header: {
-                        HStack {
-                            Label(section.title, systemImage: section.symbol)
-                            Spacer()
-                            if let label = section.label {
-                                Text(label).textCase(nil).font(.subheadline.weight(.semibold))
-                            }
-                        }
-                        .font(shoppingMode ? .headline : nil)
-                    }
+                    sectionView(section)
+                }
+                if shoppingMode && shoppingProgress.isDone {
+                    finishSection
                 }
             }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                ShopBar(selection: selectedShop) { sheet = .shops }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 8) {
-                    if let batch = clearedBatch {
-                        UndoBanner(count: batch.items.count) {
-                            withAnimation {
-                                store.restore(batch.items)
-                                clearedBatch = nil
-                            }
-                        }
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                    }
-                    QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, focusRequest: quickAddRequest, prefill: quickAddPrefill)
-                }
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 8)
-                .background(.ultraThinMaterial)
-            }
+            .safeAreaInset(edge: .top, spacing: 0) { topBar }
+            .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar }
             .task(id: clearedBatch?.id) {
                 guard let id = clearedBatch?.id else { return }
                 try? await Task.sleep(for: .seconds(7))
@@ -302,44 +419,24 @@ struct ContentView: View {
             }
             .navigationTitle(navigationTitle)
             .navigationSubtitle(subtitle)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Clear Done", action: clearDone)
-                        .disabled(!visibleItems.contains(where: \.isChecked))
-                }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Menu {
-                        Toggle(isOn: $shoppingMode) {
-                            Label("Shopping Mode", systemImage: "textformat.size")
-                        }
-                        Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
-                        Divider()
-                        Button("Send List to Family", systemImage: "person.2") { sheet = .send }
-                        ShareLink(item: shareText) {
-                            Label("Share List as Text", systemImage: "square.and.arrow.up")
-                        }
-                        .disabled(visibleItems.isEmpty)
-                        Divider()
-                        Button("Settings", systemImage: "gearshape") { sheet = .settings }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                    .accessibilityLabel("More")
-                    Button("Add", systemImage: "plus") { sheet = .add }
-                }
-            }
+            .toolbar { listToolbar }
             .sheet(item: $sheet) { sheetView($0) }
             .sheet(item: $detailItem) { item in
                 ItemDetailView(item: item, repeatDays: store.recurrence(for: item)?.everyDays ?? 0)
             }
             .onChange(of: scenePhase) { _, phase in
+                updateIdleTimer()
                 if phase == .active {
                     handlePendingAction()
                     store.reload()
                     Task { await ArrivalReminders.shared.refreshNearestStore(among: store.shops) }
                 }
             }
-            .onAppear(perform: handlePendingAction)
+            .onAppear {
+                handlePendingAction()
+                updateIdleTimer()
+            }
+            .onChange(of: shoppingMode) { _, _ in updateIdleTimer() }
             .onContinueUserActivity(CSSearchableItemActionType, perform: openSpotlightResult)
             .onReceive(NotificationCenter.default.publisher(for: PendingAction.requested)) { _ in handlePendingAction() }
             .modifier(ShoppingFeedback(finishedAisles: finishedAisles, key: activityKey, sync: syncShoppingActivity))
@@ -420,40 +517,40 @@ struct ItemRow: View {
             HStack(spacing: 12) {
                 Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(item.isChecked ? .green : .secondary)
-                    .font(large ? .title : .title3)
+                    .font(large ? .largeTitle : .title3)
                 if let photo = item.photo {
                     ItemThumbnail(name: photo, size: large ? 52 : 40)
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.name)
-                        .font(large ? .title3.weight(.medium) : .body)
+                        .font(large ? .title2.weight(.medium) : .body)
                         .strikethrough(item.isChecked)
                         .foregroundStyle(item.isChecked ? .secondary : .primary)
-                    if let detail {
+                    if !large, let detail {
                         Text(detail).font(.caption).foregroundStyle(.secondary)
                     }
                     if let note = item.note {
-                        Text(note).font(.caption).italic().foregroundStyle(.secondary)
+                        Text(note).font(large ? .subheadline : .caption).italic().foregroundStyle(.secondary)
                     }
                     if let warning = item.warning {
                         Label(warning, systemImage: "exclamationmark.triangle.fill")
                             .font(.caption.weight(.semibold)).foregroundStyle(.orange)
                     }
-                    if !item.isChecked, let hint = store.priceHint(for: item) {
-                        Text(hint).font(.caption).foregroundStyle(.green)
+                    if !large, !item.isChecked, let hint = store.priceHint(for: item) {
+                        Text(hint).font(.caption).foregroundStyle(Color.positive)
                     }
                 }
                 Spacer()
                 if item.quantity > 1 {
                     Text("×\(item.quantity)").foregroundStyle(.secondary).monospacedDigit()
-                        .font(large ? .title3 : .body)
+                        .font(large ? .title2.weight(.semibold) : .body)
                 }
-                if let line = item.lineTotal {
+                if !large, let line = item.lineTotal {
                     Text(Price.format(line)).monospacedDigit()
                         .foregroundStyle(item.isChecked ? .secondary : .primary)
                 }
             }
-            .padding(.vertical, large ? 8 : 0)
+            .padding(.vertical, large ? 10 : 0)
             // A plain button only reacts to its text and icons; make the blank middle of the row tappable too.
             .contentShape(Rectangle())
         }
