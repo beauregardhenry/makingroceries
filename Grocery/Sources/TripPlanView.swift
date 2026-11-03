@@ -28,7 +28,7 @@ struct TripPlanView: View {
                         HStack {
                             Text("You could save").foregroundStyle(.secondary)
                             Spacer()
-                            Text(Price.format(totalSaving)).font(.title3.bold()).foregroundStyle(.green).monospacedDigit()
+                            Text(Price.format(totalSaving)).font(.title3.bold()).foregroundStyle(Color.positive).monospacedDigit()
                         }
                     } footer: {
                         Text("Only stores you're already visiting are used, so none of this adds a stop.")
@@ -45,7 +45,7 @@ struct TripPlanView: View {
                                         Text(move.item.name)
                                         if move.item.quantity > 1 { Text("×\(move.item.quantity)").foregroundStyle(.secondary) }
                                         Spacer()
-                                        Text("Save \(Price.format(move.savings))").foregroundStyle(.green).monospacedDigit()
+                                        Text("Save \(Price.format(move.savings))").foregroundStyle(Color.positive).monospacedDigit()
                                     }
                                     Text(detail(move)).font(.caption).foregroundStyle(.secondary)
                                 }

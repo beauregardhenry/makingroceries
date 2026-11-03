@@ -117,6 +117,18 @@ struct MealsHub: View {
 
 // MARK: Kitchen
 
+/// "Use today", "Use tomorrow" or "Use in 3 days", counted in days the way At Home does.
+private func useBy(_ date: Date, now: Date = Date()) -> String {
+    let cal = Calendar.current
+    let days = cal.dateComponents([.day], from: cal.startOfDay(for: now), to: cal.startOfDay(for: date)).day ?? 0
+    switch days {
+    case ..<0: return "Use now"
+    case 0: return "Use today"
+    case 1: return "Use tomorrow"
+    default: return "Use in \(days) days"
+    }
+}
+
 struct KitchenHub: View {
     @Environment(GroceryStore.self) private var store
     @State private var sheet: AppSheet?
@@ -131,7 +143,7 @@ struct KitchenHub: View {
                             HStack {
                                 Text(entry.name)
                                 Spacer()
-                                Text(entry.expires < Date() ? "Use now" : entry.expires.formatted(.relative(presentation: .named)))
+                                Text(useBy(entry.expires))
                                     .font(.subheadline).foregroundStyle(Color.brand)
                             }
                         }

@@ -540,7 +540,7 @@ struct ItemRow: View {
                     }
                     if let warning = item.warning {
                         Label(warning, systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                            .font(.caption.weight(.semibold)).foregroundStyle(Color.brand)
                     }
                     if !large, !item.isChecked, let hint = store.priceHint(for: item) {
                         Text(hint).font(.caption).foregroundStyle(Color.positive)
