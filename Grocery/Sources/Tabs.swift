@@ -14,9 +14,10 @@ struct RootView: View {
             Tab("Kitchen", systemImage: "refrigerator", value: AppTab.kitchen) { KitchenHub() }
             Tab("Money", systemImage: "dollarsign.circle", value: AppTab.money) { MoneyHub() }
         }
-        .tint(.brand)
         .onAppear { showingWelcome = store.isFirstRun && !Storage.isUITesting }
         .sheet(isPresented: $showingWelcome) { WelcomeView() }
+        // Last, so sheets presented from here pick up the brand color too.
+        .tint(.brand)
     }
 }
 

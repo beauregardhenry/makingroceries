@@ -371,3 +371,13 @@ final class FirstLaunchTests: StoreTestCase {
         XCTAssertTrue(store.history.isEmpty)
     }
 }
+
+final class FirstLaunchSafetyTests: StoreTestCase {
+    func testAMissingListAloneIsNotAFirstRun() {
+        store.items = [GroceryItem(name: "Milk")]
+        store.shops = [Shop(name: "Kroger")]
+        store.history = [PastItem(name: "Milk", aisle: .dairy, shopID: nil, price: nil)]
+        try? FileManager.default.removeItem(at: Storage.url("grocery"))
+        XCTAssertFalse(GroceryStore().isFirstRun, "stores and history are still there, so this isn't a fresh install")
+    }
+}

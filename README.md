@@ -17,7 +17,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
   <tr>
     <td align="center"><img src="docs/screenshots/tab-meals.png" width="230" alt="The Meals tab"><br><sub><b>Meals tab</b><br>what's planned today, cooking ideas, saved meals and the plan</sub></td>
     <td align="center"><img src="docs/screenshots/tab-kitchen.png" width="230" alt="The Kitchen tab"><br><sub><b>Kitchen tab</b><br>what to use soon, what's at home, pantry check and usual items</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/screenshots/welcome.png" width="230" alt="First-launch setup"><br><sub><b>First launch</b><br>pick the stores you shop at, then get started</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with progress and the next aisle"><br><sub><b>Shopping Mode</b><br>progress, the next aisle, and big rows with nothing else in the way</sub></td>
