@@ -50,6 +50,11 @@ extension Aisle {
     private static let rules: [(Aisle, [String])] = [
         (.frozen, ["frozen", "ice-cream"]),
         (.drinks, ["beverage", "water", "juice", "soda", "tea", "coffee", "beer", "wine"]),
+        (.pharmacy, ["pharma", "medicine", "medication", "prescription", "vitamin", "supplement", "ibuprofen",
+                     "acetaminophen", "naproxen", "aspirin", "tylenol", "advil", "motrin", "aleve", "antacid",
+                     "nyquil", "dayquil", "claritin", "zyrtec", "benadryl", "bandage", "first-aid", "sunscreen",
+                     "thermometer", "toothpaste", "toothbrush", "floss", "mouthwash", "deodorant", "shampoo",
+                     "conditioner", "lotion", "razor", "tampon", "diaper"]),
         (.dairy, ["dair", "milk", "cheese", "yogurt", "yoghurt", "egg", "butter", "cream"]),
         (.meat, ["meat", "fish", "seafood", "poultry", "sausage", "ham", "chicken", "beef", "pork"]),
         (.bakery, ["bread", "bakery", "pastr", "viennoiserie", "baguette"]),

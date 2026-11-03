@@ -36,7 +36,7 @@ enum AisleAI {
 #if canImport(FoundationModels)
 @Generable
 enum SectionChoice {
-    case produce, dairyAndEggs, meatAndSeafood, bakery, pantry, frozen, drinks, household, other
+    case produce, dairyAndEggs, meatAndSeafood, bakery, pantry, frozen, drinks, household, pharmacy, other
 
     var aisle: Aisle {
         switch self {
@@ -48,6 +48,7 @@ enum SectionChoice {
         case .frozen: .frozen
         case .drinks: .drinks
         case .household: .household
+        case .pharmacy: .pharmacy
         case .other: .other
         }
     }

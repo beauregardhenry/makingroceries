@@ -57,7 +57,7 @@ The first launch asks which stores you shop at and whether to start with a few s
 
 **Lists and stores**
 - A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All**, and **Anywhere** for things you can buy at any store.
-- Per-store **aisle maps**: drag the aisles into the order you walk them and add labels like "Aisle 4". The list follows that order.
+- Per-store **aisle maps** with nine sections (Produce, Dairy & Eggs, Meat & Seafood, Bakery, Pantry, Frozen, Drinks, Household, Pharmacy) plus Other: drag them into the order you walk them and add labels like "Aisle 4". The list follows that order.
 - **Learns your route**: as you check things off, the app notices the order you walk a store in and updates its aisle map after a few trips. Dragging the aisles yourself turns this off for that store.
 - **Shopping Mode**: made for the store. A card at the top shows how much is in the cart and which aisle to head to next ("Next: Dairy & Eggs, Aisle 9 · 2 items"). Rows get bigger and drop prices and store names, keeping notes and allergy warnings. Checked items tuck into a collapsed "In the cart" section, the screen stays on, and **Done Shopping** (or **Finish Shopping** once everything's in the cart) clears the cart off your list, with Undo.
 - Quantities, notes, photos, and items that **repeat** on their own every week, two weeks or month.

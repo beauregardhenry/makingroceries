@@ -141,6 +141,7 @@ extension Aisle {
         case .frozen: .cyan
         case .drinks: .indigo
         case .household: .teal
+        case .pharmacy: .pink
         case .other: .gray
         }
     }
