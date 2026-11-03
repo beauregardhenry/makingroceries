@@ -3,4 +3,4 @@
 # branch (see the header of scripts/check-test-count.sh). Lower one only deliberately, with a
 # reason in the commit.
 tests=145
-ui=9
+ui=11
