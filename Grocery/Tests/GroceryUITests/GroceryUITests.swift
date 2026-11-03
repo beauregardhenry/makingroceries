@@ -24,12 +24,13 @@ final class GroceryUITests: XCTestCase {
         return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout) == .completed
     }
 
-    private func dismissSheet(file: StaticString = #filePath, line: UInt = #line) {
+    private func dismissSheet(backTo title: String = "Groceries", file: StaticString = #filePath, line: UInt = #line) {
+        // A sheet over a sheet leaves the lower one's Done in the tree too, so take the one on screen.
         for name in ["Done", "Close", "Cancel"] {
-            let button = app.navigationBars.buttons[name].firstMatch
-            if button.exists, button.isHittable {
+            let matches = app.navigationBars.buttons.matching(identifier: name).allElementsBoundByIndex
+            if let button = matches.last(where: { $0.exists && $0.isHittable }) {
                 button.tap()
-                XCTAssertTrue(app.navigationBars["Groceries"].waitForExistence(timeout: 10), "back on the list", file: file, line: line)
+                XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10), "back on \(title)", file: file, line: line)
                 return
             }
         }
@@ -113,41 +114,79 @@ final class GroceryUITests: XCTestCase {
         }
     }
 
-    func testTopLevelMenuScreensOpenAndClose() {
+    /// Switches to a tab and waits for its screen.
+    private func showTab(_ name: String, file: StaticString = #filePath, line: UInt = #line) {
+        let tab = app.tabBars.buttons[name]
+        XCTAssertTrue(tab.waitForExistence(timeout: 5), "\(name) tab", file: file, line: line)
+        tab.tap()
+        XCTAssertTrue(app.navigationBars[name].waitForExistence(timeout: 10), "\(name) opens", file: file, line: line)
+    }
+
+    /// Opens each screen from a tab's rows, checks its title, and closes it again.
+    private func openAndClose(tab: String, _ screens: [(row: String, title: String)]) {
+        showTab(tab)
+        for screen in screens {
+            XCTContext.runActivity(named: screen.row) { _ in
+                let row = app.buttons[screen.row].firstMatch
+                XCTAssertTrue(row.waitForExistence(timeout: 5), "\(screen.row) on \(tab)")
+                row.tap()
+                XCTAssertTrue(app.navigationBars[screen.title].waitForExistence(timeout: 10), "\(screen.title) opens")
+                dismissSheet(backTo: tab)
+            }
+        }
+    }
+
+    func testListMenuScreensOpenAndClose() {
         openAndClose([
-            ("Usual & Buy Again", nil, "Usual & Buy Again"),
-            ("Pantry Check", nil, "Pantry Check"),
-            ("At Home", nil, "At Home"),
             ("Scan to Check Off", nil, "Scan to Check Off"),
             ("Send List to Family", nil, "Send to Family"),
-            ("Live Sync", nil, "Live Sync"),
         ])
     }
 
-    func testMealsAndMoneyScreensOpenAndClose() {
-        openAndClose([
-            ("Saved Meals", "Meals", "Meals"),
-            ("Meal Plan", "Meals", "Meal Plan"),
-            ("What Can I Cook?", "Meals", "What Can I Cook?"),
-            ("Spending", "Money", "Spending"),
-            ("Totals by Store", "Money", "Totals"),
-            ("Price History", "Money", "Price History"),
-            ("Plan the Trip", "Money", "Plan the Trip"),
-            ("Scan Receipt", "Money", "Scan Receipt"),
+    func testMealsTabScreensOpenAndClose() {
+        openAndClose(tab: "Meals", [
+            ("What Can I Cook?", "What Can I Cook?"),
+            ("Saved Meals", "Saved Meals"),
+            ("Meal Plan", "Meal Plan"),
+        ])
+    }
+
+    func testKitchenTabScreensOpenAndClose() {
+        openAndClose(tab: "Kitchen", [
+            ("At Home", "At Home"),
+            ("Pantry Check", "Pantry Check"),
+            ("Usual & Buy Again", "Usual & Buy Again"),
+        ])
+    }
+
+    func testMoneyTabScreensOpenAndClose() {
+        openAndClose(tab: "Money", [
+            ("Spending", "Spending"),
+            ("Price History", "Price History"),
+            ("Totals by Store", "Totals"),
+            ("Plan the Trip", "Plan the Trip"),
+            ("Scan Receipt", "Scan Receipt"),
         ])
     }
 
     func testSettingsScreensOpenAndClose() {
-        openAndClose([
-            ("Allergies & Avoid List", "Settings", "Allergies & Avoid List"),
-            ("App Icon", "Settings", "App Icon"),
-            ("Back Up & Restore", "Settings", "Back Up & Restore"),
-        ])
+        chooseFromMore("Settings")
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 10), "Settings opens")
+        for (row, title) in [("App Icon", "App Icon"), ("Stores", "Stores"), ("Allergies & Avoid List", "Allergies & Avoid List"),
+                             ("Live Sync", "Live Sync"), ("Back Up & Restore", "Back Up & Restore")] {
+            XCTContext.runActivity(named: row) { _ in
+                app.buttons[row].firstMatch.tap()
+                XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10), "\(title) opens")
+                dismissSheet(backTo: "Settings")
+            }
+        }
+        dismissSheet()
     }
 
     func testImportingARecipeFromPastedText() {
-        chooseFromMore("Saved Meals", in: "Meals")
-        let meals = app.navigationBars["Meals"]
+        showTab("Meals")
+        app.buttons["Saved Meals"].firstMatch.tap()
+        let meals = app.navigationBars["Saved Meals"]
         XCTAssertTrue(meals.waitForExistence(timeout: 10))
         meals.buttons["Add"].tap()
         app.buttons["Import Recipe…"].tap()

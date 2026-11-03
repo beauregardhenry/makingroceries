@@ -108,3 +108,13 @@ struct ThemePicker: View {
         .presentationCompactAdaptation(.popover)
     }
 }
+
+extension Color {
+    /// The orange of the app icon, as the app's accent. A little deeper in light mode so text in it
+    /// and white text on it stay readable, and brighter in dark mode.
+    static let brand = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 1.00, green: 0.56, blue: 0.20, alpha: 1)
+            : UIColor(red: 0.84, green: 0.36, blue: 0.00, alpha: 1)
+    })
+}

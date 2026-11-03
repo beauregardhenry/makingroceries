@@ -181,6 +181,7 @@
 		EB796187DFEE0641CD4DF8CF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF11913A58FBF32FBD41DF19 /* BarcodeScanner.swift */; };
 		EBADE3EE7ED95E2B4FD586CB /* ControlIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E98F73823A9CB343BB40F7 /* ControlIntents.swift */; };
 		EBB3F2A629FB64F56D8E0EF5 /* GroceryStore+History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61234DEB0C354BF184E85812 /* GroceryStore+History.swift */; };
+		ECEBF9FC3D8EF6CF5DE0FDC9 /* Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFD6BB2D322B3922A5710B0 /* Tabs.swift */; };
 		ED8A82603C37B2014114772B /* UnitPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D096A4497AA5D69830D184 /* UnitPrice.swift */; };
 		EE932A6C2A73433BB15E07FC /* PriceHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7217197DD45F1EA18D2E79C1 /* PriceHistory.swift */; };
 		EF5A533C579F2E7706B9AB75 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD53CEEF85F63223C2DC032 /* Stock.swift */; };
@@ -261,6 +262,7 @@
 		3A1348E8201C220BA2C17B9E /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		3CD8F4CA29AEF54DAB62DFEB /* StoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTests.swift; sourceTree = "<group>"; };
 		3FFB8D712FA685DD46F21593 /* Planner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Planner.swift; sourceTree = "<group>"; };
+		3FFD6BB2D322B3922A5710B0 /* Tabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tabs.swift; sourceTree = "<group>"; };
 		40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usual.swift; sourceTree = "<group>"; };
 		4391A01E1754425EE50063C4 /* HouseholdSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSync.swift; sourceTree = "<group>"; };
 		44DD299310384FBC887FBD35 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
@@ -406,6 +408,7 @@
 				992FFF7CA1698D8CEED5E54A /* ScanCheckOff.swift */,
 				9BF29D61E22236EF73E84558 /* Shops.swift */,
 				C970DCA94EAC448F56F933D5 /* Spotlight.swift */,
+				3FFD6BB2D322B3922A5710B0 /* Tabs.swift */,
 				CCD4BBFEA4751E4D06061FAB /* Theme.swift */,
 				7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */,
 				40C4A7C4A04C25DC1B51C8A4 /* Usual.swift */,
@@ -777,6 +780,7 @@
 				72E4B24B000EAF42F36D2D18 /* SpotlightEntries.swift in Sources */,
 				4E4B104C8F321CB6F0F33342 /* Stock.swift in Sources */,
 				673A8563D6B1A089C8EE8D88 /* Storage.swift in Sources */,
+				ECEBF9FC3D8EF6CF5DE0FDC9 /* Tabs.swift in Sources */,
 				43FEEEC3CA540A386D2DB11B /* Theme.swift in Sources */,
 				BED320D51D869299632784F3 /* TripPlanView.swift in Sources */,
 				E0636B6C892669E373BEBCF1 /* TripPlanner.swift in Sources */,

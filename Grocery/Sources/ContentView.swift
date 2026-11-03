@@ -3,7 +3,8 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(GroceryStore.self) private var store
-    @State private var showingThemes = false
+    /// Brings the list tab forward, for a control or Spotlight result opened from another tab.
+    var showList: () -> Void = {}
     @State private var sheet: AppSheet?
     @State private var detailItem: GroceryItem?
     @Environment(\.scenePhase) private var scenePhase
@@ -58,6 +59,18 @@ struct ContentView: View {
     private var newItemShopID: UUID? {
         if case .shop(let id) = filter { return id }
         return nil
+    }
+
+    /// Under the title: what's left, and what it will cost once something is priced. Checked items are
+    /// already in the cart, so they don't count, which matches "still to buy" on the Money tab.
+    private var subtitle: String {
+        let remaining = visibleItems.filter { !$0.isChecked }
+        let left = remaining.count
+        let totals = Totals(remaining)
+        let leftText = left == 0 ? (visibleItems.isEmpty ? "" : "All done") : "\(left) left"
+        guard totals.priced > 0 else { return leftText }
+        let total = Price.format(totals.sum) + (totals.priced < totals.count ? " so far" : "")
+        return leftText.isEmpty ? total : "\(leftText) · \(total)"
     }
 
     private var navigationTitle: String {
@@ -154,7 +167,9 @@ struct ContentView: View {
 
     /// Does what a Control Center, Lock Screen or Action button control opened the app for.
     private func handlePendingAction() {
-        switch PendingAction.take() {
+        let action = PendingAction.take()
+        if action != nil { showList() }
+        switch action {
         case .quickAdd:
             sheet = nil
             quickAddPrefill = ""
@@ -173,6 +188,7 @@ struct ContentView: View {
         guard let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
               let (kind, key) = SpotlightEntry.parse(id) else { return }
         sheet = nil
+        showList()
         switch kind {
         case .item:
             if let item = store.items.first(where: { $0.id.uuidString == key }) {
@@ -215,6 +231,7 @@ struct ContentView: View {
         case .cook: CookView(shopID: newItemShopID)
         case .prices: PriceWatchView()
         case .sync: HouseholdSyncView()
+        case .settings: SettingsView()
         }
     }
 
@@ -256,7 +273,6 @@ struct ContentView: View {
                         }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
-                    TotalsBar(items: visibleItems) { sheet = .totals }
                     QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, focusRequest: quickAddRequest, prefill: quickAddPrefill)
                 }
                 .padding(.horizontal)
@@ -285,6 +301,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle(navigationTitle)
+            .navigationSubtitle(subtitle)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Clear Done", action: clearDone)
@@ -292,44 +309,22 @@ struct ContentView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Menu {
-                        Button("Usual & Buy Again", systemImage: "star") { sheet = .usual }
-                        Button("Pantry Check", systemImage: "checklist") { sheet = .pantry }
-                        Button("At Home", systemImage: "refrigerator") { sheet = .atHome }
-                        Menu("Meals", systemImage: "fork.knife") {
-                            Button("Saved Meals", systemImage: "fork.knife") { sheet = .meals }
-                            Button("Meal Plan", systemImage: "calendar") { sheet = .planner }
-                            Button("What Can I Cook?", systemImage: "frying.pan") { sheet = .cook }
-                        }
-                        Menu("Money", systemImage: "dollarsign.circle") {
-                            Button("Spending", systemImage: "chart.bar") { sheet = .spending }
-                            Button("Totals by Store", systemImage: "dollarsign.circle") { sheet = .totals }
-                            Button("Price History", systemImage: "chart.line.uptrend.xyaxis") { sheet = .prices }
-                            Button("Plan the Trip", systemImage: "arrow.left.arrow.right") { sheet = .trip }
-                            Button("Scan Receipt", systemImage: "receipt") { sheet = .receipt }
-                        }
-                        Divider()
                         Toggle(isOn: $shoppingMode) {
                             Label("Shopping Mode", systemImage: "textformat.size")
                         }
                         Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
                         Divider()
                         Button("Send List to Family", systemImage: "person.2") { sheet = .send }
-                        Button("Live Sync", systemImage: "arrow.triangle.2.circlepath") { sheet = .sync }
                         ShareLink(item: shareText) {
                             Label("Share List as Text", systemImage: "square.and.arrow.up")
                         }
                         .disabled(visibleItems.isEmpty)
-                        Menu("Settings", systemImage: "gearshape") {
-                            Button("Allergies & Avoid List", systemImage: "exclamationmark.shield") { sheet = .avoid }
-                            Button("App Icon", systemImage: "app") { sheet = .icons }
-                            Button("Back Up & Restore", systemImage: "externaldrive") { sheet = .backup }
-                        }
+                        Divider()
+                        Button("Settings", systemImage: "gearshape") { sheet = .settings }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
                     .accessibilityLabel("More")
-                    Button("Color", systemImage: "paintpalette") { showingThemes = true }
-                        .popover(isPresented: $showingThemes) { ThemePicker(selection: theme, custom: customColor) }
                     Button("Add", systemImage: "plus") { sheet = .add }
                 }
             }
@@ -385,7 +380,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync
+    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings
     var id: String { rawValue }
 }
 
@@ -402,7 +397,7 @@ struct ItemRow: View {
     private var detail: String? {
         var parts: [String] = []
         if showShop, let shop = store.shopName(for: item.shopID) { parts.append(shop) }
-        if let price = item.price { parts.append(item.quantity > 1 ? "\(Price.format(price)) each" : Price.format(price)) }
+        if let price = item.price, item.quantity > 1 { parts.append("\(Price.format(price)) each") }
         if let unit = item.unitPriceText { parts.append(unit) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
