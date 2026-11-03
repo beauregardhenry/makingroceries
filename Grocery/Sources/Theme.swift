@@ -118,3 +118,13 @@ extension Color {
             : UIColor(red: 0.84, green: 0.36, blue: 0.00, alpha: 1)
     })
 }
+
+extension Color {
+    /// Good news, like a cheaper price elsewhere. Darker than system green in light mode, which is too
+    /// faint to read as small text on white, especially in a bright store.
+    static let positive = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.30, green: 0.85, blue: 0.45, alpha: 1)
+            : UIColor(red: 0.05, green: 0.50, blue: 0.20, alpha: 1)
+    })
+}

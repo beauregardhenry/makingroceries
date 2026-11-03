@@ -44,7 +44,7 @@ struct PriceTrendSummary: View {
         VStack(alignment: .leading, spacing: 4) {
             if let off = trend.discount {
                 Label("\(Int((off * 100).rounded()))% under what you usually pay", systemImage: "tag.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.positive)
             }
             if let best = trend.cheapestStore {
                 Label("Cheapest at \(best.name), about \(Price.format(best.average))", systemImage: "storefront")
@@ -83,7 +83,7 @@ struct PriceWatchView: View {
                                     Text(trend.name)
                                     Spacer()
                                     Text("\(Price.format(trend.latest.price)), usually \(Price.format(trend.usual))")
-                                        .font(.caption).foregroundStyle(.green)
+                                        .font(.caption).foregroundStyle(Color.positive)
                                 }
                             }
                         }
