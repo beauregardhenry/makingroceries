@@ -49,6 +49,9 @@ final class GroceryStore {
     /// before anything was saved over it. The list screen tells you once, then clears this.
     var loadProblems: [String] = []
 
+    /// True on the very first launch, before anything was saved, so the app can offer a short setup.
+    var isFirstRun = false
+
     /// While loading, assignments update memory only; nothing is written back.
     @ObservationIgnored private var suppressWrites = false
     /// Each file's bytes as this copy last read or saved them, to notice when another process saved since.
@@ -90,8 +93,10 @@ final class GroceryStore {
         defer { suppressWrites = false }
         // Sample items only on a true first run. An unreadable list starts empty instead, so the sample
         // items can never be saved over a list that merely failed to load.
-        items = value(of: readFile([GroceryItem].self, "grocery"), ifMissing: Self.sampleItems)
-        shops = value(of: readFile([Shop].self, "shops"), ifMissing: Shop.defaultNames.map { Shop(name: $0) })
+        let itemsFile = readFile([GroceryItem].self, "grocery")
+        let shopsFile = readFile([Shop].self, "shops")
+        items = value(of: itemsFile, ifMissing: Self.sampleItems)
+        shops = value(of: shopsFile, ifMissing: Shop.defaultNames.map { Shop(name: $0) })
         favorites = value(of: readFile([Favorite].self, "favorites"), ifMissing: [])
         meals = value(of: readFile([Meal].self, "meals"), ifMissing: [])
         let historyFile = readFile([PastItem].self, "history")
@@ -100,6 +105,9 @@ final class GroceryStore {
         plan = value(of: readFile([PlannedMeal].self, "plan"), ifMissing: [])
         stock = value(of: readFile([StockEntry].self, "stock"), ifMissing: [])
         spending = value(of: readFile([SpendRecord].self, "spending"), ifMissing: [])
+        // Only a truly fresh install counts as a first run: one missing file on its own (after a
+        // partial restore, say) must never lead setup to replace stores or clear history.
+        if case .missing = itemsFile, case .missing = shopsFile, case .missing = historyFile { isFirstRun = true }
         if case .missing = historyFile { return true }
         return false
     }

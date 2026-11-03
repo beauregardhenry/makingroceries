@@ -416,7 +416,7 @@ final class WatchSnapshotTests: StoreTestCase {
             GroceryItem(name: "Salt", aisle: .pantry),
         ]
         let snapshot = store.watchSnapshot()
-        XCTAssertEqual(snapshot.groups.map(\.name), ["Kroger", "Walmart", "Any Store"])
+        XCTAssertEqual(snapshot.groups.map(\.name), ["Kroger", "Walmart", "Anywhere"])
         XCTAssertEqual(snapshot.groups[0].items.map(\.name), ["Bread", "Bananas", "Milk"])
         XCTAssertEqual(snapshot.groups[0].remaining, 2)
         XCTAssertEqual(snapshot.groups[0].items[1].quantity, 6)

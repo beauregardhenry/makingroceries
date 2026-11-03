@@ -17,7 +17,7 @@ Requires iOS 26 and Xcode 26. Written in SwiftUI with no third-party dependencie
   <tr>
     <td align="center"><img src="docs/screenshots/tab-meals.png" width="230" alt="The Meals tab"><br><sub><b>Meals tab</b><br>what's planned today, cooking ideas, saved meals and the plan</sub></td>
     <td align="center"><img src="docs/screenshots/tab-kitchen.png" width="230" alt="The Kitchen tab"><br><sub><b>Kitchen tab</b><br>what to use soon, what's at home, pantry check and usual items</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/screenshots/welcome.png" width="230" alt="First-launch setup"><br><sub><b>First launch</b><br>pick the stores you shop at, then get started</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/shopping-mode.png" width="230" alt="Shopping Mode with progress and the next aisle"><br><sub><b>Shopping Mode</b><br>progress, the next aisle, and big rows with nothing else in the way</sub></td>
@@ -53,10 +53,10 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 
 ## What it does
 
-Four tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kitchen**, for what's at home; and **Money**, for spending and prices. Each tab shows what matters now, like what to use soon or how much is left of your budget. Settings (list color, app icon, stores, allergies, Live Sync, backups) are under **⋯ › Settings**.
+The first launch asks which stores you shop at and whether to start with a few sample items. Four tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kitchen**, for what's at home; and **Money**, for spending and prices. Each tab shows what matters now, like what to use soon or how much is left of your budget. Settings (list color, app icon, stores, allergies, Live Sync, backups) are under **⋯ › Settings**.
 
 **Lists and stores**
-- A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All** and **Any Store** views.
+- A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All**, and **Anywhere** for things you can buy at any store.
 - Per-store **aisle maps**: drag the aisles into the order you walk them and add labels like "Aisle 4". The list follows that order.
 - **Learns your route**: as you check things off, the app notices the order you walk a store in and updates its aisle map after a few trips. Dragging the aisles yourself turns this off for that store.
 - **Shopping Mode**: made for the store. A card at the top shows how much is in the cart and which aisle to head to next ("Next: Dairy & Eggs, Aisle 9 · 2 items"). Rows get bigger and drop prices and store names, keeping notes and allergy warnings. Checked items tuck into a collapsed "In the cart" section, the screen stays on, and **Done Shopping** (or **Finish Shopping** once everything's in the cart) clears the cart off your list, with Undo.

@@ -4,6 +4,8 @@ import SwiftUI
 /// sit in the list's More menu, each with a glance at what matters now.
 struct RootView: View {
     @State private var tab = AppTab.list
+    @Environment(GroceryStore.self) private var store
+    @State private var showingWelcome = false
 
     var body: some View {
         TabView(selection: $tab) {
@@ -12,6 +14,9 @@ struct RootView: View {
             Tab("Kitchen", systemImage: "refrigerator", value: AppTab.kitchen) { KitchenHub() }
             Tab("Money", systemImage: "dollarsign.circle", value: AppTab.money) { MoneyHub() }
         }
+        .onAppear { showingWelcome = store.isFirstRun && !Storage.isUITesting }
+        .sheet(isPresented: $showingWelcome) { WelcomeView() }
+        // Last, so sheets presented from here pick up the brand color too.
         .tint(.brand)
     }
 }

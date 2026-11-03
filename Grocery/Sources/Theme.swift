@@ -128,3 +128,35 @@ extension Color {
             : UIColor(red: 0.05, green: 0.50, blue: 0.20, alpha: 1)
     })
 }
+
+extension Aisle {
+    /// Each aisle's color, so sections are easy to tell apart at a glance.
+    var tint: Color {
+        switch self {
+        case .produce: .green
+        case .dairy: .blue
+        case .meat: .red
+        case .bakery: .brown
+        case .pantry: .orange
+        case .frozen: .cyan
+        case .drinks: .indigo
+        case .household: .teal
+        case .other: .gray
+        }
+    }
+}
+
+/// An aisle's symbol, white on its color, in a small rounded tile.
+struct AisleBadge: View {
+    let aisle: Aisle
+    var size: CGFloat = 24
+
+    var body: some View {
+        Image(systemName: aisle.symbol)
+            .font(.system(size: size * 0.52, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .background(aisle.tint.gradient, in: RoundedRectangle(cornerRadius: size * 0.27, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}

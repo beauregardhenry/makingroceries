@@ -114,4 +114,22 @@ extension GroceryStore {
         stock = backup.stock ?? []
         spending = backup.spending ?? []
     }
+
+    // MARK: First launch
+
+    /// Applies the choices from first-launch setup: the stores you shop at, in the order picked, and
+    /// whether to keep the few sample items. Without them the list and its history start empty.
+    func finishSetup(storeNames: [String], keepSample: Bool) {
+        var seen = Set<String>()
+        shops = storeNames.compactMap { raw in
+            let name = raw.trimmingCharacters(in: .whitespaces)
+            guard !name.isEmpty, seen.insert(name.lowercased()).inserted else { return nil }
+            return Shop(name: name)
+        }
+        if !keepSample {
+            items = []
+            history = []
+        }
+        isFirstRun = false
+    }
 }

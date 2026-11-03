@@ -33,7 +33,7 @@ struct ShopBar: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
-                chip("Any Store", isSelected: selection == .anyStore) { selection = .anyStore }
+                chip(Shop.noStoreName, isSelected: selection == .anyStore) { selection = .anyStore }
                 ForEach(store.shops) { shop in
                     chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(shop.id)) {
                         selection = .shop(shop.id)
