@@ -4,8 +4,13 @@ name: Re-run CI that never started
 # with "The job was not acquired by Runner of type hosted even after multiple attempts". Nothing ran,
 # so this re-runs it, up to three attempts in all. It runs on Linux, which is rarely short.
 #
-# It leaves alone runs that were cancelled for a reason: a newer push to the same branch (the CI
-# concurrency group cancels the older run), or a person pressing Cancel after a job had started.
+# The run is labeled "cancelled" when every job was starved, but "failure" when another job in the
+# same run did get a Mac and passed (the UI tests often do), so both are checked. Only the jobs that
+# never started are re-run; jobs that passed are kept.
+#
+# It leaves a run alone when any job really failed or was cancelled after starting (that is for a
+# person, or Auto-fix), and when a newer push to the same branch replaced it (the CI concurrency group
+# cancels the older run).
 #
 # workflow_run only fires from the copy of this file on main, so it takes effect once merged.
 
@@ -20,7 +25,7 @@ permissions:
 jobs:
   rerun:
     name: Re-run CI jobs no runner picked up
-    if: github.event.workflow_run.conclusion == 'cancelled' && github.event.workflow_run.run_attempt < 3
+    if: (github.event.workflow_run.conclusion == 'cancelled' || github.event.workflow_run.conclusion == 'failure') && github.event.workflow_run.run_attempt < 3
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -33,10 +38,17 @@ jobs:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           EVENT: ${{ github.event.workflow_run.event }}
         run: |
-          started="$(gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" \
-            --jq '[.jobs[] | select(.runner_name != null and .runner_name != "")] | length')"
-          if [ "$started" != "0" ]; then
-            echo "A job reached a runner, so this was a real cancel. Leaving it."
+          jobs="$(gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" --jq '.jobs')"
+          # Cancelled with no runner: it was queued and never started.
+          unstarted="$(jq '[.[] | select(.conclusion == "cancelled" and ((.runner_name // "") == ""))] | length' <<<"$jobs")"
+          # Anything else that didn't succeed: a real failure, or a cancel after a job began.
+          other="$(jq '[.[] | select(.conclusion != "success" and .conclusion != "skipped" and ((.conclusion == "cancelled" and ((.runner_name // "") == "")) | not))] | length' <<<"$jobs")"
+          if [ "$unstarted" = "0" ]; then
+            echo "Every job reached a runner, so there is nothing to re-run. Leaving it."
+            exit 0
+          fi
+          if [ "$other" != "0" ]; then
+            echo "A job really failed or was cancelled after starting. Leaving it for a person."
             exit 0
           fi
           newest="$(gh run list --repo "$REPO" --workflow CI --branch "$BRANCH" --event "$EVENT" \
@@ -45,5 +57,5 @@ jobs:
             echo "Run $newest is newer on $BRANCH, so this one was replaced. Leaving it."
             exit 0
           fi
-          echo "No job in attempt $ATTEMPT reached a runner. Re-running run $RUN_ID."
-          gh run rerun "$RUN_ID" --repo "$REPO"
+          echo "$unstarted job(s) in attempt $ATTEMPT never reached a runner. Re-running them in run $RUN_ID."
+          gh run rerun "$RUN_ID" --failed --repo "$REPO"
