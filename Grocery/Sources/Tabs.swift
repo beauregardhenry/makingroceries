@@ -269,6 +269,8 @@ struct SettingsView: View {
                            tint: .red) { sheet = .avoid }
                 }
                 Section {
+                    HubRow(title: "iCloud Sync", systemImage: "icloud",
+                           detail: CloudSync.enabled ? "On" : "Your lists on all your devices", tint: .blue) { sheet = .cloud }
                     HubRow(title: "Live Sync", systemImage: "arrow.triangle.2.circlepath",
                            detail: HouseholdSync.enabled ? "On" : "One list with your household", tint: .green) { sheet = .sync }
                     HubRow(title: "Back Up & Restore", systemImage: "externaldrive", detail: nil, tint: .gray) { sheet = .backup }
@@ -283,6 +285,7 @@ struct SettingsView: View {
                 case .shops: ManageShopsView()
                 case .avoid: AvoidListView()
                 case .sync: HouseholdSyncView()
+                case .cloud: CloudSyncView()
                 case .backup: BackupView()
                 default: EmptyView()
                 }

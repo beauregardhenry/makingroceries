@@ -86,6 +86,7 @@ The first launch asks which stores you shop at and whether to start with a few s
 - **Home and Lock Screen widget** with a store picker, check-off buttons, and an option to switch to the store you're at.
 - **Live Activity** on the lock screen and Dynamic Island while Shopping Mode is on: items left, a progress bar and what's next.
 - **Send a list to family without iCloud**: share your list as a small file by iMessage, AirDrop or email. When they open it in their copy of the app, new items are added, anything already bought is marked bought, and nothing is removed or added twice. It isn't live syncing, and needs no developer account.
+- **iCloud Sync** (Settings › iCloud Sync): your list, stores, meals, history and everything else stay the same on every iPhone, iPad and Mac signed in to your iCloud account, in your private iCloud storage. Turning it on combines this device's lists with iCloud's without removing anything, changes made on two devices at once are merged, and nothing deleted in iCloud is ever deleted from a device. Off until you turn it on.
 - **Live Sync**: phones in the same household keep one list while the app is open on each, directly over Wi-Fi or Bluetooth, with no iCloud or server. Pick a household code and type it on each phone. New items, check-offs, un-checks and deletions are shared, and clearing done items on one phone doesn't bring them back on the other.
 - **Scan to check off**: scan items as they go in the cart and each is checked off your list. The app remembers each barcode after the first scan.
 - **Allergies & avoid list**: name the foods you avoid, and scanned or looked-up products that contain them are flagged. The data comes from Open Food Facts and can be wrong, so read labels if you have an allergy.
@@ -122,7 +123,7 @@ To run on your own iPhone, change these in `Grocery/project.yml`:
 - the three `PRODUCT_BUNDLE_IDENTIFIER` values (the widget's and the share extension's must start with the app's)
 - the app group name, in `project.yml`, all three `.entitlements` files and `Grocery/Shared/Models.swift` (`Storage.groupID`)
 
-Then regenerate and press Run. A free Apple ID is enough, but builds expire after 7 days. If Xcode rejects the app group on a free account, remove it from both targets. The app then keeps its data inside itself, and the widget and Siri can't see your list.
+Then regenerate and press Run. A free Apple ID is enough, but builds expire after 7 days, and iCloud Sync needs a paid Apple Developer membership: to build with a free Apple ID, delete the three iCloud and push keys and the remote-notification background mode from the Grocery target in `project.yml`. If Xcode rejects the app group on a free account, remove it from both targets. The app then keeps its data inside itself, and the widget and Siri can't see your list.
 
 ### Apple Watch app
 

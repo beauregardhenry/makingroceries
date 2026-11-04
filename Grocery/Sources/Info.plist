@@ -40,6 +40,10 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Live Sync finds other phones in your household on this network to keep one grocery list.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
