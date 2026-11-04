@@ -5,6 +5,7 @@ struct GroceryApp: App {
     @State private var store = GroceryStore()
     @State private var incoming: IncomingList?
     @State private var sync = HouseholdSync()
+    @State private var cloud = CloudSync()
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("myName") private var myName = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
@@ -24,11 +25,13 @@ struct GroceryApp: App {
             RootView()
                 .environment(store)
                 .environment(sync)
+                .environment(cloud)
                 .task {
                     ArrivalReminders.shared.syncRegions(store.shops)
                     PhoneSession.shared.start(store: store)
                     sync.start(store: store, name: myName)
                     SpotlightIndex.update(from: store)
+                    cloud.start(store: store)
                 }
                 .onChange(of: store.items) { _, _ in
                     PhoneSession.shared.push()
@@ -36,10 +39,16 @@ struct GroceryApp: App {
                     SpotlightIndex.update(from: store)
                 }
                 .onChange(of: store.meals) { _, _ in SpotlightIndex.update(from: store) }
+                .onChange(of: store.revision) { _, _ in cloud.scheduleUpload() }
                 .onChange(of: store.history) { _, _ in SpotlightIndex.update(from: store) }
                 .onChange(of: scenePhase) { _, phase in
                     // Live sync only runs while the app is open; iOS stops it in the background anyway.
-                    if phase == .active { sync.start(store: store, name: myName) } else if phase == .background { sync.stop() }
+                    if phase == .active {
+                        sync.start(store: store, name: myName)
+                        cloud.start(store: store)
+                    } else if phase == .background {
+                        sync.stop()
+                    }
                 }
                 .onOpenURL { url in
                     if let export = GroceryStore.readExport(from: url) { incoming = IncomingList(export: export) }

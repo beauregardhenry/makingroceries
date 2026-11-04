@@ -416,3 +416,96 @@ final class PharmacyAisleTests: StoreTestCase {
         XCTAssertEqual(store.items.first?.aisle, .pharmacy)
     }
 }
+
+final class CloudMergeTests: StoreTestCase {
+    private func data<T: Encodable>(_ value: [T]) -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        return try! encoder.encode(value)
+    }
+
+    func testFirstSyncCombinesAndDeletesNothing() {
+        let milk = GroceryItem(name: "Milk"), eggs = GroceryItem(name: "Eggs")
+        store.items = [milk]
+        let merged = store.applyCloudCopy(name: "grocery", remote: data([eggs]), base: nil)
+        XCTAssertEqual(Set(store.items.map(\.name)), ["Milk", "Eggs"])
+        XCTAssertNotEqual(merged, data([eggs]), "the phone had Milk, which iCloud needs")
+    }
+
+    func testDeletionsAndEditsFromAnotherDeviceArrive() {
+        let milk = GroceryItem(name: "Milk"), eggs = GroceryItem(name: "Eggs")
+        store.items = [milk, eggs]
+        let base = data([milk, eggs])
+        var boughtEggs = eggs
+        boughtEggs.isChecked = true
+        // The other device deleted Milk and checked off Eggs.
+        let merged = store.applyCloudCopy(name: "grocery", remote: data([boughtEggs]), base: base)
+        XCTAssertEqual(store.items.map(\.name), ["Eggs"])
+        XCTAssertTrue(store.items[0].isChecked)
+        XCTAssertEqual(merged, data([boughtEggs]), "nothing new here to send back")
+    }
+
+    func testChangesOnBothDevicesAreKept() {
+        let milk = GroceryItem(name: "Milk")
+        store.items = [milk, GroceryItem(name: "Bread")]
+        let base = data([milk])
+        store.applyCloudCopy(name: "grocery", remote: data([milk, GroceryItem(name: "Coffee")]), base: base)
+        XCTAssertEqual(Set(store.items.map(\.name)), ["Milk", "Bread", "Coffee"])
+    }
+
+    func testEveryFileRoundTrips() {
+        store.items = [GroceryItem(name: "Milk")]
+        _ = store.addShop(named: "Kroger")
+        store.addFavorite(name: "Coffee")
+        store.meals = [Meal(name: "Tacos")]
+        store.history = [PastItem(name: "Milk", aisle: .dairy, shopID: nil, price: 3.49)]
+        store.setRepeat(for: store.items[0], everyDays: 7)
+        store.addPlan(store.meals[0], on: Date())
+        store.stock = [StockEntry(name: "Milk", aisle: .dairy, bought: Date(), expires: Date())]
+        store.recordSpend(amount: 20, shopID: nil)
+        for name in GroceryStore.cloudFileNames {
+            let copy = try! XCTUnwrap(store.cloudData(for: name), name)
+            XCTAssertEqual(store.applyCloudCopy(name: name, remote: copy, base: copy), copy, name)
+        }
+        XCTAssertEqual(store.items.count, 1)
+        XCTAssertNil(store.cloudData(for: "unknown"))
+        XCTAssertNil(store.applyCloudCopy(name: "unknown", remote: Data(), base: nil))
+    }
+
+    func testAnUnreadableCopyChangesNothing() {
+        store.items = [GroceryItem(name: "Milk")]
+        XCTAssertNil(store.applyCloudCopy(name: "grocery", remote: Data("not a list".utf8), base: nil))
+        // A newer app's aisle this version doesn't know.
+        let future = #"[{"id":"6E13AA21-DC89-43D4-8946-D42B12D97A25","name":"X","quantity":1,"aisle":"Deli","isChecked":false}]"#
+        XCTAssertNil(store.applyCloudCopy(name: "grocery", remote: Data(future.utf8), base: nil))
+        XCTAssertEqual(store.items.map(\.name), ["Milk"])
+    }
+
+    func testChangedFilesAreThoseThatDifferFromTheBaseline() {
+        var baseline = CloudBaseline(folder: nil)
+        store.items = [GroceryItem(name: "Milk")]
+        XCTAssertEqual(store.cloudFilesChanged(since: baseline), GroceryStore.cloudFileNames)
+        for name in GroceryStore.cloudFileNames { baseline[name] = store.cloudData(for: name) }
+        XCTAssertTrue(store.cloudFilesChanged(since: baseline).isEmpty)
+        store.items.append(GroceryItem(name: "Eggs"))
+        XCTAssertEqual(store.cloudFilesChanged(since: baseline), ["grocery"])
+        baseline.reset()
+        XCTAssertNil(baseline["grocery"])
+    }
+
+    func testTheBaselineIsKeptOnDisk() {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "baseline-\(UUID().uuidString)", directoryHint: .isDirectory)
+        var baseline = CloudBaseline(folder: folder)
+        baseline["grocery"] = Data("[1]".utf8)
+        XCTAssertEqual(CloudBaseline(folder: folder)["grocery"], Data("[1]".utf8))
+        baseline.reset()
+        XCTAssertNil(CloudBaseline(folder: folder)["grocery"])
+    }
+
+    func testEveryChangeBumpsTheRevision() {
+        let before = store.revision
+        store.items.append(GroceryItem(name: "Milk"))
+        store.meals.append(Meal(name: "Tacos"))
+        XCTAssertGreaterThanOrEqual(store.revision, before + 2)
+    }
+}

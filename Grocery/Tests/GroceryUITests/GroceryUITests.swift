@@ -173,7 +173,7 @@ final class GroceryUITests: XCTestCase {
         chooseFromMore("Settings")
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 10), "Settings opens")
         for (row, title) in [("App Icon", "App Icon"), ("Stores", "Stores"), ("Allergies & Avoid List", "Allergies & Avoid List"),
-                             ("Live Sync", "Live Sync"), ("Back Up & Restore", "Back Up & Restore")] {
+                             ("iCloud Sync", "iCloud Sync"), ("Live Sync", "Live Sync"), ("Back Up & Restore", "Back Up & Restore")] {
             XCTContext.runActivity(named: row) { _ in
                 app.buttons[row].firstMatch.tap()
                 XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10), "\(title) opens")

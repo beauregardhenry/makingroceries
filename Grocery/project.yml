@@ -25,6 +25,8 @@ targets:
       properties:
         NSLocalNetworkUsageDescription: Live Sync finds other phones in your household on this network to keep one grocery list.
         NSBonjourServices: [_mkgroceries._tcp, _mkgroceries._udp]
+        # iCloud sync hears about changes from other devices through silent pushes.
+        UIBackgroundModes: [remote-notification]
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.beauregardhenry.makingroceries.list
             UTTypeDescription: Makin' Groceries List
@@ -41,6 +43,11 @@ targets:
       path: Sources/Grocery.entitlements
       properties:
         com.apple.security.application-groups: [group.com.beauregardhenry.makingroceries]
+        # iCloud sync (CloudKit, private database). Needs a paid Apple Developer membership; to build
+        # with a free Apple ID, delete these three keys and the remote-notification background mode.
+        com.apple.developer.icloud-container-identifiers: [iCloud.com.beauregardhenry.makingroceries]
+        com.apple.developer.icloud-services: [CloudKit]
+        aps-environment: development
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.beauregardhenry.makingroceries

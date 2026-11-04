@@ -52,6 +52,9 @@ final class GroceryStore {
     /// True on the very first launch, before anything was saved, so the app can offer a short setup.
     var isFirstRun = false
 
+    /// Goes up whenever any list changes, so iCloud sync knows when to look for something to send.
+    private(set) var revision = 0
+
     /// While loading, assignments update memory only; nothing is written back.
     @ObservationIgnored private var suppressWrites = false
     /// Each file's bytes as this copy last read or saved them, to notice when another process saved since.
@@ -164,6 +167,7 @@ final class GroceryStore {
     private func persist<Element: Codable & Equatable & Identifiable>(
         _ keyPath: ReferenceWritableKeyPath<GroceryStore, [Element]>, _ name: String, refreshesWidgets: Bool = false
     ) {
+        revision &+= 1
         guard !suppressWrites else { return }
         var merged: [Element]?
         coordinate(writing: Storage.url(name)) { url in
