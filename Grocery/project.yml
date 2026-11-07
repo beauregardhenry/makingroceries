@@ -37,6 +37,9 @@ targets:
             UTTypeTagSpecification:
               public.filename-extension: [makinglist]
               public.mime-type: application/x-makinglist
+        # The app imports a copy of a received list and merges it; it never edits the file itself, so
+        # App Store Connect's document-based-app check wants this stated as NO.
+        LSSupportsOpeningDocumentsInPlace: false
         CFBundleDocumentTypes:
           - CFBundleTypeName: Makin' Groceries List
             CFBundleTypeRole: Viewer
