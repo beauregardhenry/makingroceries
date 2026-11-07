@@ -27,6 +27,9 @@ targets:
         NSBonjourServices: [_mkgroceries._tcp, _mkgroceries._udp]
         # iCloud sync hears about changes from other devices through silent pushes.
         UIBackgroundModes: [remote-notification]
+        # The app only uses the encryption built into iOS (iCloud, Live Sync, hashing), which is exempt, so
+        # App Store Connect doesn't ask the export-compliance question for every TestFlight build.
+        ITSAppUsesNonExemptEncryption: false
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.beauregardhenry.makingroceries.list
             UTTypeDescription: Makin' Groceries List
