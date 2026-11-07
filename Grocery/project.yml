@@ -56,6 +56,10 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.beauregardhenry.makingroceries
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        # App Store Connect rejects a universal app that doesn't list the orientations it supports (iPad
+        # multitasking needs all four). iPhone keeps what it had: portrait and both landscapes.
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_CFBundleDisplayName: "Makin' Groceries"
         INFOPLIST_KEY_NSCameraUsageDescription: "Makin' Groceries uses the camera to scan product barcodes."
         INFOPLIST_KEY_NSSupportsLiveActivities: YES
