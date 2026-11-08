@@ -74,7 +74,7 @@ extension GroceryStore {
         guard !trimmed.isEmpty,
               !shops.contains(where: { $0.name.caseInsensitiveCompare(trimmed) == .orderedSame })
         else { return nil }
-        let shop = Shop(name: trimmed)
+        let shop = Shop(name: trimmed, kind: Shop.kind(forName: trimmed))
         shops.append(shop)
         return shop
     }

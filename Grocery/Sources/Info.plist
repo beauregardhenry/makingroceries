@@ -42,6 +42,8 @@
 		<string>_mkgroceries._tcp</string>
 		<string>_mkgroceries._udp</string>
 	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Company Coming looks at your calendar for dinners, parties and visits, so it can suggest meals to make ahead. Your calendar never leaves this phone.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Live Sync finds other phones in your household on this network to keep one grocery list.</string>
 	<key>UIBackgroundModes</key>

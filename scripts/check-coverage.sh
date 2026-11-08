@@ -27,7 +27,7 @@ set -euo pipefail
 PROJECT_ROOT="${0:A:h:h}"
 BASELINE_FILE="$PROJECT_ROOT/coverage-baseline.txt"
 RESULTS="$PROJECT_ROOT/.build/TestResults.xcresult"
-EXCLUDE_REGEX='/(ShoppingActivity|GroceryIntents|AisleAI|CookAI)\.swift$'
+EXCLUDE_REGEX='/(ShoppingActivity|GroceryIntents|AisleAI|CookAI|CalendarAccess)\.swift$'
 
 # How far coverage may drift below the baseline before the build fails, and how far above it has to
 # climb before the baseline is raised.

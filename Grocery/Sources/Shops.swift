@@ -1,28 +1,5 @@
 import SwiftUI
 
-/// Which items the list screen shows.
-enum ShopFilter: Equatable {
-    case all
-    /// Items that aren't tied to a particular store.
-    case anyStore
-    case shop(UUID)
-
-    init(raw: String) {
-        switch raw {
-        case "any": self = .anyStore
-        case let raw: self = UUID(uuidString: raw).map(ShopFilter.shop) ?? .all
-        }
-    }
-
-    var raw: String {
-        switch self {
-        case .all: ""
-        case .anyStore: "any"
-        case .shop(let id): id.uuidString
-        }
-    }
-}
-
 /// Horizontal chips for choosing which store's list to show.
 struct ShopBar: View {
     @Environment(GroceryStore.self) private var store
@@ -34,6 +11,7 @@ struct ShopBar: View {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
                 chip(Shop.noStoreName, isSelected: selection == .anyStore) { selection = .anyStore }
+                chip("Travel", symbol: "airplane", isSelected: selection == .travel) { selection = .travel }
                 ForEach(store.shops) { shop in
                     chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(shop.id)) {
                         selection = .shop(shop.id)
@@ -52,11 +30,12 @@ struct ShopBar: View {
         }
     }
 
-    private func chip(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    private func chip(_ title: String, symbol: String? = nil, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button {
             withAnimation { action() }
         } label: {
-            Text(title)
+            Label { Text(title) } icon: { if let symbol { Image(systemName: symbol) } }
+                .labelStyle(.titleAndIcon)
                 .font(.subheadline.weight(.medium))
                 .padding(.horizontal, 14).padding(.vertical, 8)
                 .foregroundStyle(isSelected ? Color.white : Color.primary)
@@ -93,7 +72,7 @@ struct ManageShopsView: View {
                         } label: {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(shop.name.isEmpty ? "Unnamed store" : shop.name)
-                                if shop.orderedAisles != Aisle.allCases || !shop.aisleLabels.isEmpty {
+                                if shop.orderedAisles != shop.defaultOrder || !shop.aisleLabels.isEmpty {
                                     Text("Custom aisle map").font(.caption).foregroundStyle(.secondary)
                                 }
                             }
@@ -160,8 +139,21 @@ struct ShopMapView: View {
         @Bindable var store = store
         if let i = store.shops.firstIndex(where: { $0.id == shopID }) {
             List {
-                Section("Name") {
+                Section {
                     TextField("Store name", text: $store.shops[i].name)
+                    Picker("Type", selection: Binding(
+                        get: { store.shops[i].kind ?? .grocery },
+                        set: { kind in
+                            store.shops[i].kind = kind == .grocery ? nil : kind
+                            store.shops[i].aisleOrder = kind.defaultOrder
+                        }
+                    )) {
+                        ForEach(ShopKind.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                } header: {
+                    Text("Name")
+                } footer: {
+                    Text("General and hardware stores put tools, garden, electronics and other non-food aisles in the order you'd walk them. Changing the type resets the aisle order.")
                 }
 
                 Section {
@@ -233,10 +225,10 @@ struct ShopMapView: View {
 
                 Section {
                     Button("Reset to Default Order", role: .destructive) {
-                        store.shops[i].aisleOrder = Aisle.allCases
+                        store.shops[i].aisleOrder = store.shops[i].defaultOrder
                         store.shops[i].aisleLabels = [:]
                     }
-                    .disabled(store.shops[i].aisleOrder == Aisle.allCases && store.shops[i].aisleLabels.isEmpty)
+                    .disabled(store.shops[i].aisleOrder == store.shops[i].defaultOrder && store.shops[i].aisleLabels.isEmpty)
                 }
             }
             .environment(\.editMode, .constant(.active))

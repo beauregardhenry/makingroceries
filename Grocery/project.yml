@@ -25,6 +25,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSCalendarsFullAccessUsageDescription: Company Coming looks at your calendar for dinners, parties and visits, so it can suggest meals to make ahead. Your calendar never leaves this phone.
         NSLocalNetworkUsageDescription: Live Sync finds other phones in your household on this network to keep one grocery list.
         NSBonjourServices: [_mkgroceries._tcp, _mkgroceries._udp]
         # iCloud sync hears about changes from other devices through silent pushes.

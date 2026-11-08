@@ -103,6 +103,8 @@ struct MealsHub: View {
                     HubRow(title: "Saved Meals", systemImage: "fork.knife",
                            detail: store.meals.isEmpty ? "Save a recipe or your list as a meal" : plural(store.meals.count, "meal"),
                            tint: .red) { sheet = .meals }
+                    HubRow(title: "Company Coming", systemImage: "party.popper.fill",
+                           detail: "Make-ahead meals that freeze well", tint: .pink) { sheet = .company }
                     let week = store.upcomingPlan().filter { $0.day < Date().addingTimeInterval(7 * 86_400) }.count
                     HubRow(title: "Meal Plan", systemImage: "calendar",
                            detail: week == 0 ? "Plan meals by day" : "\(week) planned this week",
@@ -236,6 +238,7 @@ private struct HubSheet: View {
         case .totals: TotalsView()
         case .trip: TripPlanView()
         case .receipt: ReceiptView(shopID: shopID)
+        case .company: CompanyComingView(shopID: shopID)
         default: EmptyView()
         }
     }

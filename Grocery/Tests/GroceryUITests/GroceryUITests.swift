@@ -148,7 +148,31 @@ final class GroceryUITests: XCTestCase {
             ("What Can I Cook?", "What Can I Cook?"),
             ("Saved Meals", "Saved Meals"),
             ("Meal Plan", "Meal Plan"),
+            ("Company Coming", "Company Coming"),
         ])
+    }
+
+    func testCompanyComingOffersMakeAheadMeals() {
+        showTab("Meals")
+        app.buttons["Company Coming"].firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Company Coming"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Baked Ziti"].waitForExistence(timeout: 5), "built-in make-ahead ideas are listed")
+        XCTAssertTrue(app.staticTexts["Make ahead, freezes well"].exists)
+    }
+
+    func testTripItemsStayOffTheEverydayList() {
+        app.buttons["Travel"].tap()
+        XCTAssertTrue(app.navigationBars["Travel"].waitForExistence(timeout: 5), "Travel is its own list")
+        let field = app.textFields["quickAddField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("passport holder")
+        app.buttons["Add items"].tap()
+        XCTAssertTrue(item("Passport holder").waitForExistence(timeout: 5), "it shows under Travel")
+        app.buttons["All"].tap()
+        XCTAssertTrue(app.navigationBars["Groceries"].waitForExistence(timeout: 5))
+        XCTAssertTrue(item("Milk").waitForExistence(timeout: 5))
+        XCTAssertFalse(item("Passport holder").exists, "trip items don't clog the everyday list")
     }
 
     func testKitchenTabScreensOpenAndClose() {

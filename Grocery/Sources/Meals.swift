@@ -21,6 +21,15 @@ struct MealsView: View {
     @State private var path: [UUID] = []
     @State private var showingImport = false
 
+    /// Meals grouped by category in a fixed order, so the list reads like a cookbook.
+    private var groups: [(category: MealCategory, meals: [Meal])] {
+        let sorted = store.meals.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return MealCategory.allCases.compactMap { category in
+            let meals = sorted.filter { $0.shownCategory == category }
+            return meals.isEmpty ? nil : (category, meals)
+        }
+    }
+
     private func newMeal(from items: [GroceryItem] = []) {
         let meal = Meal(name: "New meal", ingredients: items.map {
             MealIngredient(name: $0.name, quantity: $0.quantity, aisle: $0.aisle)
@@ -43,12 +52,14 @@ struct MealsView: View {
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
-                ForEach(store.meals) { meal in
+                ForEach(groups, id: \.category) { group in
+                Section {
+                ForEach(group.meals) { meal in
                     NavigationLink(value: meal.id) {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(meal.name.isEmpty ? "Untitled meal" : meal.name)
-                                Text("\(meal.ingredients.count) ingredient\(meal.ingredients.count == 1 ? "" : "s")")
+                                Text("\(meal.ingredients.count) ingredient\(meal.ingredients.count == 1 ? "" : "s")" + (meal.freezerFriendly ? " · freezes well" : ""))
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
@@ -70,7 +81,16 @@ struct MealsView: View {
                         }
                     }
                 }
-                .onDelete { store.meals.remove(atOffsets: $0) }
+                .onDelete { offsets in
+                    let ids = Set(offsets.map { group.meals[$0].id })
+                    store.meals.removeAll { ids.contains($0.id) }
+                }
+                } header: {
+                    Label(group.category.rawValue, systemImage: group.category.symbol)
+                        .font(.subheadline.weight(.bold))
+                        .tintedBand(group.category.tint)
+                }
+                }
             }
             .navigationTitle("Saved Meals")
             .navigationBarTitleDisplayMode(.inline)
@@ -111,6 +131,21 @@ struct MealEditorView: View {
             List {
                 Section("Name") {
                     TextField("Meal name", text: $store.meals[i].name)
+                }
+
+                Section {
+                    Picker("Category", selection: Binding(
+                        get: { store.meals[i].shownCategory },
+                        set: { store.meals[i].category = $0 }
+                    )) {
+                        ForEach(MealCategory.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                    }
+                    Toggle("Freezes well", isOn: Binding(
+                        get: { store.meals[i].freezerFriendly },
+                        set: { store.meals[i].freezes = $0 ? true : nil }
+                    ))
+                } footer: {
+                    Text("Meals that freeze well are suggested under Company Coming, to cook ahead.")
                 }
 
                 Section {
