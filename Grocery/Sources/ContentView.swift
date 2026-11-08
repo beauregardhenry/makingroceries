@@ -47,9 +47,10 @@ struct ContentView: View {
 
     private func isVisible(_ item: GroceryItem) -> Bool {
         switch filter {
-        case .all: true
-        case .anyStore: item.shopID == nil
-        case .shop(let id): item.shopID == id
+        case .travel: item.forTravel
+        case .all: !item.forTravel
+        case .anyStore: !item.forTravel && item.shopID == nil
+        case .shop(let id): !item.forTravel && item.shopID == id
         }
     }
 
@@ -79,6 +80,7 @@ struct ContentView: View {
         switch filter {
         case .all: "Groceries"
         case .anyStore: Shop.noStoreName
+        case .travel: "Travel"
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }
     }
@@ -232,7 +234,7 @@ struct ContentView: View {
     @ViewBuilder
     private func sheetView(_ sheet: AppSheet) -> some View {
         switch sheet {
-        case .add: AddItemView(shopID: newItemShopID)
+        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel)
         case .shops: ManageShopsView()
         case .usual: UsualView(shopID: newItemShopID)
         case .meals: MealsView(shopID: newItemShopID, currentItems: visibleItems)
@@ -253,6 +255,7 @@ struct ContentView: View {
         case .sync: HouseholdSyncView()
         case .cloud: CloudSyncView()
         case .settings: SettingsView()
+        case .company: CompanyComingView(shopID: newItemShopID)
         }
     }
 
@@ -290,6 +293,7 @@ struct ContentView: View {
                     .accessibilityHidden(true)
             }
             .font(.headline)
+            .tintedBand(.green)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -309,7 +313,8 @@ struct ContentView: View {
                 Text(label).textCase(nil).font(.subheadline.weight(.semibold))
             }
         }
-        .font(shoppingMode ? .headline : nil)
+        .font((shoppingMode ? Font.headline : Font.subheadline).weight(.bold))
+        .tintedBand(section.aisle?.tint ?? .gray)
     }
 
     private var finishSection: some View {
@@ -351,7 +356,7 @@ struct ContentView: View {
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, focusRequest: quickAddRequest, prefill: quickAddPrefill,
+            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, focusRequest: quickAddRequest, prefill: quickAddPrefill,
                         showsDue: !shoppingMode)
         }
         .padding(.horizontal)
@@ -484,7 +489,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
+    case add, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
     var id: String { rawValue }
 }
 
@@ -598,9 +603,11 @@ struct AddItemView: View {
     @State private var showingScanner = false
     @State private var lookupMessage: String?
     @State private var isLookingUp = false
+    @State private var travel = false
 
-    init(shopID: UUID?) {
+    init(shopID: UUID?, travel: Bool = false) {
         _shopID = State(initialValue: shopID)
+        _travel = State(initialValue: travel)
     }
 
     var body: some View {
@@ -622,6 +629,7 @@ struct AddItemView: View {
                     Text(Shop.noStoreName).tag(UUID?.none)
                     ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                 }
+                Toggle("For a trip", isOn: $travel)
             }
             .navigationTitle("New Item")
             .navigationBarTitleDisplayMode(.inline)
@@ -629,7 +637,7 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID, price: Price.parse(priceText))
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID, price: Price.parse(priceText), travel: travel)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -653,7 +661,7 @@ struct AddItemView: View {
                                                                     avoid: AvoidList.words))
                 store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
                           price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
-                          warning: warning, barcode: code)
+                          warning: warning, barcode: code, travel: travel)
                 if let warning {
                     // Don't hide a warning by closing the sheet.
                     lookupMessage = "Added \(product.name). Warning: \(warning)."

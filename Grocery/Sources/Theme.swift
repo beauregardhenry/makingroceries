@@ -142,6 +142,13 @@ extension Aisle {
         case .drinks: .indigo
         case .household: .teal
         case .pharmacy: .pink
+        case .hardware: .orange
+        case .garden: .mint
+        case .electronics: .blue
+        case .clothing: .purple
+        case .home: .yellow
+        case .pet: .brown
+        case .toys: .red
         case .other: .gray
         }
     }
@@ -160,4 +167,37 @@ struct AisleBadge: View {
             .background(aisle.tint.gradient, in: RoundedRectangle(cornerRadius: size * 0.27, style: .continuous))
             .accessibilityHidden(true)
     }
+}
+
+extension MealCategory {
+    var tint: Color {
+        switch self {
+        case .breakfast: .orange
+        case .lunch: .green
+        case .dinner: .red
+        case .soup: .brown
+        case .side: .teal
+        case .snack: .pink
+        case .dessert: .purple
+        case .drink: .blue
+        }
+    }
+}
+
+/// A section header on a soft wash of its color, with the text in a deeper shade so it reads in light and dark.
+private struct TintedBand: ViewModifier {
+    let tint: Color
+    @Environment(\.colorScheme) private var scheme
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(tint.mix(with: scheme == .dark ? .white : .black, by: scheme == .dark ? 0.35 : 0.4))
+            .padding(.vertical, 6).padding(.horizontal, 10)
+            .background(tint.opacity(scheme == .dark ? 0.28 : 0.17), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .textCase(nil)
+    }
+}
+
+extension View {
+    func tintedBand(_ tint: Color) -> some View { modifier(TintedBand(tint: tint)) }
 }

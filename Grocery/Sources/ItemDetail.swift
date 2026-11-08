@@ -37,6 +37,9 @@ struct ItemDetailView: View {
                         Text(Shop.noStoreName).tag(UUID?.none)
                         ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                     }
+                    Toggle("For a trip", isOn: Binding(get: { draft.forTravel }, set: { draft.isTravel = $0 ? true : nil }))
+                } footer: {
+                    Text("Trip items stay off your other lists. Find them under Travel.")
                 }
 
                 Section {

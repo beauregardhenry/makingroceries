@@ -4,7 +4,8 @@ extension GroceryStore {
     // MARK: Items
 
     func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil, note: String? = nil,
-             sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil) {
+             sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil,
+             travel: Bool = false) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         // A known size carries over from the last time you bought it.
@@ -14,6 +15,7 @@ extension GroceryStore {
         item.sizeAmount = amount
         item.sizeUnit = unit
         item.warning = warning
+        item.isTravel = travel ? true : nil
         items.append(item)
         remember(name: trimmed, aisle: aisle, shopID: shopID, price: price)
         if let i = history.firstIndex(where: { Self.same($0.name, trimmed) }) {
@@ -27,7 +29,7 @@ extension GroceryStore {
     /// a missing store comes from history too. Near-misses of a known name ("tomatos") are
     /// corrected to it.
     func addOrBump(name: String, quantity: Int = 1, aisle: Aisle? = nil, shopID: UUID?,
-                   price: Double? = nil, inferShop: Bool = false, note: String? = nil) {
+                   price: Double? = nil, inferShop: Bool = false, note: String? = nil, travel: Bool = false) {
         let typed = name.trimmingCharacters(in: .whitespaces)
         guard !typed.isEmpty else { return }
         let trimmed = canonicalName(for: typed)
@@ -36,13 +38,13 @@ extension GroceryStore {
         if shop == nil, inferShop, let remembered = past?.shopID, self.shop(for: remembered) != nil {
             shop = remembered
         }
-        if let i = items.firstIndex(where: { !$0.isChecked && $0.shopID == shop && Self.same($0.name, trimmed) }) {
+        if let i = items.firstIndex(where: { !$0.isChecked && $0.shopID == shop && $0.forTravel == travel && Self.same($0.name, trimmed) }) {
             items[i].quantity += quantity
             return
         }
         let chosen = aisle ?? resolveAisle(for: trimmed)
         add(name: trimmed, quantity: quantity, aisle: chosen,
-            shopID: shop, price: price ?? past?.price, note: note)
+            shopID: shop, price: price ?? past?.price, note: note, travel: travel)
         // Nothing recognised it, so ask the on-device model, if this phone has one.
         if aisle == nil, past == nil, chosen == .other, AisleAI.isAvailable {
             Task { @MainActor in await refineAisle(forItemNamed: trimmed) }
@@ -164,7 +166,7 @@ extension GroceryStore {
     /// Unchecked items for a widget or Siri: one store's, in its walking order, or everything.
     func widgetItems(shopID: UUID?) -> [GroceryItem] {
         let shop = shop(for: shopID)
-        let pool = items.filter { !$0.isChecked && (shopID == nil || $0.shopID == shopID) }
+        let pool = items.filter { !$0.isChecked && !$0.forTravel && (shopID == nil || $0.shopID == shopID) }
         let order = shop?.orderedAisles ?? Aisle.allCases
         return pool.sorted { (order.firstIndex(of: $0.aisle) ?? 0) < (order.firstIndex(of: $1.aisle) ?? 0) }
     }

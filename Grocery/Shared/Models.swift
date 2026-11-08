@@ -10,6 +10,14 @@ enum Aisle: String, CaseIterable, Codable, Identifiable {
     case drinks = "Drinks"
     case household = "Household"
     case pharmacy = "Pharmacy"
+    // Non-food, for stores like Target, Home Depot and Lowe's.
+    case hardware = "Hardware & Tools"
+    case garden = "Garden & Outdoor"
+    case electronics = "Electronics"
+    case clothing = "Clothing"
+    case home = "Home & Decor"
+    case pet = "Pet"
+    case toys = "Toys & Games"
     case other = "Other"
 
     var id: String { rawValue }
@@ -26,9 +34,21 @@ enum Aisle: String, CaseIterable, Codable, Identifiable {
         case .drinks: "waterbottle.fill"
         case .household: "bubbles.and.sparkles.fill"
         case .pharmacy: "cross.case.fill"
+        case .hardware: "wrench.and.screwdriver.fill"
+        case .garden: "tree.fill"
+        case .electronics: "bolt.fill"
+        case .clothing: "tshirt.fill"
+        case .home: "lamp.floor.fill"
+        case .pet: "pawprint.fill"
+        case .toys: "teddybear.fill"
         case .other: "bag.fill"
         }
     }
+
+    /// The aisles that only a general or hardware store has.
+    static let nonFood: [Aisle] = [.hardware, .garden, .electronics, .clothing, .home, .pet, .toys]
+
+    var isFood: Bool { !Aisle.nonFood.contains(self) }
 }
 
 struct GroceryItem: Identifiable, Codable, Equatable {
@@ -50,6 +70,10 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var sizeUnit: String?
     /// "Contains peanuts" and similar, from your avoid list.
     var warning: String?
+    /// For a trip: kept off the everyday lists and shown under Travel. Nil means no.
+    var isTravel: Bool?
+
+    var forTravel: Bool { isTravel == true }
 }
 
 struct PricePoint: Codable, Equatable {
@@ -108,6 +132,11 @@ struct Meal: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
     var ingredients: [MealIngredient] = []
+    var category: MealCategory?
+    /// Makes well ahead and freezes well, so it's offered when company is coming. Nil means no.
+    var freezes: Bool?
+
+    var freezerFriendly: Bool { freezes == true }
 }
 
 /// An item that returns to the list on its own every few days.
@@ -141,10 +170,14 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
     /// Adjust the aisle order from the order you check things off. Nil means on.
     var learnRoute: Bool?
     var routeEvents: [RouteEvent]?
+    /// What the store sells; nil is a grocery store.
+    var kind: ShopKind?
 
-    init(id: UUID = UUID(), name: String) {
+    init(id: UUID = UUID(), name: String, kind: ShopKind? = nil) {
         self.id = id
         self.name = name
+        self.kind = kind
+        if let kind { aisleOrder = kind.defaultOrder }
     }
 
     // Stores saved before aisle maps and locations existed lack those keys.
@@ -159,6 +192,7 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
         remindOnArrival = try c.decodeIfPresent(Bool.self, forKey: .remindOnArrival)
         learnRoute = try c.decodeIfPresent(Bool.self, forKey: .learnRoute)
         routeEvents = try c.decodeIfPresent([RouteEvent].self, forKey: .routeEvents)
+        kind = try c.decodeIfPresent(ShopKind.self, forKey: .kind)
     }
 
     /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention. A newer aisle
@@ -179,6 +213,9 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
         return (text?.isEmpty == false) ? text : nil
     }
 
+    /// The aisle order a new or reset store of this kind starts with.
+    var defaultOrder: [Aisle] { (kind ?? .grocery).defaultOrder }
+
     var hasLocation: Bool { latitude != nil && longitude != nil }
 
     static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery"]
@@ -187,7 +224,87 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
     static let presetNames = [
         "Kroger", "Walmart", "Chinese Grocery", "Costco", "Target", "Aldi", "Trader Joe's",
         "Whole Foods", "Publix", "Safeway", "Sam's Club", "Asian Market", "Farmers Market",
+        "Home Depot", "Lowe's", "Best Buy", "Menards", "Ace Hardware", "Petco", "PetSmart",
     ]
+
+    /// What a well-known store sells, from its name. Nil for a grocery store or one we don't know.
+    static func kind(forName name: String) -> ShopKind? {
+        let lower = name.lowercased()
+        func has(_ names: [String]) -> Bool { names.contains { lower.contains($0) } }
+        if has(["home depot", "lowe", "menards", "ace hardware", "harbor freight", "true value"]) { return .hardware }
+        if has(["target", "walmart", "costco", "sam's club", "best buy", "kmart", "meijer", "fred meyer",
+                "petco", "petsmart", "ikea", "bed bath", "dollar"]) { return .general }
+        return nil
+    }
+}
+
+/// What a store sells, which sets the order of its aisles to start with.
+enum ShopKind: String, Codable, CaseIterable {
+    case grocery, general, hardware
+
+    var title: String {
+        switch self {
+        case .grocery: "Grocery store"
+        case .general: "General store"
+        case .hardware: "Hardware store"
+        }
+    }
+
+    /// Food first for a general store, since you walk in through the grocery side; tools first for hardware.
+    var defaultOrder: [Aisle] {
+        switch self {
+        case .grocery:
+            return Aisle.allCases
+        case .general:
+            let food = Aisle.allCases.filter { $0.isFood && $0 != .other }
+            return food + Aisle.nonFood + [.other]
+        case .hardware:
+            let first: [Aisle] = [.hardware, .garden, .home, .electronics]
+            let rest = Aisle.allCases.filter { !first.contains($0) && $0 != .other }
+            return first + rest + [.other]
+        }
+    }
+}
+
+/// How saved recipes are grouped.
+enum MealCategory: String, Codable, CaseIterable, Identifiable {
+    case breakfast = "Breakfast"
+    case lunch = "Lunch"
+    case dinner = "Dinner"
+    case soup = "Soups & Stews"
+    case side = "Sides"
+    case snack = "Snacks"
+    case dessert = "Desserts"
+    case drink = "Drinks"
+
+    var id: String { rawValue }
+
+    var symbol: String {
+        switch self {
+        case .breakfast: "sun.horizon.fill"
+        case .lunch: "takeoutbag.and.cup.and.straw.fill"
+        case .dinner: "fork.knife"
+        case .soup: "cup.and.saucer.fill"
+        case .side: "leaf.fill"
+        case .snack: "popcorn.fill"
+        case .dessert: "birthday.cake.fill"
+        case .drink: "mug.fill"
+        }
+    }
+
+    /// A guess from a recipe's name, so imported recipes don't all land in "Uncategorized".
+    static func guess(fromName name: String) -> MealCategory? {
+        let words = Set(name.lowercased().split(whereSeparator: { !$0.isLetter }).map(String.init))
+        func has(_ keys: [String]) -> Bool { keys.contains { key in words.contains(where: { $0.hasPrefix(key) }) } }
+        if has(["soup", "stew", "chili", "chowder", "broth", "bisque"]) { return .soup }
+        if has(["pancake", "waffle", "omelet", "omelette", "breakfast", "oatmeal", "granola", "muffin", "scone", "frittata", "french"]) { return .breakfast }
+        if has(["cake", "cookie", "brownie", "pie", "dessert", "pudding", "cobbler", "cupcake", "fudge", "ice"]) { return .dessert }
+        if has(["smoothie", "lemonade", "cocktail", "punch", "latte"]) { return .drink }
+        if has(["dip", "hummus", "snack", "popcorn", "bites", "jerky"]) { return .snack }
+        if has(["salad", "slaw", "side", "fries", "rice", "mashed", "coleslaw"]) { return .side }
+        if has(["sandwich", "wrap", "sub", "burger", "quesadilla", "lunch"]) { return .lunch }
+        return nil
+    }
 }
 
 /// Everything in one file, for backup and restore.

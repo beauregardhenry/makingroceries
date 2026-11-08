@@ -386,7 +386,7 @@ final class PharmacyAisleTests: StoreTestCase {
     func testStoresSavedBeforePharmacyGetItJustBeforeOther() {
         var shop = Shop(name: "Kroger")
         shop.aisleOrder = [.bakery, .produce, .dairy, .meat, .pantry, .frozen, .drinks, .household, .other]
-        XCTAssertEqual(Array(shop.orderedAisles.suffix(3)), [.household, .pharmacy, .other])
+        XCTAssertEqual(Array(shop.orderedAisles.suffix(2 + Aisle.nonFood.count + 1)), [.household, .pharmacy] + Aisle.nonFood + [.other])
         XCTAssertEqual(shop.orderedAisles.count, Aisle.allCases.count)
     }
 
