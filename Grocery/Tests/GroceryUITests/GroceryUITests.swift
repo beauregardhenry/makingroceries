@@ -167,6 +167,43 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Unexpected expense"].exists, "surprise expenses are one tap away")
     }
 
+    func testClothingIsOrganizedByPersonWithTheSizeHiddenOnTheRow() {
+        chooseFromMore("Family Members")
+        XCTAssertTrue(app.navigationBars["Family Members"].waitForExistence(timeout: 10))
+        let nameField = app.textFields["Name (Mom, Emma, Jake…)"]
+        nameField.tap()
+        nameField.typeText("Emma\n")
+        XCTAssertTrue(app.textFields["Emma"].waitForExistence(timeout: 5), "Emma is in the family list")
+        dismissSheet()
+
+        let clothing = app.buttons["Clothing"]
+        for _ in 0..<3 where !onScreen(clothing) { app.buttons["All"].swipeLeft() }
+        clothing.tap()
+        XCTAssertTrue(app.navigationBars["Clothing"].waitForExistence(timeout: 5))
+        app.navigationBars["Clothing"].buttons["Add"].tap()
+        let sheet = app.navigationBars["New Item"]
+        XCTAssertTrue(sheet.waitForExistence(timeout: 5))
+        let name = app.textFields["Item name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        name.tap()
+        name.typeText("Jeans")
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'For'")).firstMatch.tap()
+        app.buttons["Emma"].tap()
+        let size = app.textFields["M, 8, 10 Kids, 32x30"]
+        size.tap()
+        size.typeText("10 Kids")
+        sheet.buttons["Add"].tap()
+
+        XCTAssertTrue(item("Jeans").waitForExistence(timeout: 5), "the item is listed")
+        XCTAssertFalse(item("Jeans").label.contains("10 Kids"), "the size isn't on the row: \(item("Jeans").label)")
+        XCTAssertTrue(app.staticTexts["Emma"].exists, "under Emma's header")
+
+        item("Jeans").press(forDuration: 1.2)
+        let sizeLine = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Size 10 Kids'")).firstMatch
+        XCTAssertTrue(sizeLine.waitForExistence(timeout: 5), "the long-press menu shows the size")
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Added'")).firstMatch.exists, "and when it was added")
+    }
+
     func testCompanyComingOffersMakeAheadMeals() {
         showTab("Meals")
         app.buttons["Company Coming"].firstMatch.tap()

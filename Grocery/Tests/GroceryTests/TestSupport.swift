@@ -25,6 +25,7 @@ class StoreTestCase: XCTestCase {
         store.stock = []
         store.spending = []
         store.goals = []
+        store.people = []
     }
 
     func savedData(_ name: String) -> Data? {

@@ -74,6 +74,29 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var isTravel: Bool?
 
     var forTravel: Bool { isTravel == true }
+
+    /// Clothing, kept on its own Clothing list under a header for each person. Nil means no.
+    var isClothing: Bool?
+    /// Who the clothing is for.
+    var personID: UUID?
+    /// Shown only in the item's long-press menu, never on the row.
+    var clothingSize: String?
+    /// When the size was last set or changed.
+    var sizeDate: Date?
+    /// When the item was added.
+    var addedAt: Date?
+
+    var forClothing: Bool { isClothing == true }
+    /// On its own list, so it stays off All and the store lists.
+    var isSeparate: Bool { forTravel || forClothing }
+}
+
+/// A family member clothing is bought for.
+struct Person: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    /// The last size used for each kind of item (lowercased name), to suggest next time.
+    var sizes: [String: String]?
 }
 
 struct PricePoint: Codable, Equatable {
@@ -320,4 +343,5 @@ struct Backup: Codable {
     var stock: [StockEntry]? = nil
     var spending: [SpendRecord]? = nil
     var goals: [Goal]? = nil
+    var people: [Person]? = nil
 }
