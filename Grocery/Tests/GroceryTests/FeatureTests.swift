@@ -357,7 +357,7 @@ final class FirstLaunchTests: StoreTestCase {
         store.items = [GroceryItem(name: "Bananas")]
         store.history = [PastItem(name: "Bananas", aisle: .produce, shopID: nil, price: nil)]
         store.finishSetup(storeNames: ["Costco", " Aldi ", "costco", "", "Corner Shop"], keepSample: true)
-        XCTAssertEqual(store.shops.map(\.name), ["Costco", "Aldi", "Corner Shop"])
+        XCTAssertEqual(store.shops.map(\.name), ["Costco", "Aldi", "Corner Shop", "Online"], "everyone gets an Online chip")
         XCTAssertEqual(store.items.map(\.name), ["Bananas"])
         XCTAssertFalse(store.isFirstRun)
     }
@@ -366,7 +366,7 @@ final class FirstLaunchTests: StoreTestCase {
         store.items = [GroceryItem(name: "Bananas")]
         store.history = [PastItem(name: "Bananas", aisle: .produce, shopID: nil, price: nil)]
         store.finishSetup(storeNames: [], keepSample: false)
-        XCTAssertTrue(store.shops.isEmpty)
+        XCTAssertEqual(store.shops.map(\.name), ["Online"])
         XCTAssertTrue(store.items.isEmpty)
         XCTAssertTrue(store.history.isEmpty)
     }
