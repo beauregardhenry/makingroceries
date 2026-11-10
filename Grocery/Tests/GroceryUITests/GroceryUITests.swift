@@ -41,7 +41,7 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(item("Bananas").exists)
         XCTAssertTrue(item("Milk").exists)
         XCTAssertTrue(item("Sourdough").exists)
-        for store in ["All", "Kroger", "Walmart"] {
+        for store in ["All", "Kroger", "Walmart", "Online"] {
             XCTAssertTrue(app.buttons[store].exists, "\(store) chip")
         }
     }

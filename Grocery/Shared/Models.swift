@@ -218,19 +218,22 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
 
     var hasLocation: Bool { latitude != nil && longitude != nil }
 
-    static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery"]
+    static let defaultNames = ["Kroger", "Walmart", "Chinese Grocery", onlineName]
+    /// The store for things you order online, so they get their own chip.
+    static let onlineName = "Online"
     /// What items with no store are called: they can be bought anywhere.
     static let noStoreName = "Anywhere"
     static let presetNames = [
         "Kroger", "Walmart", "Chinese Grocery", "Costco", "Target", "Aldi", "Trader Joe's",
         "Whole Foods", "Publix", "Safeway", "Sam's Club", "Asian Market", "Farmers Market",
-        "Home Depot", "Lowe's", "Best Buy", "Menards", "Ace Hardware", "Petco", "PetSmart",
+        "Online", "Amazon", "Home Depot", "Lowe's", "Best Buy", "Menards", "Ace Hardware", "Petco", "PetSmart",
     ]
 
     /// What a well-known store sells, from its name. Nil for a grocery store or one we don't know.
     static func kind(forName name: String) -> ShopKind? {
         let lower = name.lowercased()
         func has(_ names: [String]) -> Bool { names.contains { lower.contains($0) } }
+        if has(["online", "amazon", "ebay", "etsy", "instacart"]) { return .online }
         if has(["home depot", "lowe", "menards", "ace hardware", "harbor freight", "true value"]) { return .hardware }
         if has(["target", "walmart", "costco", "sam's club", "best buy", "kmart", "meijer", "fred meyer",
                 "petco", "petsmart", "ikea", "bed bath", "dollar"]) { return .general }
@@ -240,13 +243,14 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
 
 /// What a store sells, which sets the order of its aisles to start with.
 enum ShopKind: String, Codable, CaseIterable {
-    case grocery, general, hardware
+    case grocery, general, hardware, online
 
     var title: String {
         switch self {
         case .grocery: "Grocery store"
         case .general: "General store"
         case .hardware: "Hardware store"
+        case .online: "Online store"
         }
     }
 
@@ -255,7 +259,7 @@ enum ShopKind: String, Codable, CaseIterable {
         switch self {
         case .grocery:
             return Aisle.allCases
-        case .general:
+        case .general, .online:
             let food = Aisle.allCases.filter { $0.isFood && $0 != .other }
             return food + Aisle.nonFood + [.other]
         case .hardware:
