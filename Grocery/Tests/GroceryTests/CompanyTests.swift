@@ -51,7 +51,7 @@ final class TravelItemTests: StoreTestCase {
 
     func testTravelIsAFilterThatSurvivesARestart() {
         XCTAssertEqual(ShopFilter(raw: ShopFilter.travel.raw), .travel)
-        XCTAssertEqual(ShopFilter(raw: "any"), .anyStore)
+        XCTAssertEqual(ShopFilter(raw: "any"), .all, "the old Anywhere choice falls back to All")
         XCTAssertEqual(ShopFilter(raw: ""), .all)
     }
 
