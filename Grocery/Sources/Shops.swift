@@ -20,7 +20,8 @@ struct ShopBar: View {
                         chip("Clothing", symbol: "tshirt.fill", isSelected: selection == .clothing) { selection = .clothing }
                     case .shop(let id):
                         if let shop = store.shop(for: id) {
-                            chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(id)) {
+                            chip(shop.name.isEmpty ? "Unnamed store" : shop.name, symbol: shop.kind == .online ? "globe" : nil,
+                                 isSelected: selection == .shop(id)) {
                                 selection = .shop(id)
                             }
                         }

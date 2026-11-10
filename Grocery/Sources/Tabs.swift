@@ -15,7 +15,10 @@ struct RootView: View {
             Tab("Money", systemImage: "dollarsign.circle", value: AppTab.money) { MoneyHub() }
             Tab("Save Up", systemImage: "target", value: AppTab.saveUp) { SaveUpView() }
         }
-        .onAppear { showingWelcome = store.isFirstRun && !Storage.isUITesting }
+        .onAppear {
+            store.addOnlineStoreIfNeeded()
+            showingWelcome = store.isFirstRun && !Storage.isUITesting
+        }
         .sheet(isPresented: $showingWelcome) { WelcomeView() }
         // Last, so sheets presented from here pick up the brand color too.
         .tint(.brand)

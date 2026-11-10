@@ -116,7 +116,7 @@ final class NonFoodStoreTests: StoreTestCase {
         let shop = try XCTUnwrap(store.addShop(named: "Kroger"))
         XCTAssertNil(shop.kind)
         XCTAssertEqual(shop.orderedAisles, Aisle.allCases)
-        XCTAssertEqual(ShopKind.allCases.map(\.title).count, 3)
+        XCTAssertEqual(ShopKind.allCases.map(\.title).count, 4)
     }
 
     func testStoreTypeSurvivesSavingAndOldStoresStillLoad() throws {
@@ -275,5 +275,57 @@ final class ChipOrderTests: XCTestCase {
         XCTAssertEqual(clothing, 1)
         XCTAssertEqual(travel, ChipOrder.last)
         XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: travel, clothingPosition: clothing), arranged)
+    }
+}
+
+final class OnlineStoreTests: StoreTestCase {
+    private func freshDefaults() -> UserDefaults {
+        let defaults = UserDefaults(suiteName: "online-store-tests")!
+        defaults.removePersistentDomain(forName: "online-store-tests")
+        return defaults
+    }
+
+    func testOnlineIsAnOnlineKindStoreWithGeneralAisles() {
+        XCTAssertEqual(Shop.kind(forName: "Online"), .online)
+        XCTAssertEqual(Shop.kind(forName: "Amazon"), .online)
+        XCTAssertEqual(Shop(name: "Online", kind: .online).orderedAisles, ShopKind.general.defaultOrder)
+        XCTAssertTrue(Shop.defaultNames.contains("Online"))
+        XCTAssertTrue(Shop.presetNames.contains("Online"))
+    }
+
+    func testAnExistingListGetsAnOnlineChipOnce() {
+        let defaults = freshDefaults()
+        store.isFirstRun = false
+        store.shops = [Shop(name: "Kroger")]
+        XCTAssertTrue(store.addOnlineStoreIfNeeded(defaults: defaults))
+        XCTAssertEqual(store.shops.map(\.name), ["Kroger", "Online"])
+        XCTAssertEqual(store.shops.last?.kind, .online)
+        // Deleting it sticks.
+        store.shops.removeLast()
+        XCTAssertFalse(store.addOnlineStoreIfNeeded(defaults: defaults))
+        XCTAssertEqual(store.shops.map(\.name), ["Kroger"])
+    }
+
+    func testAnOnlineStoreYouAlreadyHaveIsNotDuplicated() {
+        store.isFirstRun = false
+        store.shops = [Shop(name: "online")]
+        XCTAssertFalse(store.addOnlineStoreIfNeeded(defaults: freshDefaults()))
+        XCTAssertEqual(store.shops.count, 1)
+    }
+
+    func testAFirstLaunchLeavesItToSetup() {
+        let defaults = freshDefaults()
+        store.isFirstRun = true
+        store.shops = []
+        XCTAssertFalse(store.addOnlineStoreIfNeeded(defaults: defaults))
+        XCTAssertTrue(store.shops.isEmpty)
+    }
+
+    func testItemsAddedToOnlineStayOnTheOnlineList() throws {
+        let online = try XCTUnwrap(store.addShop(named: "Online"))
+        XCTAssertEqual(online.kind, .online)
+        store.addOrBump(name: "Phone case", shopID: online.id)
+        XCTAssertEqual(store.items.first?.shopID, online.id)
+        XCTAssertEqual(store.items.first?.aisle, .other)
     }
 }

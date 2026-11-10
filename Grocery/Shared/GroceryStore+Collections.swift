@@ -132,6 +132,24 @@ extension GroceryStore {
             items = []
             history = []
         }
+        // Everyone gets an Online chip; it can be deleted like any store.
+        if !shops.contains(where: { $0.kind == .online || Self.same($0.name, Shop.onlineName) }) {
+            shops.append(Shop(name: Shop.onlineName, kind: .online))
+        }
+        UserDefaults.standard.set(true, forKey: Self.onlineOfferedKey)
         isFirstRun = false
+    }
+
+    static let onlineOfferedKey = "offeredOnlineStore"
+
+    /// Adds an Online store once, for lists made before it existed. It is only offered once, so deleting it
+    /// sticks, and never on a first launch, where setup adds it.
+    @discardableResult
+    func addOnlineStoreIfNeeded(defaults: UserDefaults = .standard) -> Bool {
+        guard !defaults.bool(forKey: Self.onlineOfferedKey) else { return false }
+        defaults.set(true, forKey: Self.onlineOfferedKey)
+        guard !isFirstRun, !shops.contains(where: { $0.kind == .online || Self.same($0.name, Shop.onlineName) }) else { return false }
+        shops.append(Shop(name: Shop.onlineName, kind: .online))
+        return true
     }
 }
