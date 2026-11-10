@@ -50,6 +50,11 @@ final class GroceryStore {
         didSet { persist(\.goals, "goals") }
     }
 
+    /// The family members clothing is organized under.
+    var people: [Person] = [] {
+        didSet { persist(\.people, "people") }
+    }
+
     /// Names of saved files that couldn't be read at launch. Each was copied into the Recovered folder
     /// before anything was saved over it. The list screen tells you once, then clears this.
     var loadProblems: [String] = []
@@ -93,6 +98,7 @@ final class GroceryStore {
         refresh(\.stock, "stock")
         refresh(\.spending, "spending")
         refresh(\.goals, "goals")
+        refresh(\.people, "people")
         applyRecurring()
     }
 
@@ -115,6 +121,7 @@ final class GroceryStore {
         stock = value(of: readFile([StockEntry].self, "stock"), ifMissing: [])
         spending = value(of: readFile([SpendRecord].self, "spending"), ifMissing: [])
         goals = value(of: readFile([Goal].self, "goals"), ifMissing: [])
+        people = value(of: readFile([Person].self, "people"), ifMissing: [])
         // Only a truly fresh install counts as a first run: one missing file on its own (after a
         // partial restore, say) must never lead setup to replace stores or clear history.
         if case .missing = itemsFile, case .missing = shopsFile, case .missing = historyFile { isFirstRun = true }

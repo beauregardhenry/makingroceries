@@ -9,7 +9,7 @@ extension GroceryStore {
                 .map { .init(id: $0.id.uuidString, name: $0.name, quantity: $0.quantity, note: $0.note, isChecked: $0.isChecked) }
         }
         // Trip items stay off the watch, like the other lists.
-        let items = self.items.filter { !$0.forTravel }
+        let items = self.items.filter { !$0.isSeparate }
         var groups: [WatchSnapshot.Group] = []
         for shop in shops {
             let mine = items.filter { $0.shopID == shop.id }

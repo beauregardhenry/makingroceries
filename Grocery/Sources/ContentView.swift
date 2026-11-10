@@ -48,8 +48,9 @@ struct ContentView: View {
     private func isVisible(_ item: GroceryItem) -> Bool {
         switch filter {
         case .travel: item.forTravel
-        case .all: !item.forTravel
-        case .shop(let id): !item.forTravel && item.shopID == id
+        case .clothing: item.forClothing
+        case .all: !item.isSeparate
+        case .shop(let id): !item.isSeparate && item.shopID == id
         }
     }
 
@@ -77,13 +78,14 @@ struct ContentView: View {
 
     /// Under the list: what everything on screen adds up to, and across all lists when one is picked.
     private var runningTotal: RunningTotal {
-        RunningTotal(visible: visibleItems, everyday: store.items.filter { !$0.forTravel })
+        RunningTotal(visible: visibleItems, everyday: store.items.filter { !$0.isSeparate })
     }
 
     private var navigationTitle: String {
         switch filter {
         case .all: "Groceries"
         case .travel: "Travel"
+        case .clothing: "Clothing"
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }
     }
@@ -142,6 +144,8 @@ struct ContentView: View {
         let title: String
         let symbol: String
         var aisle: Aisle?
+        /// Overrides the aisle's color, for a person's header.
+        var tint: Color?
         let label: String?
         let items: [GroceryItem]
     }
@@ -153,6 +157,7 @@ struct ContentView: View {
             DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol, aisle: aisle,
                            label: mappedShop?.label(for: aisle), items: items)
         }
+        if filter == .clothing { return clothingDisplaySections }
         guard shoppingMode else { return sections.map { make($0.0, $0.1) } }
         var result = order.compactMap { aisle -> DisplaySection? in
             let items = visibleItems.filter { $0.aisle == aisle && !$0.isChecked }
@@ -163,6 +168,21 @@ struct ContentView: View {
             result.append(DisplaySection(id: "cart", title: "In the cart", symbol: "cart.fill", label: nil, items: cart))
         }
         return result
+    }
+
+    private static let personColors: [Color] = [.blue, .pink, .green, .orange, .purple, .teal, .red, .indigo]
+
+    /// Clothing: a header for each person, in the order of your family list.
+    private var clothingDisplaySections: [DisplaySection] {
+        store.clothingSections(visibleItems).map { group in
+            if let person = group.person {
+                let index = store.people.firstIndex { $0.id == person.id } ?? 0
+                return DisplaySection(id: "person-\(person.id)", title: person.name, symbol: "person.fill", aisle: nil,
+                                      tint: Self.personColors[index % Self.personColors.count], label: nil, items: group.items)
+            }
+            return DisplaySection(id: "person-none", title: "No one yet", symbol: "person.crop.circle.badge.questionmark",
+                                  aisle: nil, tint: .gray, label: nil, items: group.items)
+        }
     }
 
     /// The visible list as plain text, grouped by aisle in walking order, for sharing.
@@ -237,7 +257,7 @@ struct ContentView: View {
     @ViewBuilder
     private func sheetView(_ sheet: AppSheet) -> some View {
         switch sheet {
-        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel)
+        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel, clothing: filter == .clothing)
         case .shops: ManageShopsView()
         case .usual: UsualView(shopID: newItemShopID)
         case .meals: MealsView(shopID: newItemShopID, currentItems: visibleItems)
@@ -259,6 +279,7 @@ struct ContentView: View {
         case .cloud: CloudSyncView()
         case .settings: SettingsView()
         case .company: CompanyComingView(shopID: newItemShopID)
+        case .people: FamilyMembersView()
         }
     }
 
@@ -317,7 +338,7 @@ struct ContentView: View {
             }
         }
         .font((shoppingMode ? Font.headline : Font.subheadline).weight(.bold))
-        .tintedBand(section.aisle?.tint ?? .gray)
+        .tintedBand(section.tint ?? section.aisle?.tint ?? .gray)
     }
 
     private var finishSection: some View {
@@ -360,7 +381,7 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, focusRequest: quickAddRequest, prefill: quickAddPrefill,
+            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, clothing: filter == .clothing, focusRequest: quickAddRequest, prefill: quickAddPrefill,
                         showsDue: !shoppingMode)
         }
         .padding(.horizontal)
@@ -387,6 +408,7 @@ struct ContentView: View {
                 Button("Scan to Check Off", systemImage: "barcode.viewfinder") { sheet = .scan }
                 Divider()
                 Button("Send List to Family", systemImage: "person.2") { sheet = .send }
+                Button("Family Members", systemImage: "person.crop.circle.badge.plus") { sheet = .people }
                 ShareLink(item: shareText) {
                     Label("Share List as Text", systemImage: "square.and.arrow.up")
                 }
@@ -430,6 +452,8 @@ struct ContentView: View {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
                                            description: Text(filter == .all
                                                              ? "Tap + to add your first item."
+                                                             : filter == .clothing
+                                                             ? "Tap + to add clothing for someone. Add your family under ⋯ › Family Members."
                                                              : "Tap + to add something here."))
                 }
             }
@@ -493,7 +517,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
+    case add, people, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
     var id: String { rawValue }
 }
 
@@ -580,16 +604,32 @@ struct ItemRow: View {
         .accessibilityAction(named: "Set price") { onSetPrice(item) }
         .accessibilityAction(named: "Delete") { store.delete(item) }
         .contextMenu {
+            if item.forClothing {
+                // When it was added and its size, shown only here and never on the row.
+                ForEach(Array(ClothingInfo.lines(for: item).enumerated()), id: \.offset) { index, line in
+                    Button(line, systemImage: index == 0 ? "calendar" : "ruler") {}.disabled(true)
+                }
+                Divider()
+            }
             Button("Edit Details…", systemImage: "pencil") { onEdit(item) }
             Button("Set Price…", systemImage: "dollarsign.circle") { onSetPrice(item) }
             Button("Add to Usual", systemImage: "star") {
                 store.addFavorite(name: item.name, quantity: item.quantity, aisle: item.aisle)
             }
-            Menu("Move to Store", systemImage: "arrow.right.circle") {
-                ForEach(store.shops) { shop in
-                    Button(shop.name) { store.move(item, to: shop.id) }
+            if item.forClothing {
+                Menu("Move to Person", systemImage: "person.crop.circle") {
+                    ForEach(store.people) { person in
+                        Button(person.name) { store.move(item, toPerson: person.id) }
+                    }
+                    Button("No one yet") { store.move(item, toPerson: nil) }
                 }
-                Button(Shop.noStoreName) { store.move(item, to: nil) }
+            } else {
+                Menu("Move to Store", systemImage: "arrow.right.circle") {
+                    ForEach(store.shops) { shop in
+                        Button(shop.name) { store.move(item, to: shop.id) }
+                    }
+                    Button(Shop.noStoreName) { store.move(item, to: nil) }
+                }
             }
             Button("Delete", systemImage: "trash", role: .destructive) { store.delete(item) }
         }
@@ -608,10 +648,15 @@ struct AddItemView: View {
     @State private var lookupMessage: String?
     @State private var isLookingUp = false
     @State private var travel = false
+    /// Adding clothing: pick who it's for and its size instead of an aisle and store.
+    let clothing: Bool
+    @State private var personID: UUID?
+    @State private var sizeText = ""
 
-    init(shopID: UUID?, travel: Bool = false) {
+    init(shopID: UUID?, travel: Bool = false, clothing: Bool = false) {
         _shopID = State(initialValue: shopID)
         _travel = State(initialValue: travel)
+        self.clothing = clothing
     }
 
     var body: some View {
@@ -626,14 +671,27 @@ struct AddItemView: View {
                 }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
                 TextField("Price (optional)", text: $priceText).keyboardType(.decimalPad)
-                Picker("Aisle", selection: $aisle) {
-                    ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                if clothing {
+                    Picker("For", selection: $personID) {
+                        Text("No one yet").tag(UUID?.none)
+                        ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
+                    }
+                    LabeledContent("Size") {
+                        TextField(store.lastSize(for: personID, itemNamed: name).map { "Last: \($0)" } ?? "M, 8, 10 Kids, 32x30",
+                                  text: $sizeText)
+                            .multilineTextAlignment(.trailing)
+                            .textInputAutocapitalization(.never)
+                    }
+                } else {
+                    Picker("Aisle", selection: $aisle) {
+                        ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                    }
+                    Picker("Store", selection: $shopID) {
+                        Text(Shop.noStoreName).tag(UUID?.none)
+                        ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
+                    }
+                    Toggle("For a trip", isOn: $travel)
                 }
-                Picker("Store", selection: $shopID) {
-                    Text(Shop.noStoreName).tag(UUID?.none)
-                    ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
-                }
-                Toggle("For a trip", isOn: $travel)
             }
             .navigationTitle("New Item")
             .navigationBarTitleDisplayMode(.inline)
@@ -641,7 +699,8 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: shopID, price: Price.parse(priceText), travel: travel)
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: clothing ? nil : shopID, price: Price.parse(priceText),
+                                  travel: clothing ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -665,7 +724,7 @@ struct AddItemView: View {
                                                                     avoid: AvoidList.words))
                 store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
                           price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
-                          warning: warning, barcode: code, travel: travel)
+                          warning: warning, barcode: code, travel: travel, clothing: clothing, personID: personID)
                 if let warning {
                     // Don't hide a warning by closing the sheet.
                     lookupMessage = "Added \(product.name). Warning: \(warning)."

@@ -9,6 +9,7 @@ struct ItemDetailView: View {
     @State private var priceText: String
     @State private var noteText: String
     @State private var sizeText: String
+    @State private var clothingSizeText: String
     @State private var repeatDays: Int
     @State private var pickedPhoto: PhotosPickerItem?
     /// Photos saved during this edit, so unused ones can be deleted afterwards.
@@ -21,6 +22,7 @@ struct ItemDetailView: View {
         _priceText = State(initialValue: Price.editText(item.price))
         _noteText = State(initialValue: item.note ?? "")
         _sizeText = State(initialValue: item.sizeAmount.flatMap { a in item.sizeUnit.map { SizeParser.label(a, $0) } } ?? "")
+        _clothingSizeText = State(initialValue: item.clothingSize ?? "")
         _repeatDays = State(initialValue: repeatDays)
     }
 
@@ -30,16 +32,30 @@ struct ItemDetailView: View {
                 Section {
                     TextField("Name", text: $draft.name)
                     Stepper("Quantity: \(draft.quantity)", value: $draft.quantity, in: 1...99)
-                    Picker("Aisle", selection: $draft.aisle) {
-                        ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                    if draft.forClothing {
+                        Picker("For", selection: $draft.personID) {
+                            Text("No one yet").tag(UUID?.none)
+                            ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
+                        }
+                        LabeledContent("Size") {
+                            TextField("M, 8, 10 Kids, 32x30", text: $clothingSizeText)
+                                .multilineTextAlignment(.trailing)
+                                .textInputAutocapitalization(.never)
+                        }
+                    } else {
+                        Picker("Aisle", selection: $draft.aisle) {
+                            ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                        }
+                        Picker("Store", selection: $draft.shopID) {
+                            Text(Shop.noStoreName).tag(UUID?.none)
+                            ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
+                        }
+                        Toggle("For a trip", isOn: Binding(get: { draft.forTravel }, set: { draft.isTravel = $0 ? true : nil }))
                     }
-                    Picker("Store", selection: $draft.shopID) {
-                        Text(Shop.noStoreName).tag(UUID?.none)
-                        ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
-                    }
-                    Toggle("For a trip", isOn: Binding(get: { draft.forTravel }, set: { draft.isTravel = $0 ? true : nil }))
                 } footer: {
-                    Text("Trip items stay off your other lists. Find them under Travel.")
+                    Text(draft.forClothing
+                         ? "The size isn't shown on the list. Press and hold the item to see it, with the date it was added."
+                         : "Trip items stay off your other lists. Find them under Travel.")
                 }
 
                 Section {
@@ -123,6 +139,16 @@ struct ItemDetailView: View {
         let size = SizeParser.parse(sizeText)
         draft.sizeAmount = size?.amount
         draft.sizeUnit = size?.unit
+        if draft.forClothing {
+            let old = store.items.first { $0.id == draft.id }
+            let trimmed = clothingSizeText.trimmingCharacters(in: .whitespaces)
+            let new = trimmed.isEmpty ? nil : trimmed
+            if new != old?.clothingSize {
+                draft.clothingSize = new
+                draft.sizeDate = new == nil ? nil : Date()
+                if let new { store.rememberSize(new, for: draft.personID, itemNamed: draft.name) }
+            }
+        }
         store.update(draft)
         store.setRepeat(for: draft, everyDays: repeatDays == 0 ? nil : repeatDays)
         newPhotos.filter { $0 != draft.photo }.forEach(PhotoStore.remove)

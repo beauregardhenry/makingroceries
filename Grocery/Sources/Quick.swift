@@ -7,6 +7,7 @@ struct QuickAddBar: View {
     let shopID: UUID?
     let inferShop: Bool
     var travel = false
+    var clothing = false
     /// Bumped by the list screen when a control asks to add items; the field then takes focus.
     var focusRequest = 0
     /// Typed into the field along with a focus request, when not empty.
@@ -39,7 +40,7 @@ struct QuickAddBar: View {
                         Text("Due").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                         ForEach(due) { past in
                             Button {
-                                withAnimation { store.addOrBump(name: past.name, shopID: shopID, inferShop: inferShop, travel: travel) }
+                                withAnimation { store.addOrBump(name: past.name, shopID: shopID, inferShop: inferShop, travel: travel, clothing: clothing) }
                             } label: {
                                 Label(past.name, systemImage: "clock.arrow.circlepath")
                                     .font(.subheadline)
@@ -121,7 +122,7 @@ struct QuickAddBar: View {
         guard !entries.isEmpty else { return }
         withAnimation {
             for entry in entries {
-                store.addOrBump(name: entry.name, quantity: entry.quantity, shopID: shopID, inferShop: inferShop, travel: travel)
+                store.addOrBump(name: entry.name, quantity: entry.quantity, shopID: shopID, inferShop: inferShop, travel: travel, clothing: clothing)
             }
         }
         text = ""
