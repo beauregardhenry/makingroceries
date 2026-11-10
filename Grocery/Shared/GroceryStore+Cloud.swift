@@ -23,6 +23,7 @@ extension GroceryStore {
         case "plan": encoded(plan)
         case "stock": encoded(stock)
         case "spending": encoded(spending)
+        case "goals": encoded(goals)
         default: nil
         }
     }
@@ -42,6 +43,7 @@ extension GroceryStore {
         case "plan": merge(\.plan, remote, base)
         case "stock": merge(\.stock, remote, base)
         case "spending": merge(\.spending, remote, base)
+        case "goals": merge(\.goals, remote, base)
         default: nil
         }
     }

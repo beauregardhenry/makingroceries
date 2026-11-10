@@ -76,6 +76,11 @@ struct ContentView: View {
         return leftText.isEmpty ? total : "\(leftText) · \(total)"
     }
 
+    /// Under the list: what everything on screen adds up to, and across all lists when one is picked.
+    private var runningTotal: RunningTotal {
+        RunningTotal(visible: visibleItems, everyday: store.items.filter { !$0.forTravel })
+    }
+
     private var navigationTitle: String {
         switch filter {
         case .all: "Groceries"
@@ -356,6 +361,7 @@ struct ContentView: View {
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+            if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
             QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, focusRequest: quickAddRequest, prefill: quickAddPrefill,
                         showsDue: !shoppingMode)
         }

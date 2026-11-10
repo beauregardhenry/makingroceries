@@ -13,6 +13,7 @@ struct RootView: View {
             Tab("Meals", systemImage: "fork.knife", value: AppTab.meals) { MealsHub() }
             Tab("Kitchen", systemImage: "refrigerator", value: AppTab.kitchen) { KitchenHub() }
             Tab("Money", systemImage: "dollarsign.circle", value: AppTab.money) { MoneyHub() }
+            Tab("Save Up", systemImage: "target", value: AppTab.saveUp) { SaveUpView() }
         }
         .onAppear { showingWelcome = store.isFirstRun && !Storage.isUITesting }
         .sheet(isPresented: $showingWelcome) { WelcomeView() }
@@ -22,7 +23,7 @@ struct RootView: View {
 }
 
 enum AppTab: String {
-    case list, meals, kitchen, money
+    case list, meals, kitchen, money, saveUp
 }
 
 /// The store the list is showing, for screens outside the list that add items to it.

@@ -21,6 +21,7 @@
 		1353D5BA7623C67F265B708C /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		143AB989E0E835D81B0C489F /* RouteLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */; };
 		15D069B92F4E3E43F487F1AF /* SpotlightEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BE769E2E0B38F61F3CB710 /* SpotlightEntries.swift */; };
+		17E7CBFEFE28B1814FDF5E31 /* Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14527CF1B699BFBDC2E2925 /* Goals.swift */; };
 		184C36CE7AE420FE09F8749B /* Backup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B189695D0B80057BC76D09 /* Backup.swift */; };
 		1981862ECC919BA3D38086EC /* GroceryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BD5D7C2EC353FFBCC212F3 /* GroceryStore.swift */; };
 		200B0FBA694BB947164DCD28 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
@@ -105,6 +106,7 @@
 		719C4C51ED35255362EB64AA /* ShoppingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9772A696CECB0BF35110E3 /* ShoppingProgress.swift */; };
 		72E4B24B000EAF42F36D2D18 /* SpotlightEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BE769E2E0B38F61F3CB710 /* SpotlightEntries.swift */; };
 		72EC62C05ED112E9507FF7BD /* CookAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA09F22A402DFB2270AFFDC7 /* CookAI.swift */; };
+		740899CD46A463A68A672BED /* Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14527CF1B699BFBDC2E2925 /* Goals.swift */; };
 		757D4462E14074ADA0475C1F /* Spending.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48E1542608588EA2EEDBAFD /* Spending.swift */; };
 		76888D10F8176837AC29A46A /* GroceryStore+History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61234DEB0C354BF184E85812 /* GroceryStore+History.swift */; };
 		76A1CB7EF26030E9891A86C8 /* ScanCheckOff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992FFF7CA1698D8CEED5E54A /* ScanCheckOff.swift */; };
@@ -119,6 +121,7 @@
 		84486A14FC7FE3C7780BC217 /* NearbyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE29826DDB1BA8F31D229F /* NearbyStore.swift */; };
 		857B40201ECBE2273FDEB423 /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6785649CFE2C1543568EE24 /* WatchSnapshot.swift */; };
 		8722B3D9D25242AEAA463060 /* GroceryStore+Items.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F7AE0D6968690D09E95244 /* GroceryStore+Items.swift */; };
+		8724A4878B9FA938793A5A08 /* SaveUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ECD6BF97595D9AEBF6E99A7 /* SaveUp.swift */; };
 		88555A3A1BAA5E132B2C7F65 /* DemoSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AAFBFB363638CFF7AC0C0B /* DemoSnapshot.swift */; };
 		8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D78A5C9275B720C9B3373E /* GroceryIntents.swift */; };
 		8BBB22AF20C70DDBA7AE974B /* ShoppingActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA4CB59960F935691885649 /* ShoppingActivity.swift */; };
@@ -133,6 +136,7 @@
 		96EF663E2A2888C4CAAB7C14 /* Expiry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B6020BFBEF45159218ADF6E /* Expiry.swift */; };
 		976287A040FD964650505292 /* PriceHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7217197DD45F1EA18D2E79C1 /* PriceHistory.swift */; };
 		97C0165B0B048242AD8C0FDD /* GroceryStore+Items.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F7AE0D6968690D09E95244 /* GroceryStore+Items.swift */; };
+		97CB476D7BB3E9CD42F6FFEB /* Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14527CF1B699BFBDC2E2925 /* Goals.swift */; };
 		9838038FB00F6D870873657E /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
 		9C302A5CA15A8F66B5A936D1 /* CookIdeas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */; };
 		9CC3456F271B36254658DF15 /* LiveSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5651E045DA1087FDFC9CB0 /* LiveSync.swift */; };
@@ -160,6 +164,7 @@
 		BBE9DAEE3C21D0F636E8F611 /* GroceryWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B5DCEE4D17F076C081FFAA /* GroceryWatchApp.swift */; };
 		BC5A0EF2693FEF3D7ED3F420 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
 		BD2BC3D8BEF6DBB663EBA8B4 /* GroceryStore+Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6F507D1C5EC8A8C573F64A /* GroceryStore+Cloud.swift */; };
+		BDEEBE4E3094C7A8DB66F547 /* Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14527CF1B699BFBDC2E2925 /* Goals.swift */; };
 		BEBC3ED1D2283ED37985C06F /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FCDD36EAB3D37D7BC5861BE /* Storage.swift */; };
 		BED320D51D869299632784F3 /* TripPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */; };
 		BEE6B860BE22546840579D61 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
@@ -169,6 +174,7 @@
 		C026726BF399990589DBC6FA /* ControlIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E98F73823A9CB343BB40F7 /* ControlIntents.swift */; };
 		C0523875DC41F4A4798B5F26 /* UnitPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D096A4497AA5D69830D184 /* UnitPrice.swift */; };
 		C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */; };
+		C599317266A72676F65B75A4 /* GoalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7025AC86783BB4C92B68FD5A /* GoalTests.swift */; };
 		C75AFD73B507F68E03F7114C /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
 		C7CD69E7816004C0B26C8BB7 /* RouteLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */; };
 		C96B59362AE4BB371F9BD22D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
@@ -216,6 +222,7 @@
 		F7347F88F62E4496616A2F4E /* PriceFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4688F13FD87D2D9ED29904F /* PriceFormat.swift */; };
 		F764D4A45D2616CA6AAE0ABD /* ListMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8641B730C726ED388A11D1C2 /* ListMerge.swift */; };
 		F798A4D5913E359AAAAE768E /* ShoppingActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA4CB59960F935691885649 /* ShoppingActivity.swift */; };
+		F9FD66AC2C1AC8FD8D89EEB2 /* RunningTotalBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7980155C19636C34586852 /* RunningTotalBar.swift */; };
 		FCD48D5A0F0B99E4516B16C9 /* Dictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94692ABA4F4ABD389A1144A3 /* Dictation.swift */; };
 		FD0CC18E8C848D5A44B541A6 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
 /* End PBXBuildFile section */
@@ -306,6 +313,8 @@
 		69D78A5C9275B720C9B3373E /* GroceryIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryIntents.swift; sourceTree = "<group>"; };
 		69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
 		6C90D65820F39561A46074B6 /* GroceryStore+Barcodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroceryStore+Barcodes.swift"; sourceTree = "<group>"; };
+		6ECD6BF97595D9AEBF6E99A7 /* SaveUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveUp.swift; sourceTree = "<group>"; };
+		7025AC86783BB4C92B68FD5A /* GoalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalTests.swift; sourceTree = "<group>"; };
 		7217197DD45F1EA18D2E79C1 /* PriceHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceHistory.swift; sourceTree = "<group>"; };
 		72A9B0C0401855451768A479 /* Cook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cook.swift; sourceTree = "<group>"; };
 		7356A0AB36CE94F43A8D3589 /* TripPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlanView.swift; sourceTree = "<group>"; };
@@ -343,6 +352,7 @@
 		BFA88FA4F292D68B16F229BB /* CompanyComing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyComing.swift; sourceTree = "<group>"; };
 		C7B5DCEE4D17F076C081FFAA /* GroceryWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWatchApp.swift; sourceTree = "<group>"; };
 		C970DCA94EAC448F56F933D5 /* Spotlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spotlight.swift; sourceTree = "<group>"; };
+		CB7980155C19636C34586852 /* RunningTotalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningTotalBar.swift; sourceTree = "<group>"; };
 		CCD4BBFEA4751E4D06061FAB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CCF0E94081431EAC5A452362 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFetcher.swift; sourceTree = "<group>"; };
@@ -354,6 +364,7 @@
 		D6D096A4497AA5D69830D184 /* UnitPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitPrice.swift; sourceTree = "<group>"; };
 		D8E2BB2534882D49229C2551 /* ShopFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopFilter.swift; sourceTree = "<group>"; };
 		D9EF2A8057BCF9A88E835685 /* Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parsing.swift; sourceTree = "<group>"; };
+		E14527CF1B699BFBDC2E2925 /* Goals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Goals.swift; sourceTree = "<group>"; };
 		E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryShortcuts.swift; sourceTree = "<group>"; };
 		E3E98F73823A9CB343BB40F7 /* ControlIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlIntents.swift; sourceTree = "<group>"; };
 		E55BF4F340A304CBE9D1CD3D /* OCRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRTests.swift; sourceTree = "<group>"; };
@@ -440,6 +451,8 @@
 				FCFBA1C2B742DC69C2ACD81C /* Pricing.swift */,
 				627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */,
 				59A2611C6625D05974C3C3E3 /* ReceiptView.swift */,
+				CB7980155C19636C34586852 /* RunningTotalBar.swift */,
+				6ECD6BF97595D9AEBF6E99A7 /* SaveUp.swift */,
 				992FFF7CA1698D8CEED5E54A /* ScanCheckOff.swift */,
 				D659BBB9E0B005E78B7D19B2 /* ShoppingHeader.swift */,
 				9BF29D61E22236EF73E84558 /* Shops.swift */,
@@ -497,6 +510,7 @@
 				E3E98F73823A9CB343BB40F7 /* ControlIntents.swift */,
 				EA09F22A402DFB2270AFFDC7 /* CookAI.swift */,
 				087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */,
+				E14527CF1B699BFBDC2E2925 /* Goals.swift */,
 				69D78A5C9275B720C9B3373E /* GroceryIntents.swift */,
 				08BD5D7C2EC353FFBCC212F3 /* GroceryStore.swift */,
 				6C90D65820F39561A46074B6 /* GroceryStore+Barcodes.swift */,
@@ -540,6 +554,7 @@
 				8582EF0ABD3C29544C72AAC1 /* CompanyTests.swift */,
 				0EA84F222BE3263A689CDBF7 /* DataSafetyTests.swift */,
 				BE45D380C15317B3A9E75D02 /* FeatureTests.swift */,
+				7025AC86783BB4C92B68FD5A /* GoalTests.swift */,
 				D4861C20F4071026E755B1CA /* MoneyTests.swift */,
 				1C0931E60F16A8B22951ED85 /* NetworkTests.swift */,
 				E55BF4F340A304CBE9D1CD3D /* OCRTests.swift */,
@@ -784,6 +799,7 @@
 				FCD48D5A0F0B99E4516B16C9 /* Dictation.swift in Sources */,
 				96EF663E2A2888C4CAAB7C14 /* Expiry.swift in Sources */,
 				482010B76BE408B5CCE43711 /* Family.swift in Sources */,
+				17E7CBFEFE28B1814FDF5E31 /* Goals.swift in Sources */,
 				2DDB9282F72EA268D95D785E /* GroceryApp.swift in Sources */,
 				60DDDE0D04DDE17637FF79D3 /* GroceryIntents.swift in Sources */,
 				C4949FF0D8BA325CF46F3A40 /* GroceryShortcuts.swift in Sources */,
@@ -819,6 +835,8 @@
 				6595B12879B1E5EAAE63353B /* RecipeFetcher.swift in Sources */,
 				F11F07F6B77CCA5CDC7692B7 /* RecipeOCR.swift in Sources */,
 				27F30E9DDE1ABD5352A3F2ED /* RouteLearning.swift in Sources */,
+				F9FD66AC2C1AC8FD8D89EEB2 /* RunningTotalBar.swift in Sources */,
+				8724A4878B9FA938793A5A08 /* SaveUp.swift in Sources */,
 				76A1CB7EF26030E9891A86C8 /* ScanCheckOff.swift in Sources */,
 				459BD68588FF9DF806875CD3 /* ShopFilter.swift in Sources */,
 				50A26B163B8D9B5B1E8A46CF /* ShoppingActivity.swift in Sources */,
@@ -852,6 +870,7 @@
 				EBADE3EE7ED95E2B4FD586CB /* ControlIntents.swift in Sources */,
 				44ECE4A3885B6BAB6A6200B8 /* CookAI.swift in Sources */,
 				8F9E3196854A5813D8E71170 /* CookIdeas.swift in Sources */,
+				BDEEBE4E3094C7A8DB66F547 /* Goals.swift in Sources */,
 				656CD73C61048EA6A65BB986 /* GroceryStore+Barcodes.swift in Sources */,
 				606F73BD969B7A3CB191A9A4 /* GroceryStore+Cloud.swift in Sources */,
 				83D4E9AA4C9C3802259AC822 /* GroceryStore+Collections.swift in Sources */,
@@ -899,6 +918,7 @@
 				BFC36BCE2DF876B16D9075EF /* Controls.swift in Sources */,
 				9D2741831A67F87EAA144BAC /* CookAI.swift in Sources */,
 				F514CF2877EC24F3F99D26D4 /* CookIdeas.swift in Sources */,
+				97CB476D7BB3E9CD42F6FFEB /* Goals.swift in Sources */,
 				8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */,
 				3F6AA24FBC1150895A572E30 /* GroceryStore+Barcodes.swift in Sources */,
 				95B38A9C16F72697FB5D5E82 /* GroceryStore+Cloud.swift in Sources */,
@@ -949,6 +969,8 @@
 				4A7D64406AFA17002B90489C /* CookIdeas.swift in Sources */,
 				B3F235C58281C05F0C5653EA /* DataSafetyTests.swift in Sources */,
 				D3AC30FACDE299D8E7A4B3B3 /* FeatureTests.swift in Sources */,
+				C599317266A72676F65B75A4 /* GoalTests.swift in Sources */,
+				740899CD46A463A68A672BED /* Goals.swift in Sources */,
 				12EEC7D0A864AECBBF82FCE0 /* GroceryIntents.swift in Sources */,
 				5BFF2A6E797AC29AC238FAE5 /* GroceryStore+Barcodes.swift in Sources */,
 				BD2BC3D8BEF6DBB663EBA8B4 /* GroceryStore+Cloud.swift in Sources */,

@@ -152,6 +152,21 @@ final class GroceryUITests: XCTestCase {
         ])
     }
 
+    func testSavingUpForAGoal() {
+        showTab("Save Up")
+        app.navigationBars.buttons["Add Goal"].tap()
+        let name = app.textFields["What are you saving for?"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        name.tap()
+        name.typeText("New computer")
+        let cost = app.textFields["$0.00"].firstMatch
+        cost.tap()
+        cost.typeText("1200")
+        app.navigationBars.buttons["Add"].tap()
+        XCTAssertTrue(app.buttons["goal-New computer"].waitForExistence(timeout: 5), "the goal is listed")
+        XCTAssertTrue(app.buttons["Unexpected expense"].exists, "surprise expenses are one tap away")
+    }
+
     func testCompanyComingOffersMakeAheadMeals() {
         showTab("Meals")
         app.buttons["Company Coming"].firstMatch.tap()
