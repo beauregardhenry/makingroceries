@@ -5,16 +5,23 @@ struct ShopBar: View {
     @Environment(GroceryStore.self) private var store
     @Binding var selection: ShopFilter
     let onManage: () -> Void
+    @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
                 chip(Shop.noStoreName, isSelected: selection == .anyStore) { selection = .anyStore }
-                chip("Travel", symbol: "airplane", isSelected: selection == .travel) { selection = .travel }
-                ForEach(store.shops) { shop in
-                    chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(shop.id)) {
-                        selection = .shop(shop.id)
+                ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition), id: \.self) { entry in
+                    switch entry {
+                    case .travel:
+                        chip("Travel", symbol: "airplane", isSelected: selection == .travel) { selection = .travel }
+                    case .shop(let id):
+                        if let shop = store.shop(for: id) {
+                            chip(shop.name.isEmpty ? "Unnamed store" : shop.name, isSelected: selection == .shop(id)) {
+                                selection = .shop(id)
+                            }
+                        }
                     }
                 }
                 Button(action: onManage) {
@@ -50,6 +57,7 @@ struct ManageShopsView: View {
     @Environment(GroceryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var customName = ""
+    @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
 
     private var availablePresets: [String] {
         Shop.presetNames.filter { preset in
@@ -66,26 +74,42 @@ struct ManageShopsView: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(store.shops) { shop in
-                        NavigationLink {
-                            ShopMapView(shopID: shop.id)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(shop.name.isEmpty ? "Unnamed store" : shop.name)
-                                if shop.orderedAisles != shop.defaultOrder || !shop.aisleLabels.isEmpty {
-                                    Text("Custom aisle map").font(.caption).foregroundStyle(.secondary)
+                    let entries = ChipOrder.entries(shops: store.shops, travelPosition: travelPosition)
+                    ForEach(entries, id: \.self) { entry in
+                        switch entry {
+                        case .travel:
+                            Label("Travel", systemImage: "airplane")
+                                .deleteDisabled(true)
+                        case .shop(let id):
+                            if let shop = store.shop(for: id) {
+                                NavigationLink {
+                                    ShopMapView(shopID: id)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(shop.name.isEmpty ? "Unnamed store" : shop.name)
+                                        if shop.orderedAisles != shop.defaultOrder || !shop.aisleLabels.isEmpty {
+                                            Text("Custom aisle map").font(.caption).foregroundStyle(.secondary)
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                     .onDelete { offsets in
-                        offsets.map { store.shops[$0] }.forEach(store.deleteShop)
+                        for offset in offsets {
+                            if case .shop(let id) = entries[offset], let shop = store.shop(for: id) { store.deleteShop(shop) }
+                        }
                     }
-                    .onMove { store.shops.move(fromOffsets: $0, toOffset: $1) }
+                    .onMove { offsets, destination in
+                        var arranged = entries
+                        arranged.move(fromOffsets: offsets, toOffset: destination)
+                        store.shops = ChipOrder.shops(store.shops, arrangedBy: arranged)
+                        travelPosition = ChipOrder.position(of: arranged)
+                    }
                 } header: {
                     Text("Your stores")
                 } footer: {
-                    Text("Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
+                    Text("Drag to put the stores, and Travel, in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
                 }
 
                 Section {

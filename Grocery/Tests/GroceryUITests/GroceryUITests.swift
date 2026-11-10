@@ -160,8 +160,17 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Make ahead, freezes well"].exists)
     }
 
+    /// Chips in the horizontal store bar can sit past the screen edge, where isHittable can't answer.
+    private func onScreen(_ element: XCUIElement) -> Bool {
+        let width = app.windows.firstMatch.frame.width
+        return element.exists && element.frame.minX >= 0 && element.frame.maxX <= width
+    }
+
     func testTripItemsStayOffTheEverydayList() {
-        app.buttons["Travel"].tap()
+        // Travel sits after the stores, so the chip bar may need a swipe to reach it.
+        let travel = app.buttons["Travel"]
+        for _ in 0..<3 where !onScreen(travel) { app.buttons["Anywhere"].swipeLeft() }
+        travel.tap()
         XCTAssertTrue(app.navigationBars["Travel"].waitForExistence(timeout: 5), "Travel is its own list")
         let field = app.textFields["quickAddField"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
@@ -169,6 +178,7 @@ final class GroceryUITests: XCTestCase {
         field.typeText("passport holder")
         app.buttons["Add items"].tap()
         XCTAssertTrue(item("Passport holder").waitForExistence(timeout: 5), "it shows under Travel")
+        for _ in 0..<3 where !onScreen(app.buttons["All"]) { travel.swipeRight() }
         app.buttons["All"].tap()
         XCTAssertTrue(app.navigationBars["Groceries"].waitForExistence(timeout: 5))
         XCTAssertTrue(item("Milk").waitForExistence(timeout: 5))

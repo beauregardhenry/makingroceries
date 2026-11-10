@@ -227,3 +227,40 @@ final class MakeAheadTests: StoreTestCase {
         XCTAssertEqual(store.meals.count, 1)
     }
 }
+
+final class ChipOrderTests: XCTestCase {
+    private let shops = [Shop(name: "Kroger"), Shop(name: "Walmart"), Shop(name: "Aldi")]
+
+    func testTravelIsLastUntilYouMoveIt() {
+        let entries = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)
+        XCTAssertEqual(entries.last, .travel)
+        XCTAssertEqual(entries.count, 4)
+    }
+
+    func testTravelSitsWhereYouPutIt() {
+        let entries = ChipOrder.entries(shops: shops, travelPosition: 1)
+        XCTAssertEqual(entries[1], .travel)
+        XCTAssertEqual(entries[0], .shop(shops[0].id))
+        XCTAssertEqual(entries[2], .shop(shops[1].id))
+    }
+
+    func testAPositionPastTheEndStillShowsTravel() {
+        XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: 99).last, .travel)
+        XCTAssertEqual(ChipOrder.entries(shops: [], travelPosition: 2), [.travel])
+    }
+
+    func testMovingChipsSavesBothTheStoreOrderAndTravelsPlace() {
+        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)
+        arranged.move(fromOffsets: [3], toOffset: 0)   // Travel to the front
+        XCTAssertEqual(ChipOrder.position(of: arranged), 0)
+        arranged.move(fromOffsets: [2], toOffset: 0)   // then Walmart ahead of it
+        XCTAssertEqual(ChipOrder.shops(shops, arrangedBy: arranged).map(\.name), ["Walmart", "Kroger", "Aldi"])
+        XCTAssertEqual(ChipOrder.position(of: arranged), 1)
+    }
+
+    func testTravelMovedToTheEndStaysLastWhenStoresAreAdded() {
+        var arranged = ChipOrder.entries(shops: shops, travelPosition: 0)
+        arranged.move(fromOffsets: [0], toOffset: 4)
+        XCTAssertEqual(ChipOrder.position(of: arranged), ChipOrder.last)
+    }
+}
