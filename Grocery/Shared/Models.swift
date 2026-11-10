@@ -319,4 +319,5 @@ struct Backup: Codable {
     var plan: [PlannedMeal]? = nil
     var stock: [StockEntry]? = nil
     var spending: [SpendRecord]? = nil
+    var goals: [Goal]? = nil
 }
