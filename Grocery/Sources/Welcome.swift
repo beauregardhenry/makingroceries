@@ -70,7 +70,7 @@ struct WelcomeView: View {
                                 .disabled(custom.trimmingCharacters(in: .whitespaces).isEmpty)
                         }
                         Text(picked.isEmpty
-                             ? "You can skip this. Everything goes under Anywhere until you add stores."
+                             ? "You can skip this. Everything goes on one list until you add stores."
                              : "Each store gets its own list. You can change these any time in Settings › Stores.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }

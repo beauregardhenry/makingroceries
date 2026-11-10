@@ -11,7 +11,6 @@ struct ShopBar: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
-                chip(Shop.noStoreName, isSelected: selection == .anyStore) { selection = .anyStore }
                 ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition), id: \.self) { entry in
                     switch entry {
                     case .travel:

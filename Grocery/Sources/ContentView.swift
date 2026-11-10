@@ -49,7 +49,6 @@ struct ContentView: View {
         switch filter {
         case .travel: item.forTravel
         case .all: !item.forTravel
-        case .anyStore: !item.forTravel && item.shopID == nil
         case .shop(let id): !item.forTravel && item.shopID == id
         }
     }
@@ -84,7 +83,6 @@ struct ContentView: View {
     private var navigationTitle: String {
         switch filter {
         case .all: "Groceries"
-        case .anyStore: Shop.noStoreName
         case .travel: "Travel"
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }

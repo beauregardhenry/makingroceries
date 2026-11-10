@@ -41,7 +41,7 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(item("Bananas").exists)
         XCTAssertTrue(item("Milk").exists)
         XCTAssertTrue(item("Sourdough").exists)
-        for store in ["All", "Anywhere", "Kroger", "Walmart"] {
+        for store in ["All", "Kroger", "Walmart"] {
             XCTAssertTrue(app.buttons[store].exists, "\(store) chip")
         }
     }
@@ -184,7 +184,7 @@ final class GroceryUITests: XCTestCase {
     func testTripItemsStayOffTheEverydayList() {
         // Travel sits after the stores, so the chip bar may need a swipe to reach it.
         let travel = app.buttons["Travel"]
-        for _ in 0..<3 where !onScreen(travel) { app.buttons["Anywhere"].swipeLeft() }
+        for _ in 0..<3 where !onScreen(travel) { app.buttons["All"].swipeLeft() }
         travel.tap()
         XCTAssertTrue(app.navigationBars["Travel"].waitForExistence(timeout: 5), "Travel is its own list")
         let field = app.textFields["quickAddField"]
