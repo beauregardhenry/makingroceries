@@ -274,6 +274,8 @@ struct SettingsView: View {
                            tint: .blue) { sheet = .shops }
                     HubRow(title: "Family Members", systemImage: "person.2.fill",
                            detail: "Who clothing is for", tint: .purple) { sheet = .people }
+                    HubRow(title: "Custom Aisles", systemImage: "signpost.right.fill",
+                           detail: "Your own sections beside the categories", tint: .indigo) { sheet = .aisles }
                     HubRow(title: "Allergies & Avoid List", systemImage: "exclamationmark.shield", detail: nil,
                            tint: .red) { sheet = .avoid }
                 }
@@ -294,6 +296,7 @@ struct SettingsView: View {
                 case .shops: ManageShopsView()
                 case .avoid: AvoidListView()
                 case .people: FamilyMembersView()
+                case .aisles: CustomAislesView()
                 case .sync: HouseholdSyncView()
                 case .cloud: CloudSyncView()
                 case .backup: BackupView()

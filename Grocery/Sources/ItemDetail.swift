@@ -43,8 +43,14 @@ struct ItemDetailView: View {
                                 .textInputAutocapitalization(.never)
                         }
                     } else {
-                        Picker("Aisle", selection: $draft.aisle) {
+                        Picker("Category", selection: $draft.aisle) {
                             ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                        }
+                        if !store.customAisles.isEmpty || draft.customAisleID != nil {
+                            Picker("Aisle", selection: $draft.customAisleID) {
+                                Text("None").tag(UUID?.none)
+                                ForEach(store.customAisles) { Text($0.name).tag(UUID?.some($0.id)) }
+                            }
                         }
                         Picker("Store", selection: $draft.shopID) {
                             Text(Shop.noStoreName).tag(UUID?.none)

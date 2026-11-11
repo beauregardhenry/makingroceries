@@ -25,6 +25,7 @@ extension GroceryStore {
         case "spending": encoded(spending)
         case "goals": encoded(goals)
         case "people": encoded(people)
+        case "customAisles": encoded(customAisles)
         default: nil
         }
     }
@@ -46,6 +47,7 @@ extension GroceryStore {
         case "spending": merge(\.spending, remote, base)
         case "goals": merge(\.goals, remote, base)
         case "people": merge(\.people, remote, base)
+        case "customAisles": merge(\.customAisles, remote, base)
         default: nil
         }
     }
