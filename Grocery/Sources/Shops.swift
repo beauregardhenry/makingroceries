@@ -141,7 +141,7 @@ struct ManageShopsView: View {
 
                 Section("Add your own") {
                     HStack {
-                        TextField("Custom store name", text: $customName)
+                        TextField("Custom store name", text: $customName).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit(addCustom)
                         Button("Add", action: addCustom)
@@ -182,7 +182,7 @@ struct ShopMapView: View {
         if let i = store.shops.firstIndex(where: { $0.id == shopID }) {
             List {
                 Section {
-                    TextField("Store name", text: $store.shops[i].name)
+                    TextField("Store name", text: $store.shops[i].name).textInputAutocapitalization(.words)
                     Picker("Type", selection: Binding(
                         get: { store.shops[i].kind ?? .grocery },
                         set: { kind in
@@ -206,7 +206,7 @@ struct ShopMapView: View {
                                 AisleBadge(aisle: aisle, size: 28)
                                 Text(aisle.rawValue)
                                 Spacer()
-                                TextField("Aisle", text: labelBinding(index: i, aisle: aisle))
+                                TextField("Aisle", text: labelBinding(index: i, aisle: aisle)).textInputAutocapitalization(.words)
                                     .multilineTextAlignment(.trailing)
                                     .foregroundStyle(.secondary)
                                     .frame(maxWidth: 120)

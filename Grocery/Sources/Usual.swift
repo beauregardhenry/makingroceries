@@ -20,7 +20,7 @@ struct UsualView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Add usual items: milk, eggs, rice", text: $newText)
+                        TextField("Add usual items: milk, eggs, rice", text: $newText).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit(addNew)
                         Button("Add", action: addNew)

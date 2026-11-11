@@ -176,7 +176,7 @@ struct HouseholdSyncView: View {
             Form {
                 Section {
                     Toggle("Sync with my household", isOn: $enabled)
-                    TextField("Your name (shown to them)", text: $myName)
+                    TextField("Your name (shown to them)", text: $myName).textInputAutocapitalization(.words)
                 } footer: {
                     Text("Phones with the same household code keep one list while the app is open on each, over your Wi-Fi or Bluetooth. Nothing goes through iCloud or any server.")
                 }

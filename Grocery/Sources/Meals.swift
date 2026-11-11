@@ -130,7 +130,7 @@ struct MealEditorView: View {
         if let i = store.meals.firstIndex(where: { $0.id == mealID }) {
             List {
                 Section("Name") {
-                    TextField("Meal name", text: $store.meals[i].name)
+                    TextField("Meal name", text: $store.meals[i].name).textInputAutocapitalization(.words)
                 }
 
                 Section {
@@ -152,7 +152,7 @@ struct MealEditorView: View {
                     ForEach($store.meals[i].ingredients) { $ingredient in
                         HStack {
                             AisleBadge(aisle: ingredient.aisle, size: 24)
-                            TextField("Ingredient", text: $ingredient.name)
+                            TextField("Ingredient", text: $ingredient.name).textInputAutocapitalization(.words)
                             if let amount = ingredient.amount, let unit = ingredient.unit {
                                 Text(Amount.text(amount * batch.rawValue, unit: unit))
                                     .foregroundStyle(.secondary).monospacedDigit()
@@ -168,7 +168,7 @@ struct MealEditorView: View {
                     .onDelete { store.meals[i].ingredients.remove(atOffsets: $0) }
 
                     HStack {
-                        TextField("Add ingredients: rice, 2 chicken, broccoli", text: $newText)
+                        TextField("Add ingredients: rice, 2 chicken, broccoli", text: $newText).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit { addIngredients(to: i) }
                         Button("Add") { addIngredients(to: i) }
@@ -277,7 +277,7 @@ struct RecipeImportView: View {
                 }
 
                 Section("Meal name") {
-                    TextField("Name", text: $name)
+                    TextField("Name", text: $name).textInputAutocapitalization(.words)
                 }
             }
             .navigationTitle("Import Recipe")

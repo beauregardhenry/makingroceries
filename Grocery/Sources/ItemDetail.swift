@@ -30,7 +30,7 @@ struct ItemDetailView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Name", text: $draft.name)
+                    TextField("Name", text: $draft.name).textInputAutocapitalization(.words)
                     Stepper("Quantity: \(draft.quantity)", value: $draft.quantity, in: 1...99)
                     if draft.forRegistry {
                         Picker("For", selection: $draft.giftForID) {
