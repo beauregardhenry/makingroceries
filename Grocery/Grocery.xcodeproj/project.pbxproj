@@ -169,6 +169,7 @@
 		AD9935CE2CD441B7AA2E68CB /* CustomAisles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B91889151CDD09B6E397F9 /* CustomAisles.swift */; };
 		AE47D7AC85ED757BCFAD9CD4 /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
 		B099E857BDD2AECDD992B6E6 /* GroceryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */; };
+		B30A3E3B16C07632C3CF2D28 /* NamedListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087F6E7A6445574F4E4C7D97 /* NamedListEditor.swift */; };
 		B3348D5ED3CEFAFA2B6F2094 /* GroceryWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B3F235C58281C05F0C5653EA /* DataSafetyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA84F222BE3263A689CDBF7 /* DataSafetyTests.swift */; };
 		B5996344E422C1DDDBA8A222 /* GroceryStore+Items.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F7AE0D6968690D09E95244 /* GroceryStore+Items.swift */; };
@@ -295,6 +296,7 @@
 		04FB05AD2C022503F3312ACE /* WatchSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSync.swift; sourceTree = "<group>"; };
 		059AF13D22F39FDC63FACC9E /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookIdeas.swift; sourceTree = "<group>"; };
+		087F6E7A6445574F4E4C7D97 /* NamedListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedListEditor.swift; sourceTree = "<group>"; };
 		0888DE257A824E4BD76E9F5D /* AvoidList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvoidList.swift; sourceTree = "<group>"; };
 		08BD5D7C2EC353FFBCC212F3 /* GroceryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryStore.swift; sourceTree = "<group>"; };
 		0A4732E4B34448CAA178CE26 /* CalendarAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAccess.swift; sourceTree = "<group>"; };
@@ -481,6 +483,7 @@
 				4691D557CE9C234D697E7654 /* ItemRow.swift */,
 				5A5651E045DA1087FDFC9CB0 /* LiveSync.swift */,
 				037FD404E088F37C6CAFE4DF /* Meals.swift */,
+				087F6E7A6445574F4E4C7D97 /* NamedListEditor.swift */,
 				F5540C70E607A8459DCCDAB9 /* Pantry.swift */,
 				A14032117470AF68E950FAAF /* Photos.swift */,
 				3FFB8D712FA685DD46F21593 /* Planner.swift */,
@@ -870,6 +873,7 @@
 				7C5DBDBAB34CDD46EE3C1F06 /* MealPlan.swift in Sources */,
 				A26CD52107A02B7289480662 /* Meals.swift in Sources */,
 				E66C9069C4B911EE0B982A6A /* Models.swift in Sources */,
+				B30A3E3B16C07632C3CF2D28 /* NamedListEditor.swift in Sources */,
 				BB6C69D08BBD77C9CD04A46A /* NearbyStore.swift in Sources */,
 				E1EE5F13C79E3D7D69662958 /* Pantry.swift in Sources */,
 				4E94074FF4F875A0B76C9D19 /* Parsing.swift in Sources */,
