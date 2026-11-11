@@ -229,6 +229,15 @@ final class MakeAheadTests: StoreTestCase {
 }
 
 final class ChipOrderTests: XCTestCase {
+    func testEachSpecialChipDescribesItselfAndItsList() {
+        XCTAssertEqual([ChipEntry.travel, .clothing, .registry].map(\.title), ["Travel", "Clothing", "Registry"])
+        XCTAssertEqual([ChipEntry.travel, .clothing, .registry].map(\.filter), [.travel, .clothing, .registry])
+        XCTAssertTrue([ChipEntry.travel, .clothing, .registry].allSatisfy { $0.symbol != nil })
+        let id = UUID()
+        XCTAssertNil(ChipEntry.shop(id).title)
+        XCTAssertEqual(ChipEntry.shop(id).filter, .shop(id))
+    }
+
     private let shops = [Shop(name: "Kroger"), Shop(name: "Walmart"), Shop(name: "Aldi")]
 
     func testTravelThenClothingComeAfterTheStoresUntilYouMoveThem() {
