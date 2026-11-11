@@ -1,5 +1,4 @@
 import XCTest
-@testable import Grocery
 
 final class CustomAisleTests: StoreTestCase {
     func testAddingTrimsAndRejectsDuplicatesAndCategoryNames() {
