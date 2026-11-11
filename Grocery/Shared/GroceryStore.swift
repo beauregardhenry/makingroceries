@@ -55,12 +55,12 @@ final class GroceryStore {
         didSet { persist(\.people, "people") }
     }
 
-    /// Sections you named yourself, like "Aisle 5" or "Baking", next to the built-in categories.
     /// The people gifts are kept for on the Registry list.
     var registryPeople: [RegistryPerson] = [] {
         didSet { persist(\.registryPeople, "registryPeople") }
     }
 
+    /// Sections you named yourself, like "Aisle 5" or "Baking", next to the built-in categories.
     var customAisles: [CustomAisle] = [] {
         didSet { persist(\.customAisles, "customAisles") }
     }
@@ -98,19 +98,7 @@ final class GroceryStore {
     /// Picks up anything a widget, Siri, the share sheet or the watch saved since this copy last looked,
     /// merging it with this copy's own changes. Files that haven't changed aren't touched.
     func reload() {
-        refresh(\.items, "grocery", refreshesWidgets: true)
-        refresh(\.shops, "shops", refreshesWidgets: true)
-        refresh(\.favorites, "favorites")
-        refresh(\.meals, "meals")
-        refresh(\.history, "history")
-        refresh(\.recurring, "recurring")
-        refresh(\.plan, "plan")
-        refresh(\.stock, "stock")
-        refresh(\.spending, "spending")
-        refresh(\.goals, "goals")
-        refresh(\.people, "people")
-        refresh(\.customAisles, "customAisles")
-        refresh(\.registryPeople, "registryPeople")
+        for list in Self.lists { list.reload(self) }
         applyRecurring()
     }
 
@@ -118,29 +106,67 @@ final class GroceryStore {
     private func load() -> Bool {
         suppressWrites = true
         defer { suppressWrites = false }
-        // Sample items only on a true first run. An unreadable list starts empty instead, so the sample
-        // items can never be saved over a list that merely failed to load.
-        let itemsFile = readFile([GroceryItem].self, "grocery")
-        let shopsFile = readFile([Shop].self, "shops")
-        items = value(of: itemsFile, ifMissing: Self.sampleItems)
-        shops = value(of: shopsFile, ifMissing: Shop.defaultNames.map { Shop(name: $0) })
-        favorites = value(of: readFile([Favorite].self, "favorites"), ifMissing: [])
-        meals = value(of: readFile([Meal].self, "meals"), ifMissing: [])
-        let historyFile = readFile([PastItem].self, "history")
-        history = value(of: historyFile, ifMissing: [])
-        recurring = value(of: readFile([RecurringItem].self, "recurring"), ifMissing: [])
-        plan = value(of: readFile([PlannedMeal].self, "plan"), ifMissing: [])
-        stock = value(of: readFile([StockEntry].self, "stock"), ifMissing: [])
-        spending = value(of: readFile([SpendRecord].self, "spending"), ifMissing: [])
-        goals = value(of: readFile([Goal].self, "goals"), ifMissing: [])
-        people = value(of: readFile([Person].self, "people"), ifMissing: [])
-        customAisles = value(of: readFile([CustomAisle].self, "customAisles"), ifMissing: [])
-        registryPeople = value(of: readFile([RegistryPerson].self, "registryPeople"), ifMissing: [])
+        // Each list reads its own file; a missing list starts from its fallback (sample items, the default
+        // stores), but an unreadable one starts empty, so a fallback can never be saved over a list that
+        // merely failed to load.
+        var missing: Set<String> = []
+        for list in Self.lists where list.read(self) { missing.insert(list.name) }
         // Only a truly fresh install counts as a first run: one missing file on its own (after a
         // partial restore, say) must never lead setup to replace stores or clear history.
-        if case .missing = itemsFile, case .missing = shopsFile, case .missing = historyFile { isFirstRun = true }
-        if case .missing = historyFile { return true }
-        return false
+        if ["grocery", "shops", "history"].allSatisfy(missing.contains) { isFirstRun = true }
+        return missing.contains("history")
+    }
+
+    // MARK: The lists
+
+    /// Every list the app saves and syncs, in the order they are sent. A new list needs its property above
+    /// (with the `didSet` that saves it), a line here, and a field in `Backup`.
+    static let lists: [StoredList] = [
+        list("grocery", \.items, fallback: sampleItems, widgets: true),
+        list("shops", \.shops, fallback: Shop.defaultNames.map { Shop(name: $0) }, widgets: true),
+        list("favorites", \.favorites),
+        list("meals", \.meals),
+        list("history", \.history),
+        list("recurring", \.recurring),
+        list("plan", \.plan),
+        list("stock", \.stock),
+        list("spending", \.spending),
+        list("goals", \.goals),
+        list("people", \.people),
+        list("customAisles", \.customAisles),
+        list("registryPeople", \.registryPeople),
+    ]
+
+    private static func list<Element: Codable & Equatable & Identifiable>(
+        _ name: String, _ keyPath: ReferenceWritableKeyPath<GroceryStore, [Element]>,
+        fallback: @autoclosure @escaping () -> [Element] = [], widgets: Bool = false
+    ) -> StoredList {
+        StoredList(
+            name: name,
+            reload: { $0.refresh(keyPath, name, refreshesWidgets: widgets) },
+            read: { store in
+                let file = store.readFile([Element].self, name)
+                store[keyPath: keyPath] = store.value(of: file, ifMissing: fallback())
+                if case .missing = file { return true }
+                return false
+            },
+            encode: { store in
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .sortedKeys
+                return try? encoder.encode(store[keyPath: keyPath])
+            },
+            merge: { store, remote, base in
+                guard let theirs = try? JSONDecoder().decode([Element].self, from: remote) else { return nil }
+                let baseList = base.flatMap { try? JSONDecoder().decode([Element].self, from: $0) } ?? []
+                let merged = ListMerge.merge(base: baseList, ours: store[keyPath: keyPath], theirs: theirs)
+                // Setting the list saves it to its file as usual, which the widget and Siri read.
+                if merged != store[keyPath: keyPath] { store[keyPath: keyPath] = merged }
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .sortedKeys
+                return try? encoder.encode(merged)
+            },
+            clear: { $0[keyPath: keyPath] = [] }
+        )
     }
 
     // MARK: Storage
@@ -272,4 +298,20 @@ final class GroceryStore {
         NSFileCoordinator().coordinate(writingItemAt: url, options: .forMerging, error: &error, byAccessor: body)
         if error != nil { body(url) }
     }
+}
+
+/// One saved list, seen without its type: what the app does with each file (load it, pick up changes from
+/// other processes, send it to iCloud, merge a copy from iCloud). Built by `GroceryStore.lists`.
+struct StoredList {
+    let name: String
+    /// Merges in what another process saved since this copy last looked.
+    let reload: (GroceryStore) -> Void
+    /// Reads the file into memory without writing it back. True when the file was missing.
+    let read: (GroceryStore) -> Bool
+    /// This copy as the cloud stores it.
+    let encode: (GroceryStore) -> Data?
+    /// Merges a cloud copy (and the copy both sides last agreed on) into this phone's list.
+    let merge: (GroceryStore, Data, Data?) -> Data?
+    /// Empties the list (tests).
+    let clear: (GroceryStore) -> Void
 }

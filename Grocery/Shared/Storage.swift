@@ -2,7 +2,8 @@ import Foundation
 
 enum Storage {
     static let groupID = "group.com.beauregardhenry.makingroceries"
-    static let fileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring", "plan", "stock", "spending", "goals", "people", "customAisles", "registryPeople"]
+    /// The saved files, from the table of lists in `GroceryStore.lists`.
+    static var fileNames: [String] { GroceryStore.lists.map(\.name) }
 
     /// The app group container when there is one, so widgets and Siri see the same data;
     /// otherwise Documents. Files from earlier versions are copied across once.
