@@ -191,7 +191,7 @@ private struct AddGoalSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("What are you saving for?", text: $name)
+                    TextField("What are you saving for?", text: $name).textInputAutocapitalization(.words)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
@@ -247,7 +247,7 @@ private struct UnexpectedSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("What came up? (van repair, vet bill…)", text: $name)
+                    TextField("What came up? (van repair, vet bill…)", text: $name).textInputAutocapitalization(.words)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
@@ -349,7 +349,7 @@ private struct EditGoalSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Name", text: $name)
+                    TextField("Name", text: $name).textInputAutocapitalization(.words)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }

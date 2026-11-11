@@ -16,7 +16,7 @@ struct CustomAislesView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Aisle name (Aisle 5, Baking, Bulk…)", text: $newName)
+                        TextField("Aisle name (Aisle 5, Baking, Bulk…)", text: $newName).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit(add)
                         Button("Add", action: add)
@@ -25,7 +25,7 @@ struct CustomAislesView: View {
                 }
                 Section {
                     ForEach($store.customAisles) { $aisle in
-                        TextField("Name", text: $aisle.name)
+                        TextField("Name", text: $aisle.name).textInputAutocapitalization(.words)
                     }
                     .onDelete { offsets in offsets.map { store.customAisles[$0].id }.forEach(store.deleteCustomAisle) }
                     .onMove { store.customAisles.move(fromOffsets: $0, toOffset: $1) }

@@ -715,7 +715,7 @@ struct AddItemView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Item name", text: $name)
+                TextField("Item name", text: $name).textInputAutocapitalization(.words)
                 Button("Scan Barcode", systemImage: "barcode.viewfinder") { showingScanner = true }
                 if isLookingUp {
                     HStack { ProgressView(); Text("Looking up product…").foregroundStyle(.secondary) }

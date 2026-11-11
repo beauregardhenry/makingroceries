@@ -16,7 +16,7 @@ struct RegistryPeopleView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Name (Grandma, Emma, Mr. Lee…)", text: $newName)
+                        TextField("Name (Grandma, Emma, Mr. Lee…)", text: $newName).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit(add)
                         Button("Add", action: add)
@@ -26,7 +26,7 @@ struct RegistryPeopleView: View {
                 Section {
                     ForEach($store.registryPeople) { $person in
                         VStack(alignment: .leading) {
-                            TextField("Name", text: $person.name)
+                            TextField("Name", text: $person.name).textInputAutocapitalization(.words)
                             HStack {
                                 Toggle("Birthday", isOn: Binding(
                                     get: { person.birthday != nil },

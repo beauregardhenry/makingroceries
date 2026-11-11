@@ -16,7 +16,7 @@ struct FamilyMembersView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Name (Mom, Emma, Jake…)", text: $newName)
+                        TextField("Name (Mom, Emma, Jake…)", text: $newName).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit(add)
                         Button("Add", action: add)
@@ -25,7 +25,7 @@ struct FamilyMembersView: View {
                 }
                 Section {
                     ForEach($store.people) { $person in
-                        TextField("Name", text: $person.name)
+                        TextField("Name", text: $person.name).textInputAutocapitalization(.words)
                     }
                     .onDelete { offsets in offsets.map { store.people[$0].id }.forEach(store.deletePerson) }
                     .onMove { store.people.move(fromOffsets: $0, toOffset: $1) }

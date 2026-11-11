@@ -19,7 +19,7 @@ struct AvoidListView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Add something to avoid", text: $newWord)
+                        TextField("Add something to avoid", text: $newWord).textInputAutocapitalization(.words)
                             .submitLabel(.done)
                             .onSubmit { add(newWord) }
                         Button("Add") { add(newWord) }.disabled(newWord.trimmingCharacters(in: .whitespaces).count < 3)
