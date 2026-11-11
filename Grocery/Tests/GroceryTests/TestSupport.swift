@@ -15,19 +15,7 @@ class StoreTestCase: XCTestCase {
         }
         try? FileManager.default.removeItem(at: Storage.directory.appending(path: "Recovered"))
         store = GroceryStore()
-        store.items = []
-        store.shops = []
-        store.favorites = []
-        store.meals = []
-        store.history = []
-        store.recurring = []
-        store.plan = []
-        store.stock = []
-        store.spending = []
-        store.goals = []
-        store.people = []
-        store.customAisles = []
-        store.registryPeople = []
+        GroceryStore.lists.forEach { $0.clear(store) }
     }
 
     func savedData(_ name: String) -> Data? {
