@@ -16,12 +16,8 @@ struct ShopBar: View {
                 ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition,
                                                   registryPosition: registryPosition), id: \.self) { entry in
                     switch entry {
-                    case .travel:
-                        chip("Travel", symbol: "airplane", isSelected: selection == .travel) { selection = .travel }
-                    case .clothing:
-                        chip("Clothing", symbol: "tshirt.fill", isSelected: selection == .clothing) { selection = .clothing }
-                    case .registry:
-                        chip("Registry", symbol: "gift.fill", isSelected: selection == .registry) { selection = .registry }
+                    case .travel, .clothing, .registry:
+                        chip(entry.title ?? "", symbol: entry.symbol, isSelected: selection == entry.filter) { selection = entry.filter }
                     case .shop(let id):
                         if let shop = store.shop(for: id) {
                             chip(shop.name.isEmpty ? "Unnamed store" : shop.name, symbol: shop.kind == .online ? "globe" : nil,
@@ -87,14 +83,8 @@ struct ManageShopsView: View {
                                                   registryPosition: registryPosition)
                     ForEach(entries, id: \.self) { entry in
                         switch entry {
-                        case .travel:
-                            Label("Travel", systemImage: "airplane")
-                                .deleteDisabled(true)
-                        case .clothing:
-                            Label("Clothing", systemImage: "tshirt.fill")
-                                .deleteDisabled(true)
-                        case .registry:
-                            Label("Registry", systemImage: "gift.fill")
+                        case .travel, .clothing, .registry:
+                            Label(entry.title ?? "", systemImage: entry.symbol ?? "")
                                 .deleteDisabled(true)
                         case .shop(let id):
                             if let shop = store.shop(for: id) {

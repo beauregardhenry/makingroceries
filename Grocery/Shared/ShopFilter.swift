@@ -37,6 +37,34 @@ enum ChipEntry: Hashable {
     case clothing
     case registry
     case shop(UUID)
+
+    /// The chip's name and icon, and the list it opens. A store's come from the store itself.
+    var title: String? {
+        switch self {
+        case .travel: "Travel"
+        case .clothing: "Clothing"
+        case .registry: "Registry"
+        case .shop: nil
+        }
+    }
+
+    var symbol: String? {
+        switch self {
+        case .travel: "airplane"
+        case .clothing: "tshirt.fill"
+        case .registry: "gift.fill"
+        case .shop: nil
+        }
+    }
+
+    var filter: ShopFilter {
+        switch self {
+        case .travel: .travel
+        case .clothing: .clothing
+        case .registry: .registry
+        case .shop(let id): .shop(id)
+        }
+    }
 }
 
 /// Where Travel and Clothing sit among the stores. The stores' own order is saved with the stores; each of
