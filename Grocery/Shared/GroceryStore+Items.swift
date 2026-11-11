@@ -5,7 +5,8 @@ extension GroceryStore {
 
     func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil, note: String? = nil,
              sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil,
-             travel: Bool = false, clothing: Bool = false, personID: UUID? = nil, clothingSize: String? = nil) {
+             travel: Bool = false, clothing: Bool = false, personID: UUID? = nil, clothingSize: String? = nil,
+             customAisleID: UUID? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         // A known size carries over from the last time you bought it.
@@ -17,6 +18,7 @@ extension GroceryStore {
         item.warning = warning
         item.isTravel = travel ? true : nil
         item.addedAt = Date()
+        item.customAisleID = clothing ? nil : customAisle(for: customAisleID)?.id
         if clothing {
             item.isClothing = true
             item.aisle = .clothing

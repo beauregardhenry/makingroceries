@@ -97,10 +97,23 @@ struct ContentView: View {
     }
 
     /// Sections follow the selected store's walking order, or the default order otherwise.
-    private var sections: [(Aisle, [GroceryItem])] {
-        (mappedShop?.orderedAisles ?? Aisle.allCases).compactMap { aisle in
-            let items = visibleItems.filter { $0.aisle == aisle }
-            return items.isEmpty ? nil : (aisle, items)
+    private var sections: [(section: AisleSection, items: [GroceryItem])] {
+        store.sectionGroups(visibleItems, shop: mappedShop)
+    }
+
+    private var customTints: [Color] { [.indigo, .mint, .brown, .cyan, .orange, .teal] }
+
+    /// A section's header: a built-in category keeps its icon and color, your own aisles get a sign.
+    private func makeSection(_ section: AisleSection, _ items: [GroceryItem]) -> DisplaySection {
+        switch section {
+        case .aisle(let aisle):
+            return DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol, aisle: aisle,
+                                  label: mappedShop?.label(for: aisle), items: items)
+        case .custom(let id):
+            let index = store.customAisles.firstIndex { $0.id == id } ?? 0
+            return DisplaySection(id: section.id, title: store.customAisle(for: id)?.name ?? "Aisle",
+                                  symbol: "signpost.right.fill", aisle: nil,
+                                  tint: customTints[index % customTints.count], label: nil, items: items)
         }
     }
 
@@ -152,17 +165,10 @@ struct ContentView: View {
 
     /// Normal view: by aisle. Shopping mode: what's still needed by aisle, then what's in the cart.
     private var displaySections: [DisplaySection] {
-        let order = mappedShop?.orderedAisles ?? Aisle.allCases
-        func make(_ aisle: Aisle, _ items: [GroceryItem]) -> DisplaySection {
-            DisplaySection(id: aisle.rawValue, title: aisle.rawValue, symbol: aisle.symbol, aisle: aisle,
-                           label: mappedShop?.label(for: aisle), items: items)
-        }
         if filter == .clothing { return clothingDisplaySections }
-        guard shoppingMode else { return sections.map { make($0.0, $0.1) } }
-        var result = order.compactMap { aisle -> DisplaySection? in
-            let items = visibleItems.filter { $0.aisle == aisle && !$0.isChecked }
-            return items.isEmpty ? nil : make(aisle, items)
-        }
+        guard shoppingMode else { return sections.map { makeSection($0.section, $0.items) } }
+        var result = store.sectionGroups(visibleItems.filter { !$0.isChecked }, shop: mappedShop)
+            .map { makeSection($0.section, $0.items) }
         let cart = visibleItems.filter(\.isChecked)
         if !cart.isEmpty {
             result.append(DisplaySection(id: "cart", title: "In the cart", symbol: "cart.fill", label: nil, items: cart))
@@ -188,9 +194,10 @@ struct ContentView: View {
     /// The visible list as plain text, grouped by aisle in walking order, for sharing.
     private var shareText: String {
         var lines = [filter == .all ? "Grocery list" : "\(navigationTitle) list"]
-        for (aisle, items) in sections {
-            var header = aisle.rawValue
-            if let label = mappedShop?.label(for: aisle) { header += " (\(label))" }
+        for (section, items) in sections {
+            let made = makeSection(section, items)
+            var header = made.title
+            if let label = made.label { header += " (\(label))" }
             lines += ["", header]
             for item in items {
                 var line = "\(item.isChecked ? "☑" : "☐") \(item.name)"
@@ -280,6 +287,7 @@ struct ContentView: View {
         case .settings: SettingsView()
         case .company: CompanyComingView(shopID: newItemShopID)
         case .people: FamilyMembersView()
+        case .aisles: CustomAislesView()
         }
     }
 
@@ -409,6 +417,7 @@ struct ContentView: View {
                 Divider()
                 Button("Send List to Family", systemImage: "person.2") { sheet = .send }
                 Button("Family Members", systemImage: "person.crop.circle.badge.plus") { sheet = .people }
+                Button("Custom Aisles", systemImage: "signpost.right") { sheet = .aisles }
                 ShareLink(item: shareText) {
                     Label("Share List as Text", systemImage: "square.and.arrow.up")
                 }
@@ -517,7 +526,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, people, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
+    case add, people, aisles, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
     var id: String { rawValue }
 }
 
@@ -642,6 +651,7 @@ struct AddItemView: View {
     @State private var name = ""
     @State private var quantity = 1
     @State private var aisle: Aisle = .produce
+    @State private var customAisleID: UUID?
     @State private var shopID: UUID?
     @State private var priceText = ""
     @State private var showingScanner = false
@@ -683,8 +693,14 @@ struct AddItemView: View {
                             .textInputAutocapitalization(.never)
                     }
                 } else {
-                    Picker("Aisle", selection: $aisle) {
+                    Picker("Category", selection: $aisle) {
                         ForEach(Aisle.allCases) { Label($0.rawValue, systemImage: $0.symbol).tag($0) }
+                    }
+                    if !store.customAisles.isEmpty {
+                        Picker("Aisle", selection: $customAisleID) {
+                            Text("None").tag(UUID?.none)
+                            ForEach(store.customAisles) { Text($0.name).tag(UUID?.some($0.id)) }
+                        }
                     }
                     Picker("Store", selection: $shopID) {
                         Text(Shop.noStoreName).tag(UUID?.none)
@@ -700,7 +716,8 @@ struct AddItemView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         store.add(name: name, quantity: quantity, aisle: aisle, shopID: clothing ? nil : shopID, price: Price.parse(priceText),
-                                  travel: clothing ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText)
+                                  travel: clothing ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText,
+                                  customAisleID: customAisleID)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -724,7 +741,8 @@ struct AddItemView: View {
                                                                     avoid: AvoidList.words))
                 store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
                           price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
-                          warning: warning, barcode: code, travel: travel, clothing: clothing, personID: personID)
+                          warning: warning, barcode: code, travel: travel, clothing: clothing, personID: personID,
+                          customAisleID: customAisleID)
                 if let warning {
                     // Don't hide a warning by closing the sheet.
                     lookupMessage = "Added \(product.name). Warning: \(warning)."

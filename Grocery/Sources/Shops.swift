@@ -189,28 +189,38 @@ struct ShopMapView: View {
                 }
 
                 Section {
-                    ForEach(store.shops[i].orderedAisles) { aisle in
+                    ForEach(store.shops[i].orderedSections(custom: store.customAisles)) { section in
                         HStack(spacing: 12) {
-                            AisleBadge(aisle: aisle, size: 28)
-                            Text(aisle.rawValue)
-                            Spacer()
-                            TextField("Aisle", text: labelBinding(index: i, aisle: aisle))
-                                .multilineTextAlignment(.trailing)
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: 120)
+                            switch section {
+                            case .aisle(let aisle):
+                                AisleBadge(aisle: aisle, size: 28)
+                                Text(aisle.rawValue)
+                                Spacer()
+                                TextField("Aisle", text: labelBinding(index: i, aisle: aisle))
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: 120)
+                            case .custom(let id):
+                                Image(systemName: "signpost.right.fill")
+                                    .frame(width: 28, height: 28)
+                                    .foregroundStyle(.indigo)
+                                Text(store.customAisle(for: id)?.name ?? "Aisle")
+                                Spacer()
+                                Text("Your aisle").font(.caption).foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .onMove { offsets, destination in
-                        var order = store.shops[i].orderedAisles
+                        var order = store.shops[i].orderedSections(custom: store.customAisles)
                         order.move(fromOffsets: offsets, toOffset: destination)
-                        store.shops[i].aisleOrder = order
+                        store.shops[i].setSectionOrder(order)
                         // Setting the order by hand means you don't want it changed underneath you.
                         store.shops[i].learnRoute = false
                     }
                 } header: {
-                    Text("Aisle order")
+                    Text("Category order")
                 } footer: {
-                    Text("Drag the handles to match the route you walk in this store. The list sorts this way when the store is selected. The optional label on the right, like \"Aisle 7\", shows in each section header.")
+                    Text("Drag the handles to match the route you walk in this store, including any custom aisles you made. The list sorts this way when the store is selected. The optional label on the right, like \"Aisle 7\", shows in each section header.")
                 }
 
                 Section {
@@ -259,8 +269,10 @@ struct ShopMapView: View {
                     Button("Reset to Default Order", role: .destructive) {
                         store.shops[i].aisleOrder = store.shops[i].defaultOrder
                         store.shops[i].aisleLabels = [:]
+                        store.shops[i].customAnchors = nil
                     }
-                    .disabled(store.shops[i].aisleOrder == store.shops[i].defaultOrder && store.shops[i].aisleLabels.isEmpty)
+                    .disabled(store.shops[i].aisleOrder == store.shops[i].defaultOrder && store.shops[i].aisleLabels.isEmpty
+                              && store.shops[i].customAnchors == nil)
                 }
             }
             .environment(\.editMode, .constant(.active))

@@ -79,6 +79,8 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var isClothing: Bool?
     /// Who the clothing is for.
     var personID: UUID?
+    /// Your own named section (see `CustomAisle`); the item shows there instead of under its category.
+    var customAisleID: UUID?
     /// Shown only in the item's long-press menu, never on the row.
     var clothingSize: String?
     /// When the size was last set or changed.
@@ -195,6 +197,9 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
     var routeEvents: [RouteEvent]?
     /// What the store sells; nil is a grocery store.
     var kind: ShopKind?
+    /// Where each custom aisle sits in this store: the category it follows, keyed by custom aisle id.
+    /// An empty value means first. See `orderedSections`.
+    var customAnchors: [String: String]?
 
     init(id: UUID = UUID(), name: String, kind: ShopKind? = nil) {
         self.id = id
@@ -216,6 +221,7 @@ struct Shop: Identifiable, Codable, Equatable, Hashable {
         learnRoute = try c.decodeIfPresent(Bool.self, forKey: .learnRoute)
         routeEvents = try c.decodeIfPresent([RouteEvent].self, forKey: .routeEvents)
         kind = try c.decodeIfPresent(ShopKind.self, forKey: .kind)
+        customAnchors = try c.decodeIfPresent([String: String].self, forKey: .customAnchors)
     }
 
     /// Every aisle exactly once: the saved order first, then any aisle it doesn't mention. A newer aisle
@@ -348,4 +354,5 @@ struct Backup: Codable {
     var spending: [SpendRecord]? = nil
     var goals: [Goal]? = nil
     var people: [Person]? = nil
+    var customAisles: [CustomAisle]? = nil
 }
