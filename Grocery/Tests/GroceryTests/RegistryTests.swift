@@ -14,9 +14,9 @@ final class RegistryTests: StoreTestCase {
 
     func testGiftsStayOffEveryOtherList() throws {
         let emma = try person("Emma")
-        store.add(name: "Lego set", quantity: 1, aisle: .toys, registry: true, giftForID: emma.id, occasion: "Birthday")
+        store.add(name: "Lego set", quantity: 1, aisle: .toys, list: .registry, giftForID: emma.id, occasion: "Birthday")
         let gift = store.items[0]
-        XCTAssertTrue(gift.forRegistry)
+        XCTAssertEqual(gift.list, .registry)
         XCTAssertTrue(gift.isSeparate)
         XCTAssertEqual(gift.occasion, "Birthday")
         XCTAssertNil(gift.shopID)
@@ -25,10 +25,10 @@ final class RegistryTests: StoreTestCase {
 
     func testSectionsFollowTheListWithUnassignedLastAndBoughtAtTheBottom() throws {
         let emma = try person("Emma"), jake = try person("Jake")
-        store.add(name: "Book", quantity: 1, aisle: .other, registry: true, giftForID: jake.id)
-        store.add(name: "Puzzle", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
-        store.add(name: "Bike", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
-        store.add(name: "Mystery", quantity: 1, aisle: .other, registry: true)
+        store.add(name: "Book", quantity: 1, aisle: .other, list: .registry, giftForID: jake.id)
+        store.add(name: "Puzzle", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
+        store.add(name: "Bike", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
+        store.add(name: "Mystery", quantity: 1, aisle: .other, list: .registry)
         store.toggle(store.items[1])
         let groups = store.registrySections(store.items)
         XCTAssertEqual(groups.map { $0.person?.name }, ["Emma", "Jake", nil])
@@ -37,7 +37,7 @@ final class RegistryTests: StoreTestCase {
 
     func testBuyingMarksWhenAndKeepsItOutOfGroceryHistory() throws {
         let emma = try person("Emma")
-        store.add(name: "Puzzle", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
+        store.add(name: "Puzzle", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
         store.toggle(store.items[0])
         XCTAssertTrue(store.items[0].isChecked)
         XCTAssertNotNil(store.items[0].boughtAt)
@@ -48,7 +48,7 @@ final class RegistryTests: StoreTestCase {
 
     func testDeletingAPersonKeepsTheirGifts() throws {
         let emma = try person("Emma")
-        store.add(name: "Puzzle", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
+        store.add(name: "Puzzle", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
         store.deleteRegistryPerson(emma.id)
         XCTAssertNil(store.items[0].giftForID)
         XCTAssertEqual(store.registrySections(store.items).map { $0.person?.name }, [nil])
@@ -56,7 +56,7 @@ final class RegistryTests: StoreTestCase {
 
     func testMovingAGiftToAnotherPerson() throws {
         let emma = try person("Emma"), jake = try person("Jake")
-        store.add(name: "Puzzle", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
+        store.add(name: "Puzzle", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
         store.move(store.items[0], toGiftFor: jake.id)
         XCTAssertEqual(store.items[0].giftForID, jake.id)
     }
@@ -75,8 +75,8 @@ final class RegistryTests: StoreTestCase {
     func testShareTextListsOnlyWhatIsStillNeeded() throws {
         let emma = try RegistryPerson(name: "Emma", birthday: Date(timeIntervalSince1970: 0))
         store.registryPeople = [emma]
-        store.add(name: "Puzzle", quantity: 2, aisle: .other, registry: true, giftForID: emma.id, occasion: "Birthday")
-        store.add(name: "Bike", quantity: 1, aisle: .other, registry: true, giftForID: emma.id)
+        store.add(name: "Puzzle", quantity: 2, aisle: .other, list: .registry, giftForID: emma.id, occasion: "Birthday")
+        store.add(name: "Bike", quantity: 1, aisle: .other, list: .registry, giftForID: emma.id)
         store.toggle(store.items[1])
         let text = RegistryInfo.shareText(gifts: store.items, sections: store.registrySections(store.items))
         XCTAssertTrue(text.hasPrefix("Gift list\n\nEmma (Birthday "))
@@ -92,9 +92,9 @@ final class RegistryTests: StoreTestCase {
         store.restore(backup)
         XCTAssertEqual(store.registryPeople.map(\.name), ["Emma"])
         let shop = Shop(name: "A")
-        let entries = ChipOrder.entries(shops: [shop], travelPosition: -1, clothingPosition: -2, registryPosition: -3)
-        XCTAssertEqual(entries, [.shop(shop.id), .travel, .clothing, .registry])
-        XCTAssertEqual(ChipOrder.position(of: entries, chip: .registry), -3)
-        XCTAssertEqual(ShopFilter(raw: ShopFilter.registry.raw), .registry)
+        let entries = ChipOrder.entries(shops: [shop])
+        XCTAssertEqual(entries, [.shop(shop.id), .list(.travel), .list(.clothing), .list(.registry)])
+        XCTAssertEqual(ChipOrder.position(of: entries, list: .registry), -3)
+        XCTAssertEqual(ShopFilter(raw: ShopFilter.list(.registry).raw), .list(.registry))
     }
 }

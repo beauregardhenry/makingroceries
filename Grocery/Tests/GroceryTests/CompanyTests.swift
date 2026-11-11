@@ -35,22 +35,22 @@ final class MealCategoryTests: StoreTestCase {
 final class TravelItemTests: StoreTestCase {
     func testTripItemsAreKeptSeparateFromTheSameItemOnTheList() {
         store.addOrBump(name: "Sunscreen", shopID: nil)
-        store.addOrBump(name: "Sunscreen", shopID: nil, travel: true)
+        store.addOrBump(name: "Sunscreen", shopID: nil, list: .travel)
         XCTAssertEqual(store.items.count, 2, "a trip item doesn't merge into the everyday one")
-        store.addOrBump(name: "Sunscreen", shopID: nil, travel: true)
-        XCTAssertEqual(store.items.filter(\.forTravel).first?.quantity, 2)
-        XCTAssertEqual(store.items.filter { !$0.forTravel }.first?.quantity, 1)
+        store.addOrBump(name: "Sunscreen", shopID: nil, list: .travel)
+        XCTAssertEqual(store.items.filter { $0.list == .travel }.first?.quantity, 2)
+        XCTAssertEqual(store.items.filter { $0.list != .travel }.first?.quantity, 1)
     }
 
     func testTripItemsStayOffTheWidgetAndWatch() {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
-        store.add(name: "Phone charger", quantity: 1, aisle: .electronics, travel: true)
+        store.add(name: "Phone charger", quantity: 1, aisle: .electronics, list: .travel)
         XCTAssertEqual(store.widgetItems(shopID: nil).map(\.name), ["Milk"])
         XCTAssertEqual(store.watchSnapshot().groups.flatMap(\.items).map(\.name), ["Milk"])
     }
 
     func testTravelIsAFilterThatSurvivesARestart() {
-        XCTAssertEqual(ShopFilter(raw: ShopFilter.travel.raw), .travel)
+        XCTAssertEqual(ShopFilter(raw: ShopFilter.list(.travel).raw), .list(.travel))
         XCTAssertEqual(ShopFilter(raw: "any"), .all, "the old Anywhere choice falls back to All")
         XCTAssertEqual(ShopFilter(raw: ""), .all)
     }
@@ -58,7 +58,7 @@ final class TravelItemTests: StoreTestCase {
     func testItemsSavedBeforeTravelAreNotForTravel() throws {
         let old = #"{"id":"6E13AA21-DC89-43D4-8946-D42B12D97A25","name":"Milk","quantity":1,"aisle":"Dairy & Eggs","isChecked":false}"#
         let item = try JSONDecoder().decode(GroceryItem.self, from: Data(old.utf8))
-        XCTAssertFalse(item.forTravel)
+        XCTAssertNotEqual(item.list, .travel)
     }
 }
 
@@ -229,63 +229,89 @@ final class MakeAheadTests: StoreTestCase {
 }
 
 final class ChipOrderTests: XCTestCase {
-    func testEachSpecialChipDescribesItselfAndItsList() {
-        XCTAssertEqual([ChipEntry.travel, .clothing, .registry].map(\.title), ["Travel", "Clothing", "Registry"])
-        XCTAssertEqual([ChipEntry.travel, .clothing, .registry].map(\.filter), [.travel, .clothing, .registry])
-        XCTAssertTrue([ChipEntry.travel, .clothing, .registry].allSatisfy { $0.symbol != nil })
+    private let shops = [Shop(name: "Kroger"), Shop(name: "Walmart"), Shop(name: "Aldi")]
+    private let travel = ChipEntry.list(.travel), clothing = ChipEntry.list(.clothing), registry = ChipEntry.list(.registry)
+
+    func testEachSeparateListDescribesItself() {
+        XCTAssertEqual(SeparateList.allCases.map(\.title), ["Travel", "Clothing", "Registry"])
+        XCTAssertEqual(SeparateList.allCases.map(\.symbol), ["airplane", "tshirt.fill", "gift.fill"])
+        XCTAssertEqual(ChipEntry.list(.clothing).filter, .list(.clothing))
         let id = UUID()
-        XCTAssertNil(ChipEntry.shop(id).title)
         XCTAssertEqual(ChipEntry.shop(id).filter, .shop(id))
+        XCTAssertEqual(ShopFilter.list(.registry).separateList, .registry)
+        XCTAssertNil(ShopFilter.all.separateList)
     }
 
-    private let shops = [Shop(name: "Kroger"), Shop(name: "Walmart"), Shop(name: "Aldi")]
+    func testAnItemsListIsSavedAsTheOldFlags() throws {
+        var item = GroceryItem(name: "Socks")
+        XCTAssertNil(item.list)
+        item.list = .clothing
+        XCTAssertEqual(item.isClothing, true)
+        XCTAssertNil(item.isTravel)
+        item.list = .travel
+        XCTAssertNil(item.isClothing)
+        XCTAssertEqual(item.isTravel, true)
+        // Saved data still carries only the flag, so a copy written by an older app reads back as a list.
+        var legacy = GroceryItem(name: "Gift")
+        legacy.isRegistry = true
+        let old = try JSONDecoder().decode(GroceryItem.self, from: JSONEncoder().encode(legacy))
+        XCTAssertEqual(old.list, .registry)
+        XCTAssertTrue(old.isSeparate)
+        item.list = nil
+        XCTAssertFalse(item.isSeparate)
+    }
 
-    func testTravelThenClothingComeAfterTheStoresUntilYouMoveThem() {
-        let entries = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)
-        XCTAssertEqual(Array(entries.suffix(3)), [.travel, .clothing, .registry])
+    func testChipPlacesAreStillSavedUnderTheOldSettingNames() {
+        XCTAssertEqual(SeparateList.allCases.map(ChipOrder.key), ["travelPosition", "clothingPosition", "registryPosition"])
+        XCTAssertEqual(SeparateList.allCases.map(ChipOrder.defaultPosition), [-1, -2, -3])
+    }
+
+    func testTravelThenClothingThenRegistryComeAfterTheStoresUntilYouMoveThem() {
+        let entries = ChipOrder.entries(shops: shops)
+        XCTAssertEqual(Array(entries.suffix(3)), [travel, clothing, registry])
         XCTAssertEqual(entries.count, 6)
     }
 
     func testTravelSitsWhereYouPutIt() {
-        let entries = ChipOrder.entries(shops: shops, travelPosition: 1)
-        XCTAssertEqual(entries[1], .travel)
+        let entries = ChipOrder.entries(shops: shops, positions: [.travel: 1])
+        XCTAssertEqual(entries[1], travel)
         XCTAssertEqual(entries[0], .shop(shops[0].id))
         XCTAssertEqual(entries[2], .shop(shops[1].id))
     }
 
     func testAPositionPastTheEndStillShowsBothChips() {
-        let entries = ChipOrder.entries(shops: shops, travelPosition: 99, clothingPosition: 99)
-        XCTAssertTrue(entries.contains(.travel) && entries.contains(.clothing))
-        XCTAssertEqual(ChipOrder.entries(shops: [], travelPosition: 2).count, 3)
+        let entries = ChipOrder.entries(shops: shops, positions: [.travel: 99, .clothing: 99])
+        XCTAssertTrue(entries.contains(travel) && entries.contains(clothing))
+        XCTAssertEqual(ChipOrder.entries(shops: [], positions: [.travel: 2]).count, 3)
     }
 
     func testMovingChipsSavesBothTheStoreOrderAndTheirPlaces() {
-        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C R
+        var arranged = ChipOrder.entries(shops: shops)   // K W A T C R
         arranged.move(fromOffsets: [3], toOffset: 0)   // Travel to the front: T K W A C R
-        XCTAssertEqual(ChipOrder.position(of: arranged), 0)
+        XCTAssertEqual(ChipOrder.position(of: arranged, list: .travel), 0)
         arranged.move(fromOffsets: [3], toOffset: 0)   // then Aldi ahead of it: A T K W C R
         XCTAssertEqual(ChipOrder.shops(shops, arrangedBy: arranged).map(\.name), ["Aldi", "Kroger", "Walmart"])
-        XCTAssertEqual(ChipOrder.position(of: arranged), 1)
-        XCTAssertEqual(ChipOrder.position(of: arranged, chip: .clothing), -1, "alone at the end, it is the first of the chips there")
+        XCTAssertEqual(ChipOrder.position(of: arranged, list: .travel), 1)
+        XCTAssertEqual(ChipOrder.position(of: arranged, list: .clothing), -1, "alone at the end, it is the first of the chips there")
     }
 
     func testClothingAndTravelKeepTheirOrderAtTheEnd() {
-        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C R
+        var arranged = ChipOrder.entries(shops: shops)   // K W A T C R
         arranged.move(fromOffsets: [4], toOffset: 3)                                     // K W A C T R
-        XCTAssertEqual(Array(arranged.suffix(3)), [.clothing, .travel, .registry])
-        let travel = ChipOrder.position(of: arranged), clothing = ChipOrder.position(of: arranged, chip: .clothing)
-        let registry = ChipOrder.position(of: arranged, chip: .registry)
-        XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: travel, clothingPosition: clothing,
-                                         registryPosition: registry), arranged)
+        XCTAssertEqual(Array(arranged.suffix(3)), [clothing, travel, registry])
+        let travelPlace = ChipOrder.position(of: arranged, list: .travel), clothingPlace = ChipOrder.position(of: arranged, list: .clothing)
+        let registryPlace = ChipOrder.position(of: arranged, list: .registry)
+        XCTAssertEqual(ChipOrder.entries(shops: shops, positions: [.travel: travelPlace, .clothing: clothingPlace,
+                                                                  .registry: registryPlace]), arranged)
     }
 
     func testBothChipsCanSitAmongTheStores() {
-        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C
-        arranged.move(fromOffsets: [4], toOffset: 1)                                     // K C W A T
-        let travel = ChipOrder.position(of: arranged), clothing = ChipOrder.position(of: arranged, chip: .clothing)
-        XCTAssertEqual(clothing, 1)
-        XCTAssertEqual(travel, ChipOrder.last)
-        XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: travel, clothingPosition: clothing), arranged)
+        var arranged = ChipOrder.entries(shops: shops)   // K W A T C R
+        arranged.move(fromOffsets: [4], toOffset: 1)                                     // K C W A T R
+        let places = Dictionary(uniqueKeysWithValues: SeparateList.allCases.map { ($0, ChipOrder.position(of: arranged, list: $0)) })
+        XCTAssertEqual(places[.clothing], 1)
+        XCTAssertEqual(places[.travel], -1)
+        XCTAssertEqual(ChipOrder.entries(shops: shops, positions: places), arranged)
     }
 }
 

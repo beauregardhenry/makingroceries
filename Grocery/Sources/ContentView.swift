@@ -47,9 +47,7 @@ struct ContentView: View {
 
     private func isVisible(_ item: GroceryItem) -> Bool {
         switch filter {
-        case .travel: item.forTravel
-        case .clothing: item.forClothing
-        case .registry: item.forRegistry
+        case .list(let list): item.list == list
         case .all: !item.isSeparate
         case .shop(let id): !item.isSeparate && item.shopID == id
         }
@@ -85,9 +83,7 @@ struct ContentView: View {
     private var navigationTitle: String {
         switch filter {
         case .all: "Groceries"
-        case .travel: "Travel"
-        case .clothing: "Clothing"
-        case .registry: "Registry"
+        case .list(let list): list.title
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }
     }
@@ -167,8 +163,8 @@ struct ContentView: View {
 
     /// Normal view: by aisle. Shopping mode: what's still needed by aisle, then what's in the cart.
     private var displaySections: [DisplaySection] {
-        if filter == .clothing { return clothingDisplaySections }
-        if filter == .registry { return registryDisplaySections }
+        if filter == .list(.clothing) { return clothingDisplaySections }
+        if filter == .list(.registry) { return registryDisplaySections }
         guard shoppingMode else { return sections.map { makeSection($0.section, $0.items) } }
         var result = store.sectionGroups(visibleItems.filter { !$0.isChecked }, shop: mappedShop)
             .map { makeSection($0.section, $0.items) }
@@ -210,7 +206,7 @@ struct ContentView: View {
 
     /// The visible list as plain text, grouped by aisle in walking order, for sharing.
     private var shareText: String {
-        if filter == .registry {
+        if filter == .list(.registry) {
             return RegistryInfo.shareText(gifts: visibleItems, sections: store.registrySections(visibleItems))
         }
         var lines = [filter == .all ? "Grocery list" : "\(navigationTitle) list"]
@@ -284,8 +280,7 @@ struct ContentView: View {
     @ViewBuilder
     private func sheetView(_ sheet: AppSheet) -> some View {
         switch sheet {
-        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel, clothing: filter == .clothing,
-                                  registry: filter == .registry)
+        case .add: AddItemView(shopID: newItemShopID, list: filter.separateList)
         case .shops: ManageShopsView()
         case .usual: UsualView(shopID: newItemShopID)
         case .meals: MealsView(shopID: newItemShopID, currentItems: visibleItems)
@@ -411,7 +406,7 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, clothing: filter == .clothing, registry: filter == .registry, focusRequest: quickAddRequest, prefill: quickAddPrefill,
+            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, list: filter.separateList, focusRequest: quickAddRequest, prefill: quickAddPrefill,
                         showsDue: !shoppingMode)
         }
         .padding(.horizontal)
@@ -484,9 +479,9 @@ struct ContentView: View {
                     ContentUnavailableView("Your list is empty", systemImage: "cart",
                                            description: Text(filter == .all
                                                              ? "Tap + to add your first item."
-                                                             : filter == .clothing
+                                                             : filter == .list(.clothing)
                                                              ? "Tap + to add clothing for someone. Add your family under ⋯ › Family Members."
-                                                             : filter == .registry
+                                                             : filter == .list(.registry)
                                                              ? "Tap + to add a gift idea. Add the people you buy for under ⋯ › Registry People."
                                                              : "Tap + to add something here."))
                 }

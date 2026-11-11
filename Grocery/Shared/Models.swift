@@ -73,8 +73,6 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     /// For a trip: kept off the everyday lists and shown under Travel. Nil means no.
     var isTravel: Bool?
 
-    var forTravel: Bool { isTravel == true }
-
     /// Clothing, kept on its own Clothing list under a header for each person. Nil means no.
     var isClothing: Bool?
     /// Who the clothing is for.
@@ -95,10 +93,44 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     /// When the item was added.
     var addedAt: Date?
 
-    var forClothing: Bool { isClothing == true }
-    /// On its own list, so it stays off All and the store lists.
-    var forRegistry: Bool { isRegistry == true }
-    var isSeparate: Bool { forTravel || forClothing || forRegistry }
+    /// The list of its own this item is on, kept off All and the store lists. Nil is an everyday item.
+    /// Saved as the three flags above, so older copies of the app and iCloud data still read it.
+    var list: SeparateList? {
+        get { isTravel == true ? .travel : isClothing == true ? .clothing : isRegistry == true ? .registry : nil }
+        set {
+            isTravel = newValue == .travel ? true : nil
+            isClothing = newValue == .clothing ? true : nil
+            isRegistry = newValue == .registry ? true : nil
+        }
+    }
+
+    var isSeparate: Bool { list != nil }
+}
+
+/// The lists that sit beside the stores, each kept off every other list.
+enum SeparateList: String, CaseIterable {
+    /// Items for a trip.
+    case travel
+    /// Clothing, organized by person.
+    case clothing
+    /// Gifts, organized by person.
+    case registry
+
+    var title: String {
+        switch self {
+        case .travel: "Travel"
+        case .clothing: "Clothing"
+        case .registry: "Registry"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .travel: "airplane"
+        case .clothing: "tshirt.fill"
+        case .registry: "gift.fill"
+        }
+    }
 }
 
 /// A family member clothing is bought for.
