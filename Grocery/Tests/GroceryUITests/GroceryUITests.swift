@@ -177,7 +177,7 @@ final class GroceryUITests: XCTestCase {
         dismissSheet()
 
         let clothing = app.buttons["Clothing"]
-        for _ in 0..<3 where !onScreen(clothing) { app.buttons["All"].swipeLeft() }
+        revealChip(clothing)
         clothing.tap()
         XCTAssertTrue(app.navigationBars["Clothing"].waitForExistence(timeout: 5))
         app.navigationBars["Clothing"].buttons["Add"].tap()
@@ -212,16 +212,58 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Make ahead, freezes well"].exists)
     }
 
+    func testRegistryKeepsGiftsUnderEachPerson() {
+        chooseFromMore("Registry People")
+        XCTAssertTrue(app.navigationBars["Registry People"].waitForExistence(timeout: 10))
+        let nameField = app.textFields["Name (Grandma, Emma, Mr. Lee…)"]
+        nameField.tap()
+        nameField.typeText("Grandma\n")
+        XCTAssertTrue(app.textFields["Grandma"].waitForExistence(timeout: 5), "Grandma is in the registry list")
+        dismissSheet()
+
+        let registry = app.buttons["Registry"]
+        revealChip(registry)
+        registry.tap()
+        XCTAssertTrue(app.navigationBars["Registry"].waitForExistence(timeout: 5))
+        app.navigationBars["Registry"].buttons["Add"].tap()
+        let sheet = app.navigationBars["New Item"]
+        XCTAssertTrue(sheet.waitForExistence(timeout: 5))
+        let name = app.textFields["Item name"]
+        name.tap()
+        name.typeText("Slippers")
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'For'")).firstMatch.tap()
+        app.buttons["Grandma"].tap()
+        sheet.buttons["Add"].tap()
+
+        XCTAssertTrue(item("Slippers").waitForExistence(timeout: 5), "the gift is listed")
+        XCTAssertTrue(app.staticTexts["Grandma"].exists, "under Grandma's header")
+        revealChip(app.buttons["All"], barY: registry.frame.midY)
+        app.buttons["All"].tap()
+        XCTAssertFalse(item("Slippers").exists, "gifts stay off the everyday list")
+    }
+
     /// Chips in the horizontal store bar can sit past the screen edge, where isHittable can't answer.
     private func onScreen(_ element: XCUIElement) -> Bool {
         let width = app.windows.firstMatch.frame.width
         return element.exists && element.frame.minX >= 0 && element.frame.maxX <= width
     }
 
+    /// Drags the chip bar until the chip is on screen, from a spot on the bar itself.
+    private func revealChip(_ chip: XCUIElement, barY: CGFloat? = nil) {
+        let window = app.windows.firstMatch
+        let y = (barY ?? app.buttons["All"].frame.midY) / window.frame.height
+        for _ in 0..<5 where !onScreen(chip) {
+            let toTheLeft = chip.frame.minX < 0
+            let from = window.coordinate(withNormalizedOffset: CGVector(dx: toTheLeft ? 0.15 : 0.85, dy: y))
+            let to = window.coordinate(withNormalizedOffset: CGVector(dx: toTheLeft ? 0.85 : 0.15, dy: y))
+            from.press(forDuration: 0.05, thenDragTo: to)
+        }
+    }
+
     func testTripItemsStayOffTheEverydayList() {
         // Travel sits after the stores, so the chip bar may need a swipe to reach it.
         let travel = app.buttons["Travel"]
-        for _ in 0..<3 where !onScreen(travel) { app.buttons["All"].swipeLeft() }
+        revealChip(travel)
         travel.tap()
         XCTAssertTrue(app.navigationBars["Travel"].waitForExistence(timeout: 5), "Travel is its own list")
         let field = app.textFields["quickAddField"]
@@ -261,7 +303,9 @@ final class GroceryUITests: XCTestCase {
         for (row, title) in [("App Icon", "App Icon"), ("Stores", "Stores"), ("Allergies & Avoid List", "Allergies & Avoid List"),
                              ("iCloud Sync", "iCloud Sync"), ("Live Sync", "Live Sync"), ("Back Up & Restore", "Back Up & Restore")] {
             XCTContext.runActivity(named: row) { _ in
-                app.buttons[row].firstMatch.tap()
+                let button = app.buttons[row].firstMatch
+                for _ in 0..<3 where !button.isHittable { app.swipeUp() }
+                button.tap()
                 XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10), "\(title) opens")
                 dismissSheet(backTo: "Settings")
             }

@@ -32,7 +32,16 @@ struct ItemDetailView: View {
                 Section {
                     TextField("Name", text: $draft.name)
                     Stepper("Quantity: \(draft.quantity)", value: $draft.quantity, in: 1...99)
-                    if draft.forClothing {
+                    if draft.forRegistry {
+                        Picker("For", selection: $draft.giftForID) {
+                            Text("Not assigned yet").tag(UUID?.none)
+                            ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
+                        }
+                        Picker("Occasion", selection: Binding(get: { draft.occasion ?? "" }, set: { draft.occasion = $0.isEmpty ? nil : $0 })) {
+                            Text("None").tag("")
+                            ForEach(RegistryOccasion.all, id: \.self) { Text($0).tag($0) }
+                        }
+                    } else if draft.forClothing {
                         Picker("For", selection: $draft.personID) {
                             Text("No one yet").tag(UUID?.none)
                             ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -59,7 +68,9 @@ struct ItemDetailView: View {
                         Toggle("For a trip", isOn: Binding(get: { draft.forTravel }, set: { draft.isTravel = $0 ? true : nil }))
                     }
                 } footer: {
-                    Text(draft.forClothing
+                    Text(draft.forRegistry
+                         ? "Gifts stay off your other lists. Find them under Registry. Checking one off marks it bought, so no one buys it twice."
+                         : draft.forClothing
                          ? "The size isn't shown on the list. Press and hold the item to see it, with the date it was added."
                          : "Trip items stay off your other lists. Find them under Travel.")
                 }

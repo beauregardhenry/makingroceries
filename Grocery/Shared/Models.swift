@@ -79,6 +79,13 @@ struct GroceryItem: Identifiable, Codable, Equatable {
     var isClothing: Bool?
     /// Who the clothing is for.
     var personID: UUID?
+    /// A gift on the Registry list, kept off every other list under a header for the person it is for. Nil means no.
+    var isRegistry: Bool?
+    var giftForID: UUID?
+    /// Birthday, Christmas and so on.
+    var occasion: String?
+    /// When a gift was marked bought.
+    var boughtAt: Date?
     /// Your own named section (see `CustomAisle`); the item shows there instead of under its category.
     var customAisleID: UUID?
     /// Shown only in the item's long-press menu, never on the row.
@@ -90,7 +97,8 @@ struct GroceryItem: Identifiable, Codable, Equatable {
 
     var forClothing: Bool { isClothing == true }
     /// On its own list, so it stays off All and the store lists.
-    var isSeparate: Bool { forTravel || forClothing }
+    var forRegistry: Bool { isRegistry == true }
+    var isSeparate: Bool { forTravel || forClothing || forRegistry }
 }
 
 /// A family member clothing is bought for.
@@ -355,4 +363,5 @@ struct Backup: Codable {
     var goals: [Goal]? = nil
     var people: [Person]? = nil
     var customAisles: [CustomAisle]? = nil
+    var registryPeople: [RegistryPerson]? = nil
 }

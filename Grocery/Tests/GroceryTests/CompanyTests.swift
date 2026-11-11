@@ -233,8 +233,8 @@ final class ChipOrderTests: XCTestCase {
 
     func testTravelThenClothingComeAfterTheStoresUntilYouMoveThem() {
         let entries = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)
-        XCTAssertEqual(Array(entries.suffix(2)), [.travel, .clothing])
-        XCTAssertEqual(entries.count, 5)
+        XCTAssertEqual(Array(entries.suffix(3)), [.travel, .clothing, .registry])
+        XCTAssertEqual(entries.count, 6)
     }
 
     func testTravelSitsWhereYouPutIt() {
@@ -247,25 +247,27 @@ final class ChipOrderTests: XCTestCase {
     func testAPositionPastTheEndStillShowsBothChips() {
         let entries = ChipOrder.entries(shops: shops, travelPosition: 99, clothingPosition: 99)
         XCTAssertTrue(entries.contains(.travel) && entries.contains(.clothing))
-        XCTAssertEqual(ChipOrder.entries(shops: [], travelPosition: 2).count, 2)
+        XCTAssertEqual(ChipOrder.entries(shops: [], travelPosition: 2).count, 3)
     }
 
     func testMovingChipsSavesBothTheStoreOrderAndTheirPlaces() {
-        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C
-        arranged.move(fromOffsets: [3], toOffset: 0)   // Travel to the front: T K W A C
+        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C R
+        arranged.move(fromOffsets: [3], toOffset: 0)   // Travel to the front: T K W A C R
         XCTAssertEqual(ChipOrder.position(of: arranged), 0)
-        arranged.move(fromOffsets: [3], toOffset: 0)   // then Aldi ahead of it: A T K W C
+        arranged.move(fromOffsets: [3], toOffset: 0)   // then Aldi ahead of it: A T K W C R
         XCTAssertEqual(ChipOrder.shops(shops, arrangedBy: arranged).map(\.name), ["Aldi", "Kroger", "Walmart"])
         XCTAssertEqual(ChipOrder.position(of: arranged), 1)
         XCTAssertEqual(ChipOrder.position(of: arranged, chip: .clothing), -1, "alone at the end, it is the first of the chips there")
     }
 
     func testClothingAndTravelKeepTheirOrderAtTheEnd() {
-        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C
-        arranged.move(fromOffsets: [4], toOffset: 3)                                     // K W A C T
-        XCTAssertEqual(Array(arranged.suffix(2)), [.clothing, .travel])
+        var arranged = ChipOrder.entries(shops: shops, travelPosition: ChipOrder.last)   // K W A T C R
+        arranged.move(fromOffsets: [4], toOffset: 3)                                     // K W A C T R
+        XCTAssertEqual(Array(arranged.suffix(3)), [.clothing, .travel, .registry])
         let travel = ChipOrder.position(of: arranged), clothing = ChipOrder.position(of: arranged, chip: .clothing)
-        XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: travel, clothingPosition: clothing), arranged)
+        let registry = ChipOrder.position(of: arranged, chip: .registry)
+        XCTAssertEqual(ChipOrder.entries(shops: shops, travelPosition: travel, clothingPosition: clothing,
+                                         registryPosition: registry), arranged)
     }
 
     func testBothChipsCanSitAmongTheStores() {

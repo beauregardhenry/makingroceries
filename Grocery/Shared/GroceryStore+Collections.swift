@@ -100,7 +100,7 @@ extension GroceryStore {
     // MARK: Backup
 
     func makeBackup() -> Backup {
-        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan, stock: stock, spending: spending, goals: goals, people: people, customAisles: customAisles)
+        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan, stock: stock, spending: spending, goals: goals, people: people, customAisles: customAisles, registryPeople: registryPeople)
     }
 
     func restore(_ backup: Backup) {
@@ -116,6 +116,7 @@ extension GroceryStore {
         goals = backup.goals ?? []
         people = backup.people ?? []
         customAisles = backup.customAisles ?? []
+        registryPeople = backup.registryPeople ?? []
     }
 
     // MARK: First launch

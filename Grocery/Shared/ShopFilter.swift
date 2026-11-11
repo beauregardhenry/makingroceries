@@ -8,11 +8,14 @@ enum ShopFilter: Equatable {
     case travel
     /// Clothing, organized by person and kept off every other list.
     case clothing
+    /// Gifts, organized by person and kept off every other list.
+    case registry
 
     init(raw: String) {
         switch raw {
         case "travel": self = .travel
         case "clothing": self = .clothing
+        case "registry": self = .registry
         case let raw: self = UUID(uuidString: raw).map(ShopFilter.shop) ?? .all
         }
     }
@@ -22,6 +25,7 @@ enum ShopFilter: Equatable {
         case .all: ""
         case .travel: "travel"
         case .clothing: "clothing"
+        case .registry: "registry"
         case .shop(let id): id.uuidString
         }
     }
@@ -31,6 +35,7 @@ enum ShopFilter: Equatable {
 enum ChipEntry: Hashable {
     case travel
     case clothing
+    case registry
     case shop(UUID)
 }
 
@@ -42,14 +47,18 @@ enum ChipOrder {
     static let clothingKey = "clothingPosition"
     static let last = -1
     static let clothingLast = -2
+    static let registryKey = "registryPosition"
+    static let registryLast = -3
 
-    static func entries(shops: [Shop], travelPosition: Int, clothingPosition: Int = ChipOrder.clothingLast) -> [ChipEntry] {
+    static func entries(shops: [Shop], travelPosition: Int, clothingPosition: Int = ChipOrder.clothingLast,
+                        registryPosition: Int = ChipOrder.registryLast) -> [ChipEntry] {
         let count = shops.count
         func resolved(_ position: Int) -> Int { position < 0 ? count : min(position, count) }
         // At the end, -1 comes before -2.
         var floating: [(entry: ChipEntry, spot: Int, tie: Int)] = [
             (.travel, resolved(travelPosition), travelPosition < 0 ? -travelPosition : 0),
             (.clothing, resolved(clothingPosition), clothingPosition < 0 ? -clothingPosition : 0),
+            (.registry, resolved(registryPosition), registryPosition < 0 ? -registryPosition : 0),
         ]
         floating.sort { ($0.spot, $0.tie) < ($1.spot, $1.tie) }
         var result: [ChipEntry] = []
@@ -62,7 +71,9 @@ enum ChipOrder {
 
     /// The saved position of Travel or Clothing after the chips were arranged into `entries`.
     static func position(of entries: [ChipEntry], chip: ChipEntry = .travel) -> Int {
-        guard let spot = entries.firstIndex(of: chip) else { return chip == .clothing ? clothingLast : last }
+        guard let spot = entries.firstIndex(of: chip) else {
+            return chip == .clothing ? clothingLast : chip == .registry ? registryLast : last
+        }
         let storesBefore = entries[..<spot].filter { if case .shop = $0 { return true } else { return false } }.count
         let storesAfter = entries[(spot + 1)...].contains { if case .shop = $0 { return true } else { return false } }
         if storesAfter { return storesBefore }

@@ -49,6 +49,7 @@ struct ContentView: View {
         switch filter {
         case .travel: item.forTravel
         case .clothing: item.forClothing
+        case .registry: item.forRegistry
         case .all: !item.isSeparate
         case .shop(let id): !item.isSeparate && item.shopID == id
         }
@@ -86,6 +87,7 @@ struct ContentView: View {
         case .all: "Groceries"
         case .travel: "Travel"
         case .clothing: "Clothing"
+        case .registry: "Registry"
         case .shop(let id): store.shopName(for: id) ?? "Groceries"
         }
     }
@@ -166,6 +168,7 @@ struct ContentView: View {
     /// Normal view: by aisle. Shopping mode: what's still needed by aisle, then what's in the cart.
     private var displaySections: [DisplaySection] {
         if filter == .clothing { return clothingDisplaySections }
+        if filter == .registry { return registryDisplaySections }
         guard shoppingMode else { return sections.map { makeSection($0.section, $0.items) } }
         var result = store.sectionGroups(visibleItems.filter { !$0.isChecked }, shop: mappedShop)
             .map { makeSection($0.section, $0.items) }
@@ -191,8 +194,25 @@ struct ContentView: View {
         }
     }
 
+    /// Registry: a header for each person, with their birthday, in the order of your registry list.
+    private var registryDisplaySections: [DisplaySection] {
+        store.registrySections(visibleItems).map { group in
+            if let person = group.person {
+                let index = store.registryPeople.firstIndex { $0.id == person.id } ?? 0
+                return DisplaySection(id: "gift-\(person.id)", title: person.name, symbol: "gift.fill", aisle: nil,
+                                      tint: Self.personColors[index % Self.personColors.count],
+                                      label: RegistryInfo.birthdayText(person), items: group.items)
+            }
+            return DisplaySection(id: "gift-none", title: "Not assigned yet", symbol: "gift", aisle: nil, tint: .gray,
+                                  label: nil, items: group.items)
+        }
+    }
+
     /// The visible list as plain text, grouped by aisle in walking order, for sharing.
     private var shareText: String {
+        if filter == .registry {
+            return RegistryInfo.shareText(gifts: visibleItems, sections: store.registrySections(visibleItems))
+        }
         var lines = [filter == .all ? "Grocery list" : "\(navigationTitle) list"]
         for (section, items) in sections {
             let made = makeSection(section, items)
@@ -264,7 +284,8 @@ struct ContentView: View {
     @ViewBuilder
     private func sheetView(_ sheet: AppSheet) -> some View {
         switch sheet {
-        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel, clothing: filter == .clothing)
+        case .add: AddItemView(shopID: newItemShopID, travel: filter == .travel, clothing: filter == .clothing,
+                                  registry: filter == .registry)
         case .shops: ManageShopsView()
         case .usual: UsualView(shopID: newItemShopID)
         case .meals: MealsView(shopID: newItemShopID, currentItems: visibleItems)
@@ -288,6 +309,7 @@ struct ContentView: View {
         case .company: CompanyComingView(shopID: newItemShopID)
         case .people: FamilyMembersView()
         case .aisles: CustomAislesView()
+        case .registryPeople: RegistryPeopleView()
         }
     }
 
@@ -389,7 +411,7 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, clothing: filter == .clothing, focusRequest: quickAddRequest, prefill: quickAddPrefill,
+            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, travel: filter == .travel, clothing: filter == .clothing, registry: filter == .registry, focusRequest: quickAddRequest, prefill: quickAddPrefill,
                         showsDue: !shoppingMode)
         }
         .padding(.horizontal)
@@ -418,6 +440,7 @@ struct ContentView: View {
                 Button("Send List to Family", systemImage: "person.2") { sheet = .send }
                 Button("Family Members", systemImage: "person.crop.circle.badge.plus") { sheet = .people }
                 Button("Custom Aisles", systemImage: "signpost.right") { sheet = .aisles }
+                Button("Registry People", systemImage: "gift") { sheet = .registryPeople }
                 ShareLink(item: shareText) {
                     Label("Share List as Text", systemImage: "square.and.arrow.up")
                 }
@@ -463,6 +486,8 @@ struct ContentView: View {
                                                              ? "Tap + to add your first item."
                                                              : filter == .clothing
                                                              ? "Tap + to add clothing for someone. Add your family under ⋯ › Family Members."
+                                                             : filter == .registry
+                                                             ? "Tap + to add a gift idea. Add the people you buy for under ⋯ › Registry People."
                                                              : "Tap + to add something here."))
                 }
             }
@@ -526,7 +551,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, people, aisles, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
+    case add, people, aisles, registryPeople, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
     var id: String { rawValue }
 }
 
@@ -613,6 +638,12 @@ struct ItemRow: View {
         .accessibilityAction(named: "Set price") { onSetPrice(item) }
         .accessibilityAction(named: "Delete") { store.delete(item) }
         .contextMenu {
+            if item.forRegistry {
+                ForEach(Array(RegistryInfo.lines(for: item).enumerated()), id: \.offset) { index, line in
+                    Button(line, systemImage: index == 0 ? "calendar" : "gift") {}.disabled(true)
+                }
+                Divider()
+            }
             if item.forClothing {
                 // When it was added and its size, shown only here and never on the row.
                 ForEach(Array(ClothingInfo.lines(for: item).enumerated()), id: \.offset) { index, line in
@@ -625,7 +656,14 @@ struct ItemRow: View {
             Button("Add to Usual", systemImage: "star") {
                 store.addFavorite(name: item.name, quantity: item.quantity, aisle: item.aisle)
             }
-            if item.forClothing {
+            if item.forRegistry {
+                Menu("Move to Person", systemImage: "gift") {
+                    ForEach(store.registryPeople) { person in
+                        Button(person.name) { store.move(item, toGiftFor: person.id) }
+                    }
+                    Button("Not assigned yet") { store.move(item, toGiftFor: nil) }
+                }
+            } else if item.forClothing {
                 Menu("Move to Person", systemImage: "person.crop.circle") {
                     ForEach(store.people) { person in
                         Button(person.name) { store.move(item, toPerson: person.id) }
@@ -660,13 +698,18 @@ struct AddItemView: View {
     @State private var travel = false
     /// Adding clothing: pick who it's for and its size instead of an aisle and store.
     let clothing: Bool
+    /// Adding a gift: pick who it is for and the occasion.
+    let registry: Bool
+    @State private var giftForID: UUID?
+    @State private var occasion = ""
     @State private var personID: UUID?
     @State private var sizeText = ""
 
-    init(shopID: UUID?, travel: Bool = false, clothing: Bool = false) {
+    init(shopID: UUID?, travel: Bool = false, clothing: Bool = false, registry: Bool = false) {
         _shopID = State(initialValue: shopID)
         _travel = State(initialValue: travel)
         self.clothing = clothing
+        self.registry = registry
     }
 
     var body: some View {
@@ -681,7 +724,16 @@ struct AddItemView: View {
                 }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
                 TextField("Price (optional)", text: $priceText).keyboardType(.decimalPad)
-                if clothing {
+                if registry {
+                    Picker("For", selection: $giftForID) {
+                        Text("Not assigned yet").tag(UUID?.none)
+                        ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
+                    }
+                    Picker("Occasion", selection: $occasion) {
+                        Text("None").tag("")
+                        ForEach(RegistryOccasion.all, id: \.self) { Text($0).tag($0) }
+                    }
+                } else if clothing {
                     Picker("For", selection: $personID) {
                         Text("No one yet").tag(UUID?.none)
                         ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -715,9 +767,9 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: clothing ? nil : shopID, price: Price.parse(priceText),
-                                  travel: clothing ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText,
-                                  customAisleID: customAisleID)
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: (clothing || registry) ? nil : shopID, price: Price.parse(priceText),
+                                  travel: (clothing || registry) ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText,
+                                  customAisleID: customAisleID, registry: registry, giftForID: giftForID, occasion: occasion)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
