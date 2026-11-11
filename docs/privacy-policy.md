@@ -1,6 +1,6 @@
 # Privacy Policy for Makin' Groceries
 
-_Last updated: November 7, 2026_
+_Last updated: November 11, 2026_
 
 Makin' Groceries is a grocery list app for iPhone and iPad. This policy says what the app does with your information. The short version: **your data stays on your devices and in your own iCloud account. I don't run any servers, I don't collect your data, and there is no advertising, tracking or analytics in the app.**
 
@@ -25,6 +25,7 @@ Each is optional, and the app works without them.
 - **Microphone and speech recognition**: to add items by voice, using on-device recognition when your iPhone supports it.
 - **Location**: to remember where a store is and remind you of your list when you arrive. Your location is kept on your device and is never sent anywhere.
 - **Calendar**: Company Coming reads event titles, dates and guest counts from your calendar to suggest make-ahead meals before dinners and parties. This is read on your device. Nothing from your calendar is stored in the cloud or sent anywhere.
+- **Google Calendar (optional)**: if you tap Connect Google Calendar in Company Coming, you sign in on Google's own page, in Apple's secure web sheet, and allow read-only access to your calendar events. The app never sees your Google password. It keeps a sign-in token in your iPhone's Keychain on that phone only, and fetches your events directly from Google to your phone, where they are used only to find dinners and parties. Nothing goes to the developer or any other server. Disconnect in Company Coming revokes the access with Google and deletes the token, and you can also remove it at <https://myaccount.google.com/permissions>. The app's use of information received from Google APIs follows the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements.
 - **Notifications**: for arrival reminders and for things in your kitchen that should be used soon.
 - **Local network**: for Live Sync.
 

@@ -9,6 +9,9 @@ settings:
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "7"
+    # The Google OAuth client ID for Google Calendar sign-in (see docs/google-calendar-setup.md). Not a secret.
+    # Empty keeps the Google option off.
+    GOOGLE_CLIENT_ID: ""
 targets:
   Grocery:
     type: application
@@ -25,6 +28,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        GoogleClientID: $(GOOGLE_CLIENT_ID)
         NSCalendarsFullAccessUsageDescription: Company Coming looks at your calendar for dinners, parties and visits, so it can suggest meals to make ahead. Your calendar never leaves this phone.
         NSLocalNetworkUsageDescription: Live Sync finds other phones in your household on this network to keep one grocery list.
         NSBonjourServices: [_mkgroceries._tcp, _mkgroceries._udp]
