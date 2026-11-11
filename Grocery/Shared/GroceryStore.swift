@@ -56,6 +56,11 @@ final class GroceryStore {
     }
 
     /// Sections you named yourself, like "Aisle 5" or "Baking", next to the built-in categories.
+    /// The people gifts are kept for on the Registry list.
+    var registryPeople: [RegistryPerson] = [] {
+        didSet { persist(\.registryPeople, "registryPeople") }
+    }
+
     var customAisles: [CustomAisle] = [] {
         didSet { persist(\.customAisles, "customAisles") }
     }
@@ -105,6 +110,7 @@ final class GroceryStore {
         refresh(\.goals, "goals")
         refresh(\.people, "people")
         refresh(\.customAisles, "customAisles")
+        refresh(\.registryPeople, "registryPeople")
         applyRecurring()
     }
 
@@ -129,6 +135,7 @@ final class GroceryStore {
         goals = value(of: readFile([Goal].self, "goals"), ifMissing: [])
         people = value(of: readFile([Person].self, "people"), ifMissing: [])
         customAisles = value(of: readFile([CustomAisle].self, "customAisles"), ifMissing: [])
+        registryPeople = value(of: readFile([RegistryPerson].self, "registryPeople"), ifMissing: [])
         // Only a truly fresh install counts as a first run: one missing file on its own (after a
         // partial restore, say) must never lead setup to replace stores or clear history.
         if case .missing = itemsFile, case .missing = shopsFile, case .missing = historyFile { isFirstRun = true }

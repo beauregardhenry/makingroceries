@@ -7,17 +7,21 @@ struct ShopBar: View {
     let onManage: () -> Void
     @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
     @AppStorage(ChipOrder.clothingKey) private var clothingPosition = ChipOrder.clothingLast
+    @AppStorage(ChipOrder.registryKey) private var registryPosition = ChipOrder.registryLast
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
-                ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition), id: \.self) { entry in
+                ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition,
+                                                  registryPosition: registryPosition), id: \.self) { entry in
                     switch entry {
                     case .travel:
                         chip("Travel", symbol: "airplane", isSelected: selection == .travel) { selection = .travel }
                     case .clothing:
                         chip("Clothing", symbol: "tshirt.fill", isSelected: selection == .clothing) { selection = .clothing }
+                    case .registry:
+                        chip("Registry", symbol: "gift.fill", isSelected: selection == .registry) { selection = .registry }
                     case .shop(let id):
                         if let shop = store.shop(for: id) {
                             chip(shop.name.isEmpty ? "Unnamed store" : shop.name, symbol: shop.kind == .online ? "globe" : nil,
@@ -62,6 +66,7 @@ struct ManageShopsView: View {
     @State private var customName = ""
     @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
     @AppStorage(ChipOrder.clothingKey) private var clothingPosition = ChipOrder.clothingLast
+    @AppStorage(ChipOrder.registryKey) private var registryPosition = ChipOrder.registryLast
 
     private var availablePresets: [String] {
         Shop.presetNames.filter { preset in
@@ -78,7 +83,8 @@ struct ManageShopsView: View {
         NavigationStack {
             List {
                 Section {
-                    let entries = ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition)
+                    let entries = ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition,
+                                                  registryPosition: registryPosition)
                     ForEach(entries, id: \.self) { entry in
                         switch entry {
                         case .travel:
@@ -86,6 +92,9 @@ struct ManageShopsView: View {
                                 .deleteDisabled(true)
                         case .clothing:
                             Label("Clothing", systemImage: "tshirt.fill")
+                                .deleteDisabled(true)
+                        case .registry:
+                            Label("Registry", systemImage: "gift.fill")
                                 .deleteDisabled(true)
                         case .shop(let id):
                             if let shop = store.shop(for: id) {
@@ -113,11 +122,12 @@ struct ManageShopsView: View {
                         store.shops = ChipOrder.shops(store.shops, arrangedBy: arranged)
                         travelPosition = ChipOrder.position(of: arranged)
                         clothingPosition = ChipOrder.position(of: arranged, chip: .clothing)
+                        registryPosition = ChipOrder.position(of: arranged, chip: .registry)
                     }
                 } header: {
                     Text("Your stores")
                 } footer: {
-                    Text("Drag to put the stores, Travel and Clothing in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
+                    Text("Drag to put the stores, Travel, Clothing and Registry in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
                 }
 
                 Section {
