@@ -8,7 +8,7 @@ settings:
     DEVELOPMENT_TEAM: 8K5724Q6WR
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "7"
+    CURRENT_PROJECT_VERSION: "8"
     # The Google OAuth client ID for Google Calendar sign-in (see docs/google-calendar-setup.md). Not a secret.
     # Empty keeps the Google option off.
     GOOGLE_CLIENT_ID: ""
