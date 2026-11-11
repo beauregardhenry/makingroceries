@@ -5,19 +5,16 @@ struct ShopBar: View {
     @Environment(GroceryStore.self) private var store
     @Binding var selection: ShopFilter
     let onManage: () -> Void
-    @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
-    @AppStorage(ChipOrder.clothingKey) private var clothingPosition = ChipOrder.clothingLast
-    @AppStorage(ChipOrder.registryKey) private var registryPosition = ChipOrder.registryLast
+    private let chipPositions = ChipPositions()
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", isSelected: selection == .all) { selection = .all }
-                ForEach(ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition,
-                                                  registryPosition: registryPosition), id: \.self) { entry in
+                ForEach(ChipOrder.entries(shops: store.shops, positions: chipPositions.all), id: \.self) { entry in
                     switch entry {
-                    case .travel, .clothing, .registry:
-                        chip(entry.title ?? "", symbol: entry.symbol, isSelected: selection == entry.filter) { selection = entry.filter }
+                    case .list(let list):
+                        chip(list.title, symbol: list.symbol, isSelected: selection == entry.filter) { selection = entry.filter }
                     case .shop(let id):
                         if let shop = store.shop(for: id) {
                             chip(shop.name.isEmpty ? "Unnamed store" : shop.name, symbol: shop.kind == .online ? "globe" : nil,
@@ -60,9 +57,7 @@ struct ManageShopsView: View {
     @Environment(GroceryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var customName = ""
-    @AppStorage(ChipOrder.key) private var travelPosition = ChipOrder.last
-    @AppStorage(ChipOrder.clothingKey) private var clothingPosition = ChipOrder.clothingLast
-    @AppStorage(ChipOrder.registryKey) private var registryPosition = ChipOrder.registryLast
+    private let chipPositions = ChipPositions()
 
     private var availablePresets: [String] {
         Shop.presetNames.filter { preset in
@@ -79,12 +74,11 @@ struct ManageShopsView: View {
         NavigationStack {
             List {
                 Section {
-                    let entries = ChipOrder.entries(shops: store.shops, travelPosition: travelPosition, clothingPosition: clothingPosition,
-                                                  registryPosition: registryPosition)
+                    let entries = ChipOrder.entries(shops: store.shops, positions: chipPositions.all)
                     ForEach(entries, id: \.self) { entry in
                         switch entry {
-                        case .travel, .clothing, .registry:
-                            Label(entry.title ?? "", systemImage: entry.symbol ?? "")
+                        case .list(let list):
+                            Label(list.title, systemImage: list.symbol)
                                 .deleteDisabled(true)
                         case .shop(let id):
                             if let shop = store.shop(for: id) {
@@ -110,9 +104,7 @@ struct ManageShopsView: View {
                         var arranged = entries
                         arranged.move(fromOffsets: offsets, toOffset: destination)
                         store.shops = ChipOrder.shops(store.shops, arrangedBy: arranged)
-                        travelPosition = ChipOrder.position(of: arranged)
-                        clothingPosition = ChipOrder.position(of: arranged, chip: .clothing)
-                        registryPosition = ChipOrder.position(of: arranged, chip: .registry)
+                        chipPositions.save(arranged)
                     }
                 } header: {
                     Text("Your stores")
@@ -300,5 +292,21 @@ struct ShopMapView: View {
             get: { store.shops[i].aisleLabels[aisle.rawValue] ?? "" },
             set: { store.shops[i].aisleLabels[aisle.rawValue] = $0 }
         )
+    }
+}
+
+/// Where Travel, Clothing and Registry sit among the stores, kept in the app's settings (one setting each).
+struct ChipPositions: DynamicProperty {
+    @AppStorage(ChipOrder.key(.travel)) private var travel = ChipOrder.defaultPosition(.travel)
+    @AppStorage(ChipOrder.key(.clothing)) private var clothing = ChipOrder.defaultPosition(.clothing)
+    @AppStorage(ChipOrder.key(.registry)) private var registry = ChipOrder.defaultPosition(.registry)
+
+    var all: [SeparateList: Int] { [.travel: travel, .clothing: clothing, .registry: registry] }
+
+    /// Saves the places the lists ended up in after the chips were rearranged.
+    func save(_ arranged: [ChipEntry]) {
+        travel = ChipOrder.position(of: arranged, list: .travel)
+        clothing = ChipOrder.position(of: arranged, list: .clothing)
+        registry = ChipOrder.position(of: arranged, list: .registry)
     }
 }

@@ -5,8 +5,8 @@ extension GroceryStore {
 
     func add(name: String, quantity: Int, aisle: Aisle, shopID: UUID? = nil, price: Double? = nil, note: String? = nil,
              sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil,
-             travel: Bool = false, clothing: Bool = false, personID: UUID? = nil, clothingSize: String? = nil,
-             customAisleID: UUID? = nil, registry: Bool = false, giftForID: UUID? = nil, occasion: String? = nil) {
+             list: SeparateList? = nil, personID: UUID? = nil, clothingSize: String? = nil,
+             customAisleID: UUID? = nil, giftForID: UUID? = nil, occasion: String? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         // A known size carries over from the last time you bought it.
@@ -16,17 +16,15 @@ extension GroceryStore {
         item.sizeAmount = amount
         item.sizeUnit = unit
         item.warning = warning
-        item.isTravel = travel ? true : nil
+        item.list = list
         item.addedAt = Date()
-        item.customAisleID = (clothing || registry) ? nil : customAisle(for: customAisleID)?.id
-        if registry {
-            item.isRegistry = true
+        item.customAisleID = list == .clothing || list == .registry ? nil : customAisle(for: customAisleID)?.id
+        if list == .registry {
             item.giftForID = registryPerson(for: giftForID)?.id
             let trimmedOccasion = occasion?.trimmingCharacters(in: .whitespaces)
             item.occasion = (trimmedOccasion?.isEmpty ?? true) ? nil : trimmedOccasion
         }
-        if clothing {
-            item.isClothing = true
+        if list == .clothing {
             item.aisle = .clothing
             item.personID = personID
             let size = clothingSize?.trimmingCharacters(in: .whitespaces)
@@ -49,7 +47,7 @@ extension GroceryStore {
     /// a missing store comes from history too. Near-misses of a known name ("tomatos") are
     /// corrected to it.
     func addOrBump(name: String, quantity: Int = 1, aisle: Aisle? = nil, shopID: UUID?,
-                   price: Double? = nil, inferShop: Bool = false, note: String? = nil, travel: Bool = false, clothing: Bool = false, registry: Bool = false) {
+                   price: Double? = nil, inferShop: Bool = false, note: String? = nil, list: SeparateList? = nil) {
         let typed = name.trimmingCharacters(in: .whitespaces)
         guard !typed.isEmpty else { return }
         let trimmed = canonicalName(for: typed)
@@ -58,13 +56,13 @@ extension GroceryStore {
         if shop == nil, inferShop, let remembered = past?.shopID, self.shop(for: remembered) != nil {
             shop = remembered
         }
-        if let i = items.firstIndex(where: { !$0.isChecked && $0.shopID == shop && $0.forTravel == travel && $0.forClothing == clothing && $0.forRegistry == registry && Self.same($0.name, trimmed) }) {
+        if let i = items.firstIndex(where: { !$0.isChecked && $0.shopID == shop && $0.list == list && Self.same($0.name, trimmed) }) {
             items[i].quantity += quantity
             return
         }
         let chosen = aisle ?? resolveAisle(for: trimmed)
         add(name: trimmed, quantity: quantity, aisle: chosen,
-            shopID: shop, price: price ?? past?.price, note: note, travel: travel, clothing: clothing, registry: registry)
+            shopID: shop, price: price ?? past?.price, note: note, list: list)
         // Nothing recognised it, so ask the on-device model, if this phone has one.
         if aisle == nil, past == nil, chosen == .other, AisleAI.isAvailable {
             Task { @MainActor in await refineAisle(forItemNamed: trimmed) }
@@ -86,7 +84,7 @@ extension GroceryStore {
     func toggle(_ item: GroceryItem) {
         guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
         items[i].isChecked.toggle()
-        if items[i].forRegistry {
+        if items[i].list == .registry {
             // A gift is tracked as bought, not counted in your grocery history, stock or spending.
             items[i].boughtAt = items[i].isChecked ? Date() : nil
         } else if items[i].isChecked {

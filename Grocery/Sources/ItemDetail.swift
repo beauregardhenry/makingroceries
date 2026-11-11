@@ -32,7 +32,7 @@ struct ItemDetailView: View {
                 Section {
                     TextField("Name", text: $draft.name).textInputAutocapitalization(.words)
                     Stepper("Quantity: \(draft.quantity)", value: $draft.quantity, in: 1...99)
-                    if draft.forRegistry {
+                    if draft.list == .registry {
                         Picker("For", selection: $draft.giftForID) {
                             Text("Not assigned yet").tag(UUID?.none)
                             ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -41,7 +41,7 @@ struct ItemDetailView: View {
                             Text("None").tag("")
                             ForEach(RegistryOccasion.all, id: \.self) { Text($0).tag($0) }
                         }
-                    } else if draft.forClothing {
+                    } else if draft.list == .clothing {
                         Picker("For", selection: $draft.personID) {
                             Text("No one yet").tag(UUID?.none)
                             ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -65,12 +65,12 @@ struct ItemDetailView: View {
                             Text(Shop.noStoreName).tag(UUID?.none)
                             ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                         }
-                        Toggle("For a trip", isOn: Binding(get: { draft.forTravel }, set: { draft.isTravel = $0 ? true : nil }))
+                        Toggle("For a trip", isOn: Binding(get: { draft.list == .travel }, set: { draft.list = $0 ? .travel : nil }))
                     }
                 } footer: {
-                    Text(draft.forRegistry
+                    Text(draft.list == .registry
                          ? "Gifts stay off your other lists. Find them under Registry. Checking one off marks it bought, so no one buys it twice."
-                         : draft.forClothing
+                         : draft.list == .clothing
                          ? "The size isn't shown on the list. Press and hold the item to see it, with the date it was added."
                          : "Trip items stay off your other lists. Find them under Travel.")
                 }
@@ -156,7 +156,7 @@ struct ItemDetailView: View {
         let size = SizeParser.parse(sizeText)
         draft.sizeAmount = size?.amount
         draft.sizeUnit = size?.unit
-        if draft.forClothing {
+        if draft.list == .clothing {
             let old = store.items.first { $0.id == draft.id }
             let trimmed = clothingSizeText.trimmingCharacters(in: .whitespaces)
             let new = trimmed.isEmpty ? nil : trimmed

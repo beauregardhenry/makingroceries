@@ -83,13 +83,13 @@ struct ItemRow: View {
         .accessibilityAction(named: "Set price") { onSetPrice(item) }
         .accessibilityAction(named: "Delete") { store.delete(item) }
         .contextMenu {
-            if item.forRegistry {
+            if item.list == .registry {
                 ForEach(Array(RegistryInfo.lines(for: item).enumerated()), id: \.offset) { index, line in
                     Button(line, systemImage: index == 0 ? "calendar" : "gift") {}.disabled(true)
                 }
                 Divider()
             }
-            if item.forClothing {
+            if item.list == .clothing {
                 // When it was added and its size, shown only here and never on the row.
                 ForEach(Array(ClothingInfo.lines(for: item).enumerated()), id: \.offset) { index, line in
                     Button(line, systemImage: index == 0 ? "calendar" : "ruler") {}.disabled(true)
@@ -101,14 +101,14 @@ struct ItemRow: View {
             Button("Add to Usual", systemImage: "star") {
                 store.addFavorite(name: item.name, quantity: item.quantity, aisle: item.aisle)
             }
-            if item.forRegistry {
+            if item.list == .registry {
                 Menu("Move to Person", systemImage: "gift") {
                     ForEach(store.registryPeople) { person in
                         Button(person.name) { store.move(item, toGiftFor: person.id) }
                     }
                     Button("Not assigned yet") { store.move(item, toGiftFor: nil) }
                 }
-            } else if item.forClothing {
+            } else if item.list == .clothing {
                 Menu("Move to Person", systemImage: "person.crop.circle") {
                     ForEach(store.people) { person in
                         Button(person.name) { store.move(item, toPerson: person.id) }

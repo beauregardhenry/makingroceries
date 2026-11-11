@@ -12,21 +12,17 @@ struct AddItemView: View {
     @State private var showingScanner = false
     @State private var lookupMessage: String?
     @State private var isLookingUp = false
-    @State private var travel = false
-    /// Adding clothing: pick who it's for and its size instead of an aisle and store.
-    let clothing: Bool
-    /// Adding a gift: pick who it is for and the occasion.
-    let registry: Bool
+    /// Clothing asks who it's for and its size, a gift who it is for and the occasion, each instead of an
+    /// aisle and store. Travel is the "For a trip" switch.
+    @State private var list: SeparateList?
     @State private var giftForID: UUID?
     @State private var occasion = ""
     @State private var personID: UUID?
     @State private var sizeText = ""
 
-    init(shopID: UUID?, travel: Bool = false, clothing: Bool = false, registry: Bool = false) {
+    init(shopID: UUID?, list: SeparateList? = nil) {
         _shopID = State(initialValue: shopID)
-        _travel = State(initialValue: travel)
-        self.clothing = clothing
-        self.registry = registry
+        _list = State(initialValue: list)
     }
 
     var body: some View {
@@ -41,7 +37,7 @@ struct AddItemView: View {
                 }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
                 TextField("Price (optional)", text: $priceText).keyboardType(.decimalPad)
-                if registry {
+                if list == .registry {
                     Picker("For", selection: $giftForID) {
                         Text("Not assigned yet").tag(UUID?.none)
                         ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -50,7 +46,7 @@ struct AddItemView: View {
                         Text("None").tag("")
                         ForEach(RegistryOccasion.all, id: \.self) { Text($0).tag($0) }
                     }
-                } else if clothing {
+                } else if list == .clothing {
                     Picker("For", selection: $personID) {
                         Text("No one yet").tag(UUID?.none)
                         ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
@@ -75,7 +71,7 @@ struct AddItemView: View {
                         Text(Shop.noStoreName).tag(UUID?.none)
                         ForEach(store.shops) { Text($0.name).tag(UUID?.some($0.id)) }
                     }
-                    Toggle("For a trip", isOn: $travel)
+                    Toggle("For a trip", isOn: Binding(get: { list == .travel }, set: { list = $0 ? .travel : nil }))
                 }
             }
             .navigationTitle("New Item")
@@ -84,9 +80,9 @@ struct AddItemView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: (clothing || registry) ? nil : shopID, price: Price.parse(priceText),
-                                  travel: (clothing || registry) ? false : travel, clothing: clothing, personID: personID, clothingSize: sizeText,
-                                  customAisleID: customAisleID, registry: registry, giftForID: giftForID, occasion: occasion)
+                        store.add(name: name, quantity: quantity, aisle: aisle, shopID: list == .clothing || list == .registry ? nil : shopID,
+                                  price: Price.parse(priceText), list: list, personID: personID, clothingSize: sizeText,
+                                  customAisleID: customAisleID, giftForID: giftForID, occasion: occasion)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -110,8 +106,8 @@ struct AddItemView: View {
                                                                     avoid: AvoidList.words))
                 store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
                           price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
-                          warning: warning, barcode: code, travel: travel, clothing: clothing, personID: personID,
-                          customAisleID: customAisleID)
+                          warning: warning, barcode: code, list: list, personID: personID,
+                          customAisleID: customAisleID, giftForID: giftForID, occasion: occasion)
                 if let warning {
                     // Don't hide a warning by closing the sheet.
                     lookupMessage = "Added \(product.name). Warning: \(warning)."
