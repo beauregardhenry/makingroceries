@@ -8,6 +8,7 @@ struct CompanyComingView: View {
     @Environment(\.openURL) private var openURL
     let shopID: UUID?
     @State private var calendar = CalendarAccess()
+    @State private var google = GoogleCalendarAccount()
     @State private var events: [CalendarEvent] = []
     @State private var date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @State private var guests = 8
@@ -15,8 +16,11 @@ struct CompanyComingView: View {
 
     private var makeBy: Date { MakeAhead.makeByDate(for: date) }
 
-    private func loadEvents() {
-        events = CompanyEvents.upcoming(calendar.events(days: 21))
+    private func loadEvents() async {
+        let phone = calendar.events(days: 21)
+        events = CompanyEvents.upcoming(phone)
+        // Google's come a moment later, from the network.
+        events = CompanyEvents.upcoming(CompanyEvents.merged(phone, await google.events(days: 21)))
     }
 
     var body: some View {
@@ -45,17 +49,18 @@ struct CompanyComingView: View {
             .navigationTitle("Company Coming")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .onAppear { loadEvents() }
+            .task { await loadEvents() }
         }
     }
 
     @ViewBuilder
     private var calendarSection: some View {
         Section {
+            googleRows
             switch calendar.state {
             case .unknown:
                 Button("Connect Calendar", systemImage: "calendar.badge.plus") {
-                    Task { await calendar.request(); loadEvents() }
+                    Task { await calendar.request(); await loadEvents() }
                 }
             case .denied:
                 Text("Calendar access is off. Turn it on in Settings to see your dinners and parties here.")
@@ -90,7 +95,29 @@ struct CompanyComingView: View {
         } header: {
             Text("On your calendar")
         } footer: {
-            Text("Uses the calendars on this phone, including Google Calendar if you've added that account in Settings › Calendar › Accounts. Tap an event to plan for it.")
+            Text("Uses the calendars on this phone, plus Google Calendar if you connect it here. Both are read-only. Tap an event to plan for it.")
+        }
+    }
+
+    /// Connect or disconnect Google Calendar. Hidden until the app has a Google client ID (see docs/google-calendar-setup.md).
+    @ViewBuilder
+    private var googleRows: some View {
+        switch google.state {
+        case .notSetUp:
+            EmptyView()
+        case .signedOut:
+            Button("Connect Google Calendar", systemImage: "g.circle") {
+                Task { await google.signIn(); await loadEvents() }
+            }
+            .disabled(google.isWorking)
+        case .signedIn:
+            Label("Google Calendar connected", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            Button("Disconnect Google Calendar", role: .destructive) {
+                Task { await google.signOut(); await loadEvents() }
+            }
+        }
+        if let message = google.message {
+            Text(message).font(.footnote).foregroundStyle(.secondary)
         }
     }
 

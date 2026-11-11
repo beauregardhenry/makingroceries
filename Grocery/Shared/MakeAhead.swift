@@ -1,7 +1,7 @@
 import Foundation
 
-/// An event from the phone's calendar. Google Calendar events show up here too when the Google account is
-/// added in Settings › Calendar › Accounts, so the app never needs a Google sign-in of its own.
+/// An upcoming calendar event: from the phone's calendars (which include Google Calendar when that account is
+/// added in Settings › Calendar › Accounts) or from a direct Google sign-in (GoogleCalendarAccount).
 struct CalendarEvent: Identifiable, Equatable {
     var id: String
     var title: String
