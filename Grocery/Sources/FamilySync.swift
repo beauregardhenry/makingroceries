@@ -36,7 +36,6 @@ final class FamilySync: @unchecked Sendable {
     var notice: String?
 
     private static let zoneName = "Family"
-    private static let title = "Makin' Groceries List"
     private static let folder = Storage.directory.appending(path: "FamilySync", directoryHint: .isDirectory)
 
     @ObservationIgnored private weak var store: GroceryStore?
@@ -146,17 +145,22 @@ final class FamilySync: @unchecked Sendable {
     /// Starts sharing this phone's list: makes the family zone and its share, then starts sending the list.
     /// Returns the share to invite people with. If you already share, returns the existing share.
     @MainActor
-    func startSharing() async throws -> CKShare {
+    func startSharing(title: String) async throws -> CKShare {
         let zoneID = CKRecordZone.ID(zoneName: Self.zoneName, ownerName: CKCurrentUserDefaultName)
         let database = container.privateCloudDatabase
         let shareID = CKRecord.ID(recordName: CKRecordNameZoneWideShare, zoneID: zoneID)
         let share: CKShare
         if let existing = try? await database.record(for: shareID) as? CKShare {
             share = existing
+            // Keep the invite's title in step with your name; an old title is no reason to fail.
+            if existing[CKShare.SystemFieldKey.title] as? String != title {
+                existing[CKShare.SystemFieldKey.title] = title
+                _ = try? await database.modifyRecords(saving: [existing], deleting: [])
+            }
         } else {
             _ = try await database.modifyRecordZones(saving: [CKRecordZone(zoneID: zoneID)], deleting: [])
             let new = CKShare(recordZoneID: zoneID)
-            new[CKShare.SystemFieldKey.title] = Self.title
+            new[CKShare.SystemFieldKey.title] = title
             new.publicPermission = .none
             let saved = try await database.modifyRecords(saving: [new], deleting: [])
             if case .failure(let error) = saved.saveResults[new.recordID] { throw error }
@@ -399,7 +403,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 struct FamilySharingView: View {
     @Environment(FamilySync.self) private var family
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("myName") private var myName = ""
     @State private var share: SharedList?
+    /// The share you own, once loaded, so Invite can send it with a message.
+    @State private var ownShare: CKShare?
     @State private var working = false
     @State private var problem: String?
 
@@ -424,9 +431,13 @@ struct FamilySharingView: View {
             Form {
                 switch family.role {
                 case .none:
+                    nameSection
                     Section {
-                        Button("Share My List with Family", systemImage: "person.2.badge.plus") { open() }
-                            .disabled(working)
+                        ShareLink(item: FamilyInviteItem(family: family, name: myName, existing: nil),
+                                  message: Text(FamilyInvite.message(from: myName)),
+                                  preview: SharePreview(FamilyInvite.title(from: myName))) {
+                            Label("Share My List with Family", systemImage: "person.2.badge.plus")
+                        }
                     } footer: {
                         Text("Invite family members by Messages or Mail. Everyone who accepts sees the same list on their own phone, from anywhere, and changes show up for everyone. They need the app and an iCloud account.")
                     }
@@ -445,13 +456,23 @@ struct FamilySharingView: View {
                         Button("Sync Now", systemImage: "arrow.triangle.2.circlepath") { family.refresh() }
                             .disabled(family.status == .checking || family.status == .noAccount)
                     }
+                    if family.role == .owner {
+                        nameSection
+                    }
                     Section {
-                        Button(family.role == .owner ? "Invite or Remove People" : "People on This List",
+                        if family.role == .owner, let ownShare {
+                            ShareLink(item: FamilyInviteItem(family: family, name: myName, existing: ownShare),
+                                      message: Text(FamilyInvite.message(from: myName)),
+                                      preview: SharePreview(FamilyInvite.title(from: myName))) {
+                                Label("Invite Someone", systemImage: "person.badge.plus")
+                            }
+                        }
+                        Button(family.role == .owner ? "See or Remove People" : "People on This List",
                                systemImage: "person.2") { open() }
                             .disabled(working)
                     } footer: {
                         Text(family.role == .owner
-                             ? "To stop sharing, tap Invite or Remove People, then Stop Sharing. Everyone keeps the list as it was."
+                             ? "To stop sharing, tap See or Remove People, then Stop Sharing. Everyone keeps the list as it was."
                              : "To leave, tap People on This List, then Remove Me. Your list stays on this phone as it was.")
                     }
                 }
@@ -466,6 +487,9 @@ struct FamilySharingView: View {
             .navigationTitle("Family Sharing")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .task(id: family.role) {
+                ownShare = family.role == .owner ? try? await family.currentShare() : nil
+            }
             .sheet(item: $share) { shared in
                 CloudSharingView(share: shared.share, container: family.cloudContainer) {
                     family.endLocally()
@@ -475,12 +499,22 @@ struct FamilySharingView: View {
         }
     }
 
+    private var nameSection: some View {
+        Section {
+            TextField("Your name", text: $myName).textInputAutocapitalization(.words)
+        } footer: {
+            Text("Invites say who they're from: \"\(FamilyInvite.title(from: myName))\".")
+        }
+    }
+
     private func open() {
         working = true
         problem = nil
         Task { @MainActor in
             do {
-                let found = family.role == .none ? try await family.startSharing() : try await family.currentShare()
+                let found = family.role == .none
+                    ? try await family.startSharing(title: FamilyInvite.title(from: myName))
+                    : try await family.currentShare()
                 share = SharedList(share: found)
             } catch {
                 problem = "Couldn't reach iCloud: \(error.localizedDescription)"
@@ -513,9 +547,30 @@ private struct CloudSharingView: UIViewControllerRepresentable {
         init(onStop: @escaping () -> Void) { self.onStop = onStop }
 
         func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {}
-        func itemTitle(for csc: UICloudSharingController) -> String? { "Makin' Groceries List" }
+        func itemTitle(for csc: UICloudSharingController) -> String? { csc.share?[CKShare.SystemFieldKey.title] as? String }
         func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
             Task { @MainActor in onStop() }
+        }
+    }
+}
+
+/// What Invite sends: the family share, made the first time, so Messages and Mail send its link with
+/// `FamilyInvite.message` above it.
+private struct FamilyInviteItem: Transferable {
+    let family: FamilySync
+    let name: String
+    let existing: CKShare?
+
+    static var transferRepresentation: some TransferRepresentation {
+        CKShareTransferRepresentation { item in
+            let options = CKAllowedSharingOptions(allowedParticipantPermissionOptions: .readWrite,
+                                                  allowedParticipantAccessOptions: .specifiedRecipientsOnly)
+            if let existing = item.existing {
+                return .existing(existing, container: item.family.cloudContainer, allowedSharingOptions: options)
+            }
+            return .prepareShare(container: item.family.cloudContainer, allowedSharingOptions: options) {
+                try await item.family.startSharing(title: FamilyInvite.title(from: item.name))
+            }
         }
     }
 }

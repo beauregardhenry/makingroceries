@@ -174,3 +174,18 @@ final class FamilyShareTests: StoreTestCase {
         XCTAssertEqual(store.shops.map(\.id), [shop.id])
     }
 }
+
+final class FamilyInviteTests: XCTestCase {
+    func testTheInviteSaysWhoSentItAndWhatTheLinkDoes() {
+        let message = FamilyInvite.message(from: "  Pat ")
+        XCTAssertTrue(message.hasPrefix("Pat invited you to share a grocery list in Makin' Groceries."))
+        XCTAssertTrue(message.contains("Tap the link below"))
+        XCTAssertTrue(message.contains("same list"))
+        XCTAssertEqual(FamilyInvite.title(from: "Pat"), "Pat's grocery list")
+    }
+
+    func testWithoutANameTheInviteStillExplainsItself() {
+        XCTAssertTrue(FamilyInvite.message(from: " ").hasPrefix("You're invited to share a grocery list"))
+        XCTAssertEqual(FamilyInvite.title(from: ""), "Shared grocery list")
+    }
+}

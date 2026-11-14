@@ -100,3 +100,23 @@ extension GroceryStore {
         }
     }
 }
+
+/// What a Family Sharing invite says, so whoever gets it knows who sent it and what tapping it does.
+enum FamilyInvite {
+    private static func trimmed(_ name: String) -> String? {
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
+    }
+
+    /// The title on the invite's link card and on the share itself.
+    static func title(from name: String) -> String {
+        trimmed(name).map { "\($0)'s grocery list" } ?? "Shared grocery list"
+    }
+
+    /// The message sent with the link, above it.
+    static func message(from name: String) -> String {
+        let opening = trimmed(name).map { "\($0) invited you to share a grocery list in Makin' Groceries." }
+            ?? "You're invited to share a grocery list in Makin' Groceries."
+        return opening + " Tap the link below on your iPhone to join. You'll both see the same list on your own phones, and anything added or checked off shows up for everyone. You'll need the Makin' Groceries app and an iCloud account."
+    }
+}
