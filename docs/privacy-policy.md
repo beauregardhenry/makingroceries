@@ -1,6 +1,6 @@
 # Privacy Policy for Makin' Groceries
 
-_Last updated: November 11, 2026_
+_Last updated: November 14, 2026_
 
 Makin' Groceries is a grocery list app for iPhone and iPad. This policy says what the app does with your information. The short version: **your data stays on your devices and in your own iCloud account. I don't run any servers, I don't collect your data, and there is no advertising, tracking or analytics in the app.**
 
@@ -11,6 +11,10 @@ Your lists, stores, saved meals, meal plans, prices, spending history, what's at
 ## iCloud Sync (optional, off until you turn it on)
 
 If you turn on iCloud Sync, the same files are copied to **your private iCloud database** (CloudKit) so your devices stay in step. That data belongs to your Apple ID. It is stored and protected by Apple under [Apple's privacy policy](https://www.apple.com/legal/privacy/). The developer has no access to it.
+
+## Family Sharing (optional)
+
+If you share your list with family, the shared part (the grocery list, including Travel, Clothing and Registry, plus stores, custom aisles, family members and Registry people) is kept in **the sharer's private iCloud database** and shared through Apple's CloudKit sharing with the people they invite. Only invited people who accept can see or change it. Apple shows each person's name and Apple ID contact to the others on the share. Meals, history, spending, what's at home and Save Up are never shared. The developer has no access to any of it.
 
 ## Live Sync (optional)
 
@@ -34,6 +38,7 @@ Each is optional, and the app works without them.
 1. **Barcode lookup.** When you scan a product barcode, the barcode number is sent to [Open Food Facts](https://world.openfoodfacts.org) to get the product's name, size and allergens. Nothing else is sent, and nothing identifies you.
 2. **Recipe import from a web address.** When you paste a recipe link, the app downloads that page to read its ingredients, like a browser would.
 3. **iCloud Sync**, if you turn it on, as described above.
+4. **Family Sharing**, if you share a list or join one, as described above.
 
 Suggestions such as "What can I cook?" and aisle guesses use Apple's on-device intelligence on supported iPhones. Nothing is sent to a server for them.
 
@@ -47,7 +52,7 @@ The app doesn't knowingly collect any information from anyone, including childre
 
 ## Deleting your data
 
-Delete the app to remove everything stored on that device. To remove iCloud copies, turn off iCloud Sync and delete the app's data in **Settings › [your name] › iCloud › Manage Storage**.
+Delete the app to remove everything stored on that device. To stop sharing a family list, or leave one, use **Settings › Family Sharing** in the app; everyone keeps the list as it was. To remove iCloud copies, turn off iCloud Sync and delete the app's data in **Settings › [your name] › iCloud › Manage Storage**.
 
 ## Changes
 

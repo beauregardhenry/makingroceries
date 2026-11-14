@@ -300,6 +300,7 @@ struct ContentView: View {
         case .prices: PriceWatchView()
         case .sync: HouseholdSyncView()
         case .cloud: CloudSyncView()
+        case .family: FamilySharingView()
         case .settings: SettingsView()
         case .company: CompanyComingView(shopID: newItemShopID)
         case .people: FamilyMembersView()
@@ -546,7 +547,7 @@ enum LoadProblem {
 
 /// Every sheet the main screen can show; one at a time.
 enum AppSheet: String, Identifiable {
-    case add, people, aisles, registryPeople, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud
+    case add, people, aisles, registryPeople, company, shops, usual, meals, totals, pantry, backup, receipt, trip, planner, scan, spending, atHome, avoid, icons, send, cook, prices, sync, settings, cloud, family
     var id: String { rawValue }
 }
 

@@ -126,7 +126,8 @@ final class CloudSync: @unchecked Sendable {
     /// Merges a copy that came from iCloud. If this device had changes iCloud doesn't, they're sent back.
     @MainActor
     private func receive(_ record: CKRecord) {
-        guard record.recordType == Self.recordType,
+        // Family Sharing keeps its records in its own zone of the same database; those aren't ours.
+        guard record.recordType == Self.recordType, record.recordID.zoneID == zoneID,
               let url = (record["data"] as? CKAsset)?.fileURL, let data = try? Data(contentsOf: url) else { return }
         let name = record.recordID.recordName
         saveFields(of: record)
