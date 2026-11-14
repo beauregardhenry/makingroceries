@@ -1,13 +1,30 @@
 import SwiftUI
 
 extension View {
-    /// A name field: each word starts with a capital letter as you type, pasted or dictated text included.
+    /// A name field: the keyboard capitalizes each word, and when you press Return or leave the field, every word
+    /// is given a capital letter, pasted or dictated text included. (Changing the text while typing would drop
+    /// keystrokes, so it waits until you're done.)
     func titleCase(_ text: Binding<String>) -> some View {
-        textInputAutocapitalization(.words)
-            .onChange(of: text.wrappedValue) { _, typed in
-                let fixed = TitleCase.apply(typed)
-                if fixed != typed { text.wrappedValue = fixed }
-            }
+        modifier(TitleCaseField(text: text))
+    }
+}
+
+private struct TitleCaseField: ViewModifier {
+    @Binding var text: String
+    @FocusState private var focused: Bool
+
+    private func fix() {
+        let fixed = TitleCase.apply(text)
+        if fixed != text { text = fixed }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .textInputAutocapitalization(.words)
+            .focused($focused)
+            .onSubmit(fix)
+            .onChange(of: focused) { _, isFocused in if !isFocused { fix() } }
+            .onDisappear(perform: fix)
     }
 }
 

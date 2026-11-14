@@ -102,7 +102,7 @@ struct QuickAddBar: View {
                     .accessibilityIdentifier("quickAddField")
                     .focused($focused)
                     .submitLabel(.done)
-                    .titleCase($text)
+                    .textInputAutocapitalization(.words)
                     .onSubmit(submit)
                 Button {
                     Task { await dictation.toggle() }
