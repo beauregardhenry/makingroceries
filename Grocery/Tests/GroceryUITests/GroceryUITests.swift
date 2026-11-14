@@ -180,6 +180,7 @@ final class GroceryUITests: XCTestCase {
         revealChip(clothing)
         clothing.tap()
         XCTAssertTrue(app.navigationBars["Clothing"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.textFields["quickAddField"].exists, "clothing is added only with +")
         app.navigationBars["Clothing"].buttons["Add"].tap()
         let sheet = app.navigationBars["New Item"]
         XCTAssertTrue(sheet.waitForExistence(timeout: 5))

@@ -5,6 +5,8 @@ struct RegistryPerson: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
     var birthday: Date?
+    /// The color of their header on the Registry list, by `NameColor.rawValue`; nil means the one for their place.
+    var color: String?
 }
 
 enum RegistryOccasion {

@@ -141,6 +141,8 @@ struct Person: Identifiable, Codable, Equatable {
     var sizes: [String: String]?
     /// Sizes and measurements entered in Settings › Family Members, like Shoes 7 or Inseam 30.
     var measurements: [Measurement]?
+    /// The color of their header on the Clothing list, by `NameColor.rawValue`; nil means the one for their place.
+    var color: String?
 }
 
 struct PricePoint: Codable, Equatable {

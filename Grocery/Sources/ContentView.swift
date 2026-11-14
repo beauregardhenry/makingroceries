@@ -58,6 +58,16 @@ struct ContentView: View {
     }
 
     /// The store new items start in: the chosen one, otherwise none.
+    /// Online, Clothing and Registry items need more than a name (a size, who it's for), so on those lists items
+    /// are added only with + and the typing bar is hidden.
+    private var showsQuickAdd: Bool {
+        switch filter {
+        case .all: true
+        case .list(let list): list == .travel
+        case .shop(let id): store.shop(for: id)?.kind != .online
+        }
+    }
+
     private var newItemShopID: UUID? {
         if case .shop(let id) = filter { return id }
         return nil
@@ -175,15 +185,12 @@ struct ContentView: View {
         return result
     }
 
-    private static let personColors: [Color] = [.blue, .pink, .green, .orange, .purple, .teal, .red, .indigo]
-
     /// Clothing: a header for each person, in the order of your family list.
     private var clothingDisplaySections: [DisplaySection] {
         store.clothingSections(visibleItems).map { group in
             if let person = group.person {
-                let index = store.people.firstIndex { $0.id == person.id } ?? 0
                 return DisplaySection(id: "person-\(person.id)", title: person.name, symbol: "person.fill", aisle: nil,
-                                      tint: Self.personColors[index % Self.personColors.count], label: nil, items: group.items)
+                                      tint: store.color(ofPerson: person.id).color, label: nil, items: group.items)
             }
             return DisplaySection(id: "person-none", title: "No one yet", symbol: "person.crop.circle.badge.questionmark",
                                   aisle: nil, tint: .gray, label: nil, items: group.items)
@@ -194,9 +201,8 @@ struct ContentView: View {
     private var registryDisplaySections: [DisplaySection] {
         store.registrySections(visibleItems).map { group in
             if let person = group.person {
-                let index = store.registryPeople.firstIndex { $0.id == person.id } ?? 0
                 return DisplaySection(id: "gift-\(person.id)", title: person.name, symbol: "gift.fill", aisle: nil,
-                                      tint: Self.personColors[index % Self.personColors.count],
+                                      tint: store.color(ofRegistryPerson: person.id).color,
                                       label: RegistryInfo.birthdayText(person), items: group.items)
             }
             return DisplaySection(id: "gift-none", title: "Not assigned yet", symbol: "gift", aisle: nil, tint: .gray,
@@ -241,7 +247,7 @@ struct ContentView: View {
         case .quickAdd:
             sheet = nil
             quickAddPrefill = ""
-            quickAddRequest += 1
+            if showsQuickAdd { quickAddRequest += 1 } else { sheet = .add }
         case .startShopping:
             sheet = nil
             if let id = NearbyStore.currentShopID(among: store.shops) { selectedShopRaw = ShopFilter.shop(id).raw }
@@ -404,8 +410,10 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, list: filter.separateList, focusRequest: quickAddRequest, prefill: quickAddPrefill,
-                        showsDue: !shoppingMode)
+            if showsQuickAdd {
+                QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, list: filter.separateList, focusRequest: quickAddRequest,
+                            prefill: quickAddPrefill, showsDue: !shoppingMode)
+            }
         }
         .padding(.horizontal)
         .padding(.top, 8)
