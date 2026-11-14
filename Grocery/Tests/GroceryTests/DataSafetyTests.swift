@@ -14,6 +14,27 @@ final class ListMergeTests: XCTestCase {
         XCTAssertEqual(ListMerge.merge(base: base, ours: base, theirs: reordered), reordered)
     }
 
+    func testOurNewOrderSurvivesTheirEdit() {
+        // We dragged c to the top while another phone edited b (say, a store's learned route).
+        let ours = [base[2], base[0], base[1]]
+        let theirs = [base[0], Entry(id: 2, value: "edited"), base[2]]
+        let merged = ListMerge.merge(base: base, ours: ours, theirs: theirs)
+        XCTAssertEqual(merged.map(\.id), [3, 1, 2], "our order is kept")
+        XCTAssertEqual(merged.map(\.value), ["c", "a", "edited"], "and their edit too")
+    }
+
+    func testTheirNewOrderSurvivesOurEdit() {
+        let ours = [base[0], Entry(id: 2, value: "edited"), base[2]]
+        let theirs = [base[1], base[2], base[0]]
+        XCTAssertEqual(ListMerge.merge(base: base, ours: ours, theirs: theirs).map(\.id), [2, 3, 1])
+    }
+
+    func testOurNewOrderKeepsTheirAdditionsAtTheEnd() {
+        let ours = [base[2], base[1], base[0]]
+        let theirs = base + [Entry(id: 7, value: "new")]
+        XCTAssertEqual(ListMerge.merge(base: base, ours: ours, theirs: theirs).map(\.id), [3, 2, 1, 7])
+    }
+
     func testAdditionsFromBothSidesAreKept() {
         let ours = base + [Entry(id: 4, value: "ours")]
         let theirs = base + [Entry(id: 5, value: "theirs")]
