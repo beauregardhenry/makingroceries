@@ -93,8 +93,7 @@ struct ScanCheckOffView: View {
             return product?.name
         }
 
-        let warnings = product.map { AvoidList.warnings(allergens: $0.allergens, ingredients: $0.ingredients, avoid: AvoidList.words) } ?? []
-        var extra = AvoidList.message(warnings)
+        var extra = product.flatMap { store.allergyWarning(allergens: $0.allergens, ingredients: $0.ingredients) }
         if case .ticked(let name) = outcome, extra == nil {
             extra = store.items.first { $0.name == name }?.warning
         }

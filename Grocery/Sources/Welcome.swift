@@ -62,7 +62,7 @@ struct WelcomeView: View {
                             }
                         }
                         HStack {
-                            TextField("Another store", text: $custom).textInputAutocapitalization(.words)
+                            TextField("Another store", text: $custom).titleCase($custom)
                                 .textFieldStyle(.roundedBorder)
                                 .submitLabel(.done)
                                 .onSubmit(addCustom)

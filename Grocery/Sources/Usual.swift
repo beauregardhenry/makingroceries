@@ -20,7 +20,7 @@ struct UsualView: View {
             List {
                 Section {
                     HStack {
-                        TextField("Add usual items: milk, eggs, rice", text: $newText).textInputAutocapitalization(.words)
+                        TextField("Add usual items: milk, eggs, rice", text: $newText).titleCase($newText)
                             .submitLabel(.done)
                             .onSubmit(addNew)
                         Button("Add", action: addNew)
@@ -54,8 +54,12 @@ struct UsualView: View {
                                 .accessibilityLabel("Add \(favorite.name) to list")
                             }
                         }
+                        .contextMenu {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                store.favorites.removeAll { $0.id == favorite.id }
+                            }
+                        }
                     }
-                    .onDelete { store.favorites.remove(atOffsets: $0) }
                 } header: {
                     Text("Usual items")
                 }

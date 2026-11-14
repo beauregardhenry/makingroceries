@@ -5,7 +5,7 @@ extension GroceryStore {
 
     @discardableResult
     func addPerson(named name: String) -> Person? {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty, !people.contains(where: { Self.same($0.name, trimmed) }) else { return nil }
         let person = Person(name: trimmed)
         people.append(person)

@@ -3,13 +3,13 @@ import XCTest
 final class GoalTests: StoreTestCase {
     func testGoalsKeepTheOrderYouGiveThem() {
         store.addGoal(name: "Computer", cost: 1200)
-        store.addGoal(name: "Van repair", cost: 800)
+        store.addGoal(name: "Van Repair", cost: 800)
         store.addGoal(name: "Vacation", cost: 2000, priority: .urgent)
-        XCTAssertEqual(store.activeGoals.map(\.name), ["Vacation", "Computer", "Van repair"])
+        XCTAssertEqual(store.activeGoals.map(\.name), ["Vacation", "Computer", "Van Repair"])
         store.makeTopPriority(store.activeGoals[2].id)
-        XCTAssertEqual(store.activeGoals.map(\.name), ["Van repair", "Vacation", "Computer"])
+        XCTAssertEqual(store.activeGoals.map(\.name), ["Van Repair", "Vacation", "Computer"])
         store.moveGoals(from: IndexSet(integer: 2), to: 1)
-        XCTAssertEqual(store.activeGoals.map(\.name), ["Van repair", "Computer", "Vacation"])
+        XCTAssertEqual(store.activeGoals.map(\.name), ["Van Repair", "Computer", "Vacation"])
     }
 
     func testBlankOrFreeGoalsAreRefusedAndSavedIsCapped() {
@@ -80,30 +80,30 @@ final class GoalTests: StoreTestCase {
     }
 
     func testOnlyOneRainyDayFund() {
-        XCTAssertNotNil(store.addGoal(name: "Rainy-day fund", cost: 500, isReserve: true))
+        XCTAssertNotNil(store.addGoal(name: "Rainy-day Fund", cost: 500, isReserve: true))
         store.addGoal(name: "Second fund", cost: 500, isReserve: true)
         XCTAssertEqual(store.activeGoals.filter(\.reserve).count, 1)
-        XCTAssertEqual(store.reserveGoal?.name, "Rainy-day fund")
+        XCTAssertEqual(store.reserveGoal?.name, "Rainy-day Fund")
     }
 
     func testAnUnexpectedExpenseIsPaidFromTheRainyDayFundWhenItCoversIt() throws {
-        let fund = try XCTUnwrap(store.addGoal(name: "Rainy-day fund", cost: 500, saved: 400, isReserve: true))
+        let fund = try XCTUnwrap(store.addGoal(name: "Rainy-day Fund", cost: 500, saved: 400, isReserve: true))
         store.addGoal(name: "Computer", cost: 1000)
-        let paid = store.addUnexpected(name: "Vet bill", cost: 150, priority: .urgent, useReserve: true)
+        let paid = store.addUnexpected(name: "Vet Bill", cost: 150, priority: .urgent, useReserve: true)
         XCTAssertTrue(paid)
         XCTAssertEqual(store.goals.first { $0.id == fund.id }?.saved, 250)
-        XCTAssertEqual(store.activeGoals.map(\.name), ["Rainy-day fund", "Computer"], "the other goals don't move")
-        XCTAssertEqual(store.doneGoals.map(\.name), ["Vet bill"], "and the expense is logged")
+        XCTAssertEqual(store.activeGoals.map(\.name), ["Rainy-day Fund", "Computer"], "the other goals don't move")
+        XCTAssertEqual(store.doneGoals.map(\.name), ["Vet Bill"], "and the expense is logged")
     }
 
     func testAnUnexpectedExpenseTheFundCantCoverBecomesAnUrgentGoal() throws {
-        store.addGoal(name: "Rainy-day fund", cost: 500, saved: 100, isReserve: true)
+        store.addGoal(name: "Rainy-day Fund", cost: 500, saved: 100, isReserve: true)
         store.addGoal(name: "Computer", cost: 1000)
-        XCTAssertFalse(store.addUnexpected(name: "Van repair", cost: 800, priority: .urgent, useReserve: true))
-        XCTAssertEqual(store.activeGoals.first?.name, "Van repair")
+        XCTAssertFalse(store.addUnexpected(name: "Van Repair", cost: 800, priority: .urgent, useReserve: true))
+        XCTAssertEqual(store.activeGoals.first?.name, "Van Repair")
         XCTAssertEqual(store.reserveGoal?.saved, 100, "the fund is untouched")
-        XCTAssertFalse(store.addUnexpected(name: "Later thing", cost: 50, priority: .normal, useReserve: false))
-        XCTAssertEqual(store.activeGoals.last?.name, "Later thing")
+        XCTAssertFalse(store.addUnexpected(name: "Later Thing", cost: 50, priority: .normal, useReserve: false))
+        XCTAssertEqual(store.activeGoals.last?.name, "Later Thing")
         XCTAssertFalse(store.addUnexpected(name: "", cost: 50, priority: .normal, useReserve: false))
     }
 

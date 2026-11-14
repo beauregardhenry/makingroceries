@@ -163,7 +163,7 @@ final class GroceryUITests: XCTestCase {
         cost.tap()
         cost.typeText("1200")
         app.navigationBars.buttons["Add"].tap()
-        XCTAssertTrue(app.buttons["goal-New computer"].waitForExistence(timeout: 5), "the goal is listed")
+        XCTAssertTrue(app.buttons["goal-New Computer"].waitForExistence(timeout: 5), "the goal is listed")
         XCTAssertTrue(app.buttons["Unexpected expense"].exists, "surprise expenses are one tap away")
     }
 
@@ -271,12 +271,12 @@ final class GroceryUITests: XCTestCase {
         field.tap()
         field.typeText("passport holder")
         app.buttons["Add items"].tap()
-        XCTAssertTrue(item("Passport holder").waitForExistence(timeout: 5), "it shows under Travel")
+        XCTAssertTrue(item("Passport Holder").waitForExistence(timeout: 5), "it shows under Travel")
         for _ in 0..<3 where !onScreen(app.buttons["All"]) { travel.swipeRight() }
         app.buttons["All"].tap()
         XCTAssertTrue(app.navigationBars["Groceries"].waitForExistence(timeout: 5))
         XCTAssertTrue(item("Milk").waitForExistence(timeout: 5))
-        XCTAssertFalse(item("Passport holder").exists, "trip items don't clog the everyday list")
+        XCTAssertFalse(item("Passport Holder").exists, "trip items don't clog the everyday list")
     }
 
     func testKitchenTabScreensOpenAndClose() {

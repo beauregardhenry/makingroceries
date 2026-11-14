@@ -25,7 +25,7 @@ struct SendListView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Your name (shown to them)", text: $myName).textInputAutocapitalization(.words)
+                    TextField("Your name (shown to them)", text: $myName).titleCase($myName)
                     if shopID != nil {
                         Toggle("Only \(store.shopName(for: shopID) ?? "this store")", isOn: $onlyThisStore)
                     }

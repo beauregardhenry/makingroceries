@@ -14,7 +14,7 @@ enum RegistryOccasion {
 extension GroceryStore {
     @discardableResult
     func addRegistryPerson(named name: String, birthday: Date? = nil) -> RegistryPerson? {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty, !registryPeople.contains(where: { Self.same($0.name, trimmed) }) else { return nil }
         let person = RegistryPerson(name: trimmed, birthday: birthday)
         registryPeople.append(person)

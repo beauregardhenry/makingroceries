@@ -318,9 +318,6 @@ struct ContentView: View {
                     ItemRow(item: item, showShop: filter == .all, large: shoppingMode,
                             onSetPrice: beginPricing, onEdit: { detailItem = $0 })
                 }
-                .onDelete { offsets in
-                    offsets.map { section.items[$0] }.forEach(store.delete)
-                }
             }
         } header: {
             if isCart {

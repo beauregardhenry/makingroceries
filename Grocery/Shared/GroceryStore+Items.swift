@@ -7,7 +7,7 @@ extension GroceryStore {
              sizeAmount: Double? = nil, sizeUnit: String? = nil, warning: String? = nil, barcode: String? = nil,
              list: SeparateList? = nil, personID: UUID? = nil, clothingSize: String? = nil,
              customAisleID: UUID? = nil, giftForID: UUID? = nil, occasion: String? = nil) {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty else { return }
         // A known size carries over from the last time you bought it.
         let past = pastItem(named: trimmed)
@@ -21,7 +21,7 @@ extension GroceryStore {
         item.customAisleID = list == .clothing || list == .registry ? nil : customAisle(for: customAisleID)?.id
         if list == .registry {
             item.giftForID = registryPerson(for: giftForID)?.id
-            let trimmedOccasion = occasion?.trimmingCharacters(in: .whitespaces)
+            let trimmedOccasion = occasion.map { TitleCase.apply($0.trimmingCharacters(in: .whitespaces)) }
             item.occasion = (trimmedOccasion?.isEmpty ?? true) ? nil : trimmedOccasion
         }
         if list == .clothing {

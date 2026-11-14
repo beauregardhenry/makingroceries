@@ -80,10 +80,11 @@ struct MealsView: View {
                             .accessibilityHint("Press and hold to add a half, double or bigger batch")
                         }
                     }
-                }
-                .onDelete { offsets in
-                    let ids = Set(offsets.map { group.meals[$0].id })
-                    store.meals.removeAll { ids.contains($0.id) }
+                    .contextMenu {
+                        Button("Delete Meal", systemImage: "trash", role: .destructive) {
+                            store.meals.removeAll { $0.id == meal.id }
+                        }
+                    }
                 }
                 } header: {
                     Label(group.category.rawValue, systemImage: group.category.symbol)
@@ -130,7 +131,7 @@ struct MealEditorView: View {
         if let i = store.meals.firstIndex(where: { $0.id == mealID }) {
             List {
                 Section("Name") {
-                    TextField("Meal name", text: $store.meals[i].name).textInputAutocapitalization(.words)
+                    TextField("Meal name", text: $store.meals[i].name).titleCase($store.meals[i].name)
                 }
 
                 Section {
@@ -152,7 +153,7 @@ struct MealEditorView: View {
                     ForEach($store.meals[i].ingredients) { $ingredient in
                         HStack {
                             AisleBadge(aisle: ingredient.aisle, size: 24)
-                            TextField("Ingredient", text: $ingredient.name).textInputAutocapitalization(.words)
+                            TextField("Ingredient", text: $ingredient.name).titleCase($ingredient.name)
                             if let amount = ingredient.amount, let unit = ingredient.unit {
                                 Text(Amount.text(amount * batch.rawValue, unit: unit))
                                     .foregroundStyle(.secondary).monospacedDigit()
@@ -164,11 +165,15 @@ struct MealEditorView: View {
                                     .frame(minWidth: 30, alignment: .trailing)
                             }
                         }
+                        .contextMenu {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                store.meals[i].ingredients.removeAll { $0.id == ingredient.id }
+                            }
+                        }
                     }
-                    .onDelete { store.meals[i].ingredients.remove(atOffsets: $0) }
 
                     HStack {
-                        TextField("Add ingredients: rice, 2 chicken, broccoli", text: $newText).textInputAutocapitalization(.words)
+                        TextField("Add ingredients: rice, 2 chicken, broccoli", text: $newText).titleCase($newText)
                             .submitLabel(.done)
                             .onSubmit { addIngredients(to: i) }
                         Button("Add") { addIngredients(to: i) }
@@ -277,7 +282,7 @@ struct RecipeImportView: View {
                 }
 
                 Section("Meal name") {
-                    TextField("Name", text: $name).textInputAutocapitalization(.words)
+                    TextField("Name", text: $name).titleCase($name)
                 }
             }
             .navigationTitle("Import Recipe")

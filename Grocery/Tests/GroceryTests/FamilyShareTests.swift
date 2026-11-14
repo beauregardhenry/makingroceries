@@ -15,7 +15,7 @@ final class FamilyShareTests: StoreTestCase {
     }
 
     func testOnlyTheListAndWhatItNeedsAreShared() {
-        XCTAssertEqual(GroceryStore.familyFileNames, ["shops", "customAisles", "people", "registryPeople", "grocery"])
+        XCTAssertEqual(GroceryStore.familyFileNames, ["shops", "customAisles", "people", "registryPeople", "allergies", "grocery"])
         XCTAssertTrue(Set(GroceryStore.familyFileNames).isSubset(of: GroceryStore.cloudFileNames))
         for privateFile in ["meals", "history", "spending", "goals", "stock"] {
             XCTAssertFalse(GroceryStore.familyFileNames.contains(privateFile))
@@ -158,7 +158,7 @@ final class FamilyShareTests: StoreTestCase {
     func testEachFamilyEntryIsMatchedOnlyOnce() {
         let ours = [CustomAisle(name: "Bulk"), CustomAisle(name: "Bulk")]
         let theirs = [CustomAisle(name: "Bulk")]
-        let map = GroceryStore.matchingIDs(ours: ours, theirs: theirs) { $0.name }
+        let map = GroceryStore.matchingIDs(ours: ours, theirs: theirs) { $0.name == $1.name }
         XCTAssertEqual(map.count, 1)
         XCTAssertEqual(map[ours[0].id], theirs[0].id)
     }

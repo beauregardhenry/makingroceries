@@ -26,7 +26,7 @@ struct NamedListEditor<Item: Identifiable, Extra: View>: View {
             List {
                 Section {
                     HStack {
-                        TextField(placeholder, text: $newName).textInputAutocapitalization(.words)
+                        TextField(placeholder, text: $newName).titleCase($newName)
                             .submitLabel(.done)
                             .onSubmit(addNew)
                         Button("Add", action: addNew)
@@ -36,11 +36,13 @@ struct NamedListEditor<Item: Identifiable, Extra: View>: View {
                 Section {
                     ForEach($items) { $item in
                         VStack(alignment: .leading) {
-                            TextField("Name", text: $item[dynamicMember: name]).textInputAutocapitalization(.words)
+                            TextField("Name", text: $item[dynamicMember: name]).titleCase($item[dynamicMember: name])
                             extra($item)
                         }
+                        .contextMenu {
+                            Button("Delete", systemImage: "trash", role: .destructive) { delete(item.id) }
+                        }
                     }
-                    .onDelete { offsets in offsets.map { items[$0].id }.forEach(delete) }
                     .onMove { items.move(fromOffsets: $0, toOffset: $1) }
                 } header: {
                     Text(header)

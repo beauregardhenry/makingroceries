@@ -141,11 +141,11 @@ struct InsightsView: View {
                     Spacer()
                     Text(Price.format(record.amount)).monospacedDigit()
                 }
-            }
-            .onDelete { offsets in
-                let recent = Array(store.spending.sorted { $0.date > $1.date }.prefix(12))
-                let ids = Set(offsets.map { recent[$0].id })
-                store.spending.removeAll { ids.contains($0.id) }
+                .contextMenu {
+                    Button("Delete Trip", systemImage: "trash", role: .destructive) {
+                        store.spending.removeAll { $0.id == record.id }
+                    }
+                }
             }
         }
     }

@@ -3,10 +3,10 @@ import Foundation
 /// The part of Family Sharing that doesn't need iCloud: which files a family list shares, and lining up this
 /// phone's entries with the family's before the first merge. FamilySync (in the app) moves the bytes.
 extension GroceryStore {
-    /// What a family list shares: the list itself (with its Travel, Clothing and Registry chips) and what the
-    /// list needs to show it. Stores come first so items can be lined up with the family's stores. Meals,
+    /// What a family list shares: the list itself (with its Travel, Clothing and Registry chips), what the
+    /// list needs to show it, and everyone's allergies. Stores come first so items can be lined up with the family's stores. Meals,
     /// the kitchen, history, spending and Save Up stay private.
-    static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "grocery"]
+    static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "allergies", "grocery"]
 
     /// Before this phone first combines one file with the family's copy: anything here that is the same as
     /// one of theirs (a store, aisle or person with the same name, or an item still needed from the same
@@ -17,26 +17,31 @@ extension GroceryStore {
         switch name {
         case "shops":
             guard let theirs = try? decoder.decode([Shop].self, from: remote) else { return }
-            remapShops(Self.matchingIDs(ours: shops, theirs: theirs) { Self.key($0.name) })
+            remapShops(Self.matchingIDs(ours: shops, theirs: theirs) { Self.same($0.name, $1.name) })
         case "customAisles":
             guard let theirs = try? decoder.decode([CustomAisle].self, from: remote) else { return }
-            remapCustomAisles(Self.matchingIDs(ours: customAisles, theirs: theirs) { Self.key($0.name) })
+            remapCustomAisles(Self.matchingIDs(ours: customAisles, theirs: theirs) { Self.same($0.name, $1.name) })
         case "people":
             guard let theirs = try? decoder.decode([Person].self, from: remote) else { return }
-            let map = Self.matchingIDs(ours: people, theirs: theirs) { Self.key($0.name) }
+            let map = Self.matchingIDs(ours: people, theirs: theirs) { Self.same($0.name, $1.name) }
             guard !map.isEmpty else { return }
             people = people.map { var person = $0; person.id = map[person.id] ?? person.id; return person }
             items = items.map { var item = $0; item.personID = item.personID.map { map[$0] ?? $0 }; return item }
         case "registryPeople":
             guard let theirs = try? decoder.decode([RegistryPerson].self, from: remote) else { return }
-            let map = Self.matchingIDs(ours: registryPeople, theirs: theirs) { Self.key($0.name) }
+            let map = Self.matchingIDs(ours: registryPeople, theirs: theirs) { Self.same($0.name, $1.name) }
             guard !map.isEmpty else { return }
             registryPeople = registryPeople.map { var person = $0; person.id = map[person.id] ?? person.id; return person }
             items = items.map { var item = $0; item.giftForID = item.giftForID.map { map[$0] ?? $0 }; return item }
+        case "allergies":
+            guard let theirs = try? decoder.decode([Allergy].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: allergies, theirs: theirs) { Self.same($0.name, $1.name) }
+            guard !map.isEmpty else { return }
+            allergies = allergies.map { var allergy = $0; allergy.id = map[allergy.id] ?? allergy.id; return allergy }
         case "grocery":
             guard let theirs = try? decoder.decode([GroceryItem].self, from: remote) else { return }
             // Only items still needed: a bought item on one phone and a needed one on the other are two trips.
-            let map = Self.matchingIDs(ours: items.filter { !$0.isChecked }, theirs: theirs.filter { !$0.isChecked }, key: Self.itemKey)
+            let map = Self.matchingIDs(ours: items.filter { !$0.isChecked }, theirs: theirs.filter { !$0.isChecked }, matches: Self.sameItem)
             guard !map.isEmpty else { return }
             items = items.map { var item = $0; item.id = map[item.id] ?? item.id; return item }
         default:
@@ -44,30 +49,24 @@ extension GroceryStore {
         }
     }
 
-    /// For each of ours that the family doesn't have by id, the id of the family's entry with the same key, if
+    /// For each of ours that the family doesn't have by id, the id of the family's entry that `matches` it, if
     /// there is one that isn't already matched. Entries with the same id on both sides are already lined up.
-    static func matchingIDs<Element: Identifiable>(ours: [Element], theirs: [Element], key: (Element) -> String) -> [UUID: UUID]
+    static func matchingIDs<Element: Identifiable>(ours: [Element], theirs: [Element], matches: (Element, Element) -> Bool) -> [UUID: UUID]
     where Element.ID == UUID {
         let ourIDs = Set(ours.map(\.id))
         var available = theirs.filter { !ourIDs.contains($0.id) }
         let theirIDs = Set(theirs.map(\.id))
         var map: [UUID: UUID] = [:]
         for entry in ours where !theirIDs.contains(entry.id) {
-            let wanted = key(entry)
-            guard !wanted.isEmpty, let index = available.firstIndex(where: { key($0) == wanted }) else { continue }
+            guard let index = available.firstIndex(where: { matches(entry, $0) }) else { continue }
             map[entry.id] = available.remove(at: index).id
         }
         return map
     }
 
-    private static func key(_ name: String) -> String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-    }
-
-    /// The same item twice: same name, same store, same list chip, and for the same person.
-    private static func itemKey(_ item: GroceryItem) -> String {
-        [key(item.name), item.shopID?.uuidString ?? "", item.list?.rawValue ?? "",
-         item.personID?.uuidString ?? "", item.giftForID?.uuidString ?? ""].joined(separator: "|")
+    /// The same item twice: same name (singular or plural), same store, same list chip, and for the same person.
+    private static func sameItem(_ a: GroceryItem, _ b: GroceryItem) -> Bool {
+        a.shopID == b.shopID && a.list == b.list && a.personID == b.personID && a.giftForID == b.giftForID && same(a.name, b.name)
     }
 
     /// Gives stores new ids everywhere they're used: the list, history and prices, repeating items and spending.

@@ -79,7 +79,7 @@ final class ItemTests: StoreTestCase {
         store.add(name: "Peanut butter", quantity: 1, aisle: .pantry, sizeAmount: 16, sizeUnit: "oz", barcode: "123")
         store.add(name: "Peanut butter", quantity: 1, aisle: .pantry)
         XCTAssertEqual(store.items.last?.sizeAmount, 16)
-        XCTAssertEqual(store.pastItem(forBarcode: "123")?.name, "Peanut butter")
+        XCTAssertEqual(store.pastItem(forBarcode: "123")?.name, "Peanut Butter")
     }
 }
 
@@ -581,7 +581,7 @@ final class UsualAndRepeatTests: StoreTestCase {
         store.addFavorite(name: "  Oat milk ", quantity: 2)
         store.addFavorite(name: "oat milk")
         store.addFavorite(name: " ")
-        XCTAssertEqual(store.favorites.map(\.name), ["Oat milk"])
+        XCTAssertEqual(store.favorites.map(\.name), ["Oat Milk"])
         XCTAssertEqual(store.favorites[0].aisle, .dairy)
         store.addToList(store.favorites[0], shopID: nil)
         store.addToList(store.favorites[0], shopID: nil)

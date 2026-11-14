@@ -42,7 +42,6 @@ struct SaveUpView: View {
                         row(goal, rank: index)
                     }
                     .onMove { store.moveGoals(from: $0, to: $1) }
-                    .onDelete { offsets in offsets.map { active[$0].id }.forEach(store.deleteGoal) }
                 } header: {
                     Text("Priority order")
                 } footer: {
@@ -57,8 +56,8 @@ struct SaveUpView: View {
                                 Spacer()
                                 Text(Price.format(goal.cost)).foregroundStyle(.secondary).monospacedDigit()
                             }
-                            .swipeActions {
-                                Button("Put Back", systemImage: "arrow.uturn.backward") { store.reopen(goal.id) }.tint(.blue)
+                            .contextMenu {
+                                Button("Put Back", systemImage: "arrow.uturn.backward") { store.reopen(goal.id) }
                                 Button("Delete", systemImage: "trash", role: .destructive) { store.deleteGoal(goal.id) }
                             }
                         }
@@ -148,17 +147,11 @@ struct SaveUpView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("goal-\(goal.name)")
-        .swipeActions(edge: .leading) {
-            Button("Set Aside", systemImage: "plus.circle") { sheet = .aside(goal.id) }.tint(.blue)
-        }
-        .swipeActions(edge: .trailing) {
-            Button("Delete", systemImage: "trash", role: .destructive) { store.deleteGoal(goal.id) }
-            Button("Bought", systemImage: "checkmark") { store.markBought(goal.id) }.tint(.green)
-        }
         .contextMenu {
             if rank > 0 { Button("Make Top Priority", systemImage: "arrow.up.to.line") { store.makeTopPriority(goal.id) } }
             Button("Set Money Aside", systemImage: "plus.circle") { sheet = .aside(goal.id) }
             Button("Bought It", systemImage: "checkmark") { store.markBought(goal.id) }
+            Button("Delete", systemImage: "trash", role: .destructive) { store.deleteGoal(goal.id) }
         }
     }
 
@@ -191,7 +184,7 @@ private struct AddGoalSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("What are you saving for?", text: $name).textInputAutocapitalization(.words)
+                    TextField("What are you saving for?", text: $name).titleCase($name)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
@@ -247,7 +240,7 @@ private struct UnexpectedSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("What came up? (van repair, vet bill…)", text: $name).textInputAutocapitalization(.words)
+                    TextField("What came up? (van repair, vet bill…)", text: $name).titleCase($name)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
@@ -349,7 +342,7 @@ private struct EditGoalSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Name", text: $name).textInputAutocapitalization(.words)
+                    TextField("Name", text: $name).titleCase($name)
                     LabeledContent("Cost") {
                         TextField("$0.00", text: $costText).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
