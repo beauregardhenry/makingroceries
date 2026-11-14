@@ -55,7 +55,7 @@ struct AddItemView: View {
                         ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
                     }
                     LabeledContent("Size") {
-                        TextField(store.lastSize(for: personID, itemNamed: name).map { "Last: \($0)" } ?? "M, 8, 10 Kids, 32x30",
+                        TextField(store.suggestedSize(for: personID, itemNamed: name).map { "Usually \($0)" } ?? "M, 8, 10 Kids, 32x30",
                                   text: $sizeText)
                             .multilineTextAlignment(.trailing)
                             .textInputAutocapitalization(.never)

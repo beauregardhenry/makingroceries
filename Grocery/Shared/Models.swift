@@ -139,6 +139,8 @@ struct Person: Identifiable, Codable, Equatable {
     var name: String
     /// The last size used for each kind of item (lowercased name), to suggest next time.
     var sizes: [String: String]?
+    /// Sizes and measurements entered in Settings › Family Members, like Shoes 7 or Inseam 30.
+    var measurements: [Measurement]?
 }
 
 struct PricePoint: Codable, Equatable {
