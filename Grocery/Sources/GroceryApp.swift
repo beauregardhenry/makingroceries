@@ -6,6 +6,9 @@ struct GroceryApp: App {
     @State private var incoming: IncomingList?
     @State private var sync = HouseholdSync()
     @State private var cloud = CloudSync()
+    @State private var family = FamilySync.shared
+    // Hands Family Sharing invites opened from Messages or Mail to the app.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("myName") private var myName = ""
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
@@ -26,12 +29,14 @@ struct GroceryApp: App {
                 .environment(store)
                 .environment(sync)
                 .environment(cloud)
+                .environment(family)
                 .task {
                     ArrivalReminders.shared.syncRegions(store.shops)
                     PhoneSession.shared.start(store: store)
                     sync.start(store: store, name: myName)
                     SpotlightIndex.update(from: store)
                     cloud.start(store: store)
+                    family.start(store: store)
                 }
                 .onChange(of: store.items) { _, _ in
                     PhoneSession.shared.push()
@@ -39,13 +44,17 @@ struct GroceryApp: App {
                     SpotlightIndex.update(from: store)
                 }
                 .onChange(of: store.meals) { _, _ in SpotlightIndex.update(from: store) }
-                .onChange(of: store.revision) { _, _ in cloud.scheduleUpload() }
+                .onChange(of: store.revision) { _, _ in
+                    cloud.scheduleUpload()
+                    family.scheduleUpload()
+                }
                 .onChange(of: store.history) { _, _ in SpotlightIndex.update(from: store) }
                 .onChange(of: scenePhase) { _, phase in
                     // Live sync only runs while the app is open; iOS stops it in the background anyway.
                     if phase == .active {
                         sync.start(store: store, name: myName)
                         cloud.start(store: store)
+                        family.start(store: store)
                     } else if phase == .background {
                         sync.stop()
                     }
@@ -54,6 +63,11 @@ struct GroceryApp: App {
                     if let export = GroceryStore.readExport(from: url) { incoming = IncomingList(export: export) }
                 }
                 .sheet(item: $incoming) { ImportListView(incoming: $0).environment(store) }
+                .alert("Family Sharing", isPresented: Binding(get: { family.notice != nil }, set: { if !$0 { family.notice = nil } })) {
+                    Button("OK") { family.notice = nil }
+                } message: {
+                    Text(family.notice ?? "")
+                }
                 .preferredColorScheme((Theme(rawValue: themeName) ?? .grey).scheme)
                 .task { await ExpiryReminders.reschedule(store.stock) }
                 .onChange(of: store.stock) { _, stock in Task { await ExpiryReminders.reschedule(stock) } }

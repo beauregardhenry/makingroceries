@@ -83,6 +83,7 @@
 		46FB3A1EF58A20F202D5606A /* AvoidList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0888DE257A824E4BD76E9F5D /* AvoidList.swift */; };
 		482010B76BE408B5CCE43711 /* Family.swift in Sources */ = {isa = PBXBuildFile; fileRef = A602C0078CD5BB386E1088A7 /* Family.swift */; };
 		497A174962D986C63DF78893 /* GoogleCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08422B353A28E9FBCFBDD2C9 /* GoogleCalendar.swift */; };
+		49C89088E6CAA4498E049BC3 /* FamilyShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD422F588AF263CA32D38A /* FamilyShare.swift */; };
 		4A7D64406AFA17002B90489C /* CookIdeas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */; };
 		4CC250448DBAA86B6287E99D /* SpotlightEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BE769E2E0B38F61F3CB710 /* SpotlightEntries.swift */; };
 		4D7CE6200B27B81B335E4C6D /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E58ADB69B19ADF0F59A7EE /* MealPlan.swift */; };
@@ -149,6 +150,7 @@
 		8BF8CB14C18AA157F9D31296 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FCDD36EAB3D37D7BC5861BE /* Storage.swift */; };
 		8CD31E6E701F3E4450811341 /* ShopFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2BB2534882D49229C2551 /* ShopFilter.swift */; };
 		8F9E3196854A5813D8E71170 /* CookIdeas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */; };
+		9035580C198A652206FEF551 /* FamilyShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD422F588AF263CA32D38A /* FamilyShare.swift */; };
 		92A3575CFAD0B86451BD75CB /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A16C69F34C946E42D063411 /* AppIcons.swift */; };
 		93A2D8F5E7934D1F572757EE /* ShopFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E2BB2534882D49229C2551 /* ShopFilter.swift */; };
 		9415BA5755A4F6F7204953E0 /* GroceryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BD5D7C2EC353FFBCC212F3 /* GroceryStore.swift */; };
@@ -170,6 +172,7 @@
 		A747159FDEB14380491FD6FF /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
 		A77031E52FBC18A662D0954F /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
 		A840AB6FECFCDC572AE6261A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1388B3BE5B5BB9A90385765B /* Models.swift */; };
+		AABF7DF1C723535460D7E63F /* FamilyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88C9821404D69A549576BEDA /* FamilyShareTests.swift */; };
 		AAF8172A82FF23E0F0395E56 /* GroceryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BD5D7C2EC353FFBCC212F3 /* GroceryStore.swift */; };
 		AC5CF49118FA92727DA7792E /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6785649CFE2C1543568EE24 /* WatchSnapshot.swift */; };
 		AD9935CE2CD441B7AA2E68CB /* CustomAisles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B91889151CDD09B6E397F9 /* CustomAisles.swift */; };
@@ -207,6 +210,7 @@
 		CABCA04585E1D3BC31424744 /* Arrival.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9351DBAEF175CDA248781172 /* Arrival.swift */; };
 		CB53A56B6FEB3A80AB634606 /* NetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0931E60F16A8B22951ED85 /* NetworkTests.swift */; };
 		CD3E4E59567B29EDAB02D903 /* ListMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8641B730C726ED388A11D1C2 /* ListMerge.swift */; };
+		CE4D838ED5A17EE7F15A65D7 /* FamilySync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66842F0DF6A427EAA239D49 /* FamilySync.swift */; };
 		CF471499920E3C4B0B616C03 /* Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF2A8057BCF9A88E835685 /* Parsing.swift */; };
 		D0F0CA9086CFACB51D141D5F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8CA078D797036AB2313A5227 /* Assets.xcassets */; };
 		D1882265C58037F2EC749889 /* AisleAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93CC7A0C7AE37F77F82532DA /* AisleAI.swift */; };
@@ -217,9 +221,11 @@
 		D68ED53A9C354D63269E1F85 /* WatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF7115579F71E22F29E30AE /* WatchListView.swift */; };
 		D71ADD46EEA7744664B5D804 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */; };
 		D9C94FA77717FE9E13CBAC6B /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6785649CFE2C1543568EE24 /* WatchSnapshot.swift */; };
+		DB1511B27FDA99516FC242EB /* FamilyShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD422F588AF263CA32D38A /* FamilyShare.swift */; };
 		DB538CB702CCB07669B957D9 /* ProductLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CE2AE19C066140118EE8D /* ProductLookup.swift */; };
 		DB8088368D6ED21F7F6D9C59 /* PriceFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4688F13FD87D2D9ED29904F /* PriceFormat.swift */; };
 		DCA30B49DC4A44336B3E177D /* ListMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8641B730C726ED388A11D1C2 /* ListMerge.swift */; };
+		DDBA58C55FB9FB00D2F9FC4E /* FamilyShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD422F588AF263CA32D38A /* FamilyShare.swift */; };
 		DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65588F8D169654D2847F9EA9 /* ItemDetail.swift */; };
 		E0622C12FA9382137329EA06 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */; };
 		E0636B6C892669E373BEBCF1 /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
@@ -336,6 +342,7 @@
 		493672A6A386A3C2831730D5 /* GoogleCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarTests.swift; sourceTree = "<group>"; };
 		49633A16F83D4F0AAAE986D8 /* ClothingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClothingTests.swift; sourceTree = "<group>"; };
 		4A689FB469E99DEA380D4B1F /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
+		4BAD422F588AF263CA32D38A /* FamilyShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyShare.swift; sourceTree = "<group>"; };
 		4CC858F1DBEB1FDB8F628DED /* GroceryWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GroceryWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504E059EBD40D84873D6C1F3 /* GroceryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryApp.swift; sourceTree = "<group>"; };
 		59A2611C6625D05974C3C3E3 /* ReceiptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptView.swift; sourceTree = "<group>"; };
@@ -363,6 +370,7 @@
 		8582EF0ABD3C29544C72AAC1 /* CompanyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyTests.swift; sourceTree = "<group>"; };
 		8641B730C726ED388A11D1C2 /* ListMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListMerge.swift; sourceTree = "<group>"; };
 		86A7E5EB488FD37BD2073C8D /* ListExchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListExchange.swift; sourceTree = "<group>"; };
+		88C9821404D69A549576BEDA /* FamilyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyShareTests.swift; sourceTree = "<group>"; };
 		8A16C69F34C946E42D063411 /* AppIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIcons.swift; sourceTree = "<group>"; };
 		8A7FA8D8409378DC7CA8F0B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8CA078D797036AB2313A5227 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -379,6 +387,7 @@
 		A14032117470AF68E950FAAF /* Photos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photos.swift; sourceTree = "<group>"; };
 		A602C0078CD5BB386E1088A7 /* Family.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Family.swift; sourceTree = "<group>"; };
 		A631789F7F55EDB4EFD19497 /* GroceryWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GroceryWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A66842F0DF6A427EAA239D49 /* FamilySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilySync.swift; sourceTree = "<group>"; };
 		AB75D52FA10C5CF1E211422B /* GroceryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryWidget.swift; sourceTree = "<group>"; };
 		AB93E89F5CAE9638D4F457CB /* RecipeOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeOCR.swift; sourceTree = "<group>"; };
 		AEF7115579F71E22F29E30AE /* WatchListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchListView.swift; sourceTree = "<group>"; };
@@ -485,6 +494,7 @@
 				2B6020BFBEF45159218ADF6E /* Expiry.swift */,
 				A602C0078CD5BB386E1088A7 /* Family.swift */,
 				EA04592EEE51EF539DB35587 /* FamilyMembers.swift */,
+				A66842F0DF6A427EAA239D49 /* FamilySync.swift */,
 				DF340084309CE7A4D328EFF1 /* GoogleCalendarAccount.swift */,
 				8F33F4BA1F49153D285628F1 /* Grocery.entitlements */,
 				504E059EBD40D84873D6C1F3 /* GroceryApp.swift */,
@@ -566,6 +576,7 @@
 				EA09F22A402DFB2270AFFDC7 /* CookAI.swift */,
 				087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */,
 				24B91889151CDD09B6E397F9 /* CustomAisles.swift */,
+				4BAD422F588AF263CA32D38A /* FamilyShare.swift */,
 				E14527CF1B699BFBDC2E2925 /* Goals.swift */,
 				08422B353A28E9FBCFBDD2C9 /* GoogleCalendar.swift */,
 				69D78A5C9275B720C9B3373E /* GroceryIntents.swift */,
@@ -613,6 +624,7 @@
 				8582EF0ABD3C29544C72AAC1 /* CompanyTests.swift */,
 				659C13C088656003DB812C3D /* CustomAisleTests.swift */,
 				0EA84F222BE3263A689CDBF7 /* DataSafetyTests.swift */,
+				88C9821404D69A549576BEDA /* FamilyShareTests.swift */,
 				BE45D380C15317B3A9E75D02 /* FeatureTests.swift */,
 				7025AC86783BB4C92B68FD5A /* GoalTests.swift */,
 				493672A6A386A3C2831730D5 /* GoogleCalendarTests.swift */,
@@ -867,6 +879,8 @@
 				96EF663E2A2888C4CAAB7C14 /* Expiry.swift in Sources */,
 				482010B76BE408B5CCE43711 /* Family.swift in Sources */,
 				F6650AFCC20C0915F6CC4E93 /* FamilyMembers.swift in Sources */,
+				DB1511B27FDA99516FC242EB /* FamilyShare.swift in Sources */,
+				CE4D838ED5A17EE7F15A65D7 /* FamilySync.swift in Sources */,
 				17E7CBFEFE28B1814FDF5E31 /* Goals.swift in Sources */,
 				09D660BEFD13125551918C70 /* GoogleCalendar.swift in Sources */,
 				328A925695121A77E6D9A24B /* GoogleCalendarAccount.swift in Sources */,
@@ -947,6 +961,7 @@
 				44ECE4A3885B6BAB6A6200B8 /* CookAI.swift in Sources */,
 				8F9E3196854A5813D8E71170 /* CookIdeas.swift in Sources */,
 				E7AFBDAAB43B91D61215AEE7 /* CustomAisles.swift in Sources */,
+				49C89088E6CAA4498E049BC3 /* FamilyShare.swift in Sources */,
 				BDEEBE4E3094C7A8DB66F547 /* Goals.swift in Sources */,
 				497A174962D986C63DF78893 /* GoogleCalendar.swift in Sources */,
 				656CD73C61048EA6A65BB986 /* GroceryStore+Barcodes.swift in Sources */,
@@ -999,6 +1014,7 @@
 				9D2741831A67F87EAA144BAC /* CookAI.swift in Sources */,
 				F514CF2877EC24F3F99D26D4 /* CookIdeas.swift in Sources */,
 				74D72345A8AECCE69DE53BB7 /* CustomAisles.swift in Sources */,
+				DDBA58C55FB9FB00D2F9FC4E /* FamilyShare.swift in Sources */,
 				97CB476D7BB3E9CD42F6FFEB /* Goals.swift in Sources */,
 				BEADC8EC0501F51F26CF548B /* GoogleCalendar.swift in Sources */,
 				8B352D2D21F01EB07F52CB3D /* GroceryIntents.swift in Sources */,
@@ -1055,6 +1071,8 @@
 				1308250B334C1AF4D282D8C7 /* CustomAisleTests.swift in Sources */,
 				AD9935CE2CD441B7AA2E68CB /* CustomAisles.swift in Sources */,
 				B3F235C58281C05F0C5653EA /* DataSafetyTests.swift in Sources */,
+				9035580C198A652206FEF551 /* FamilyShare.swift in Sources */,
+				AABF7DF1C723535460D7E63F /* FamilyShareTests.swift in Sources */,
 				D3AC30FACDE299D8E7A4B3B3 /* FeatureTests.swift in Sources */,
 				C599317266A72676F65B75A4 /* GoalTests.swift in Sources */,
 				740899CD46A463A68A672BED /* Goals.swift in Sources */,

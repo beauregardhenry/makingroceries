@@ -256,6 +256,15 @@ struct SettingsView: View {
     @AppStorage("theme") private var themeName = Theme.grey.rawValue
     @AppStorage("customColor") private var customHex = "34C759"
     @State private var sheet: AppSheet?
+    @Environment(FamilySync.self) private var family
+
+    private var familyDetail: String {
+        switch family.role {
+        case .none: "One list with family on their own phones"
+        case .owner: "Sharing your list"
+        case .member: family.ownerName.map { "On \($0)'s list" } ?? "On a shared list"
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -282,6 +291,8 @@ struct SettingsView: View {
                            tint: .red) { sheet = .avoid }
                 }
                 Section {
+                    HubRow(title: "Family Sharing", systemImage: "person.2.badge.plus",
+                           detail: familyDetail, tint: .teal) { sheet = .family }
                     HubRow(title: "iCloud Sync", systemImage: "icloud",
                            detail: CloudSync.enabled ? "On" : "Your lists on all your devices", tint: .blue) { sheet = .cloud }
                     HubRow(title: "Live Sync", systemImage: "arrow.triangle.2.circlepath",
@@ -302,6 +313,7 @@ struct SettingsView: View {
                 case .registryPeople: RegistryPeopleView()
                 case .sync: HouseholdSyncView()
                 case .cloud: CloudSyncView()
+                case .family: FamilySharingView()
                 case .backup: BackupView()
                 default: EmptyView()
                 }

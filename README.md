@@ -53,7 +53,7 @@ The screenshots use made-up demo data. Regenerate them after a visible change, i
 
 ## What it does
 
-The first launch asks which stores you shop at and whether to start with a few sample items. Five tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kitchen**, for what's at home; **Money**, for spending and prices; and **Save Up**, for bigger purchases you're saving toward. Each tab shows what matters now, like what to use soon or how much is left of your budget. Settings (list color, app icon, stores and store types, allergies, iCloud Sync, Live Sync, backups) are under **⋯ › Settings**.
+The first launch asks which stores you shop at and whether to start with a few sample items. Five tabs: **List**, where you shop; **Meals**, for what to cook and plan; **Kitchen**, for what's at home; **Money**, for spending and prices; and **Save Up**, for bigger purchases you're saving toward. Each tab shows what matters now, like what to use soon or how much is left of your budget. Settings (list color, app icon, stores and store types, allergies, Family Sharing, iCloud Sync, Live Sync, backups) are under **⋯ › Settings**.
 
 **Lists and stores**
 - A list per store (Kroger, Walmart, a Chinese grocery, or any you name), plus **All**, which also holds anything you haven't given a store. An **Online** chip (a globe) is for things you order online; it's an ordinary store you can rename, move or delete, and it's added to lists made before it existed.
@@ -96,6 +96,7 @@ The first launch asks which stores you shop at and whether to start with a few s
 - **Home and Lock Screen widget** with a store picker, check-off buttons, and an option to switch to the store you're at.
 - **Live Activity** on the lock screen and Dynamic Island while Shopping Mode is on: items left, a progress bar and what's next.
 - **Send a list to family without iCloud**: share your list as a small file by iMessage, AirDrop or email. When they open it in their copy of the app, new items are added, anything already bought is marked bought, and nothing is removed or added twice. It isn't live syncing, and needs no developer account.
+- **Family Sharing** (Settings › Family Sharing): one list shared with family members on their own Apple IDs, from anywhere. Tap **Share My List with Family** and invite people by Messages or Mail; when they open the invite on their phone, they're on your list, and items, check-offs and deletions show up for everyone. It shares the list (with Travel, Clothing and Registry), stores, custom aisles, family members and Registry people; meals, the kitchen, history, spending and Save Up stay private. Joining combines the joiner's list with the family's: nothing is removed, and stores, people and items you both have are listed once. Stopping sharing, or leaving, leaves everyone with the list as it was. It uses CloudKit sharing, so everyone needs iCloud.
 - **iCloud Sync** (Settings › iCloud Sync): your list, stores, meals, history and everything else stay the same on every iPhone, iPad and Mac signed in to your iCloud account, in your private iCloud storage. Turning it on combines this device's lists with iCloud's without removing anything, changes made on two devices at once are merged, and nothing deleted in iCloud is ever deleted from a device. Off until you turn it on.
 - **Live Sync**: phones in the same household keep one list while the app is open on each, directly over Wi-Fi or Bluetooth, with no iCloud or server. Pick a household code and type it on each phone. New items, check-offs, un-checks and deletions are shared, and clearing done items on one phone doesn't bring them back on the other.
 - **Scan to check off**: scan items as they go in the cart and each is checked off your list. The app remembers each barcode after the first scan.
@@ -165,7 +166,3 @@ CI runs on GitHub's macOS 26 runners with the newest Xcode 26 they have. If GitH
 | `.github/workflows` | CI and the baseline ratchets |
 | `docs/screenshots` | The README's pictures |
 | `tools/make_icon.py` | Draws the shopping cart app icons, the alternates and the Watch icon: `python3 tools/make_icon.py` |
-
-## Not done yet
-
-Sharing a list between family members' phones needs iCloud sharing, which needs a paid Apple Developer account.
