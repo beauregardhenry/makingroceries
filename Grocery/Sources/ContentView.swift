@@ -165,10 +165,12 @@ struct ContentView: View {
         let title: String
         let symbol: String
         var aisle: Aisle?
-        /// Overrides the aisle's color, for a person's header.
+        /// Overrides the aisle's color.
         var tint: Color?
         let label: String?
         let items: [GroceryItem]
+        /// A person's header, drawn solid in their color.
+        var person: NameColor? = nil
     }
 
     /// Normal view: by aisle. Shopping mode: what's still needed by aisle, then what's in the cart.
@@ -190,7 +192,7 @@ struct ContentView: View {
         store.clothingSections(visibleItems).map { group in
             if let person = group.person {
                 return DisplaySection(id: "person-\(person.id)", title: person.name, symbol: "person.fill", aisle: nil,
-                                      tint: store.color(ofPerson: person.id).color, label: nil, items: group.items)
+                                      tint: nil, label: nil, items: group.items, person: store.color(ofPerson: person.id))
             }
             return DisplaySection(id: "person-none", title: "No one yet", symbol: "person.crop.circle.badge.questionmark",
                                   aisle: nil, tint: .gray, label: nil, items: group.items)
@@ -202,8 +204,8 @@ struct ContentView: View {
         store.registrySections(visibleItems).map { group in
             if let person = group.person {
                 return DisplaySection(id: "gift-\(person.id)", title: person.name, symbol: "gift.fill", aisle: nil,
-                                      tint: store.color(ofRegistryPerson: person.id).color,
-                                      label: RegistryInfo.birthdayText(person), items: group.items)
+                                      tint: nil, label: RegistryInfo.birthdayText(person), items: group.items,
+                                      person: store.color(ofRegistryPerson: person.id))
             }
             return DisplaySection(id: "gift-none", title: "Not assigned yet", symbol: "gift", aisle: nil, tint: .gray,
                                   label: nil, items: group.items)
@@ -367,7 +369,7 @@ struct ContentView: View {
             }
         }
         .font((shoppingMode ? Font.headline : Font.subheadline).weight(.bold))
-        .tintedBand(section.tint ?? section.aisle?.tint ?? .gray)
+        .modifier(SectionBand(person: section.person, tint: section.tint ?? section.aisle?.tint ?? .gray))
     }
 
     private var finishSection: some View {
@@ -566,5 +568,15 @@ private struct ShoppingFeedback: ViewModifier {
         content
             .sensoryFeedback(trigger: finishedAisles) { old, new in new > old ? .success : nil }
             .onChange(of: key) { _, _ in sync() }
+    }
+}
+
+/// A section header's band: solid in a person's color, or the usual light tint.
+private struct SectionBand: ViewModifier {
+    let person: NameColor?
+    let tint: Color
+
+    func body(content: Content) -> some View {
+        if let person { content.personBand(person) } else { content.tintedBand(tint) }
     }
 }

@@ -43,7 +43,7 @@ struct AddItemView: View {
                 if list == .registry {
                     Picker("For", selection: $giftForID) {
                         Text("Not assigned yet").tag(UUID?.none)
-                        ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
+                        ForEach(store.registryPeople) { PersonLabel(name: $0.name, color: store.color(named: $0.name)).tag(UUID?.some($0.id)) }
                     }
                     Picker("Occasion", selection: $occasion) {
                         Text("None").tag("")
@@ -52,7 +52,7 @@ struct AddItemView: View {
                 } else if list == .clothing {
                     Picker("For", selection: $personID) {
                         Text("No one yet").tag(UUID?.none)
-                        ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
+                        ForEach(store.people) { PersonLabel(name: $0.name, color: store.color(named: $0.name)).tag(UUID?.some($0.id)) }
                     }
                     LabeledContent("Size") {
                         TextField(store.suggestedSize(for: personID, itemNamed: name).map { "Usually \($0)" } ?? "M, 8, 10 Kids, 32x30",

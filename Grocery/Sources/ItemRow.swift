@@ -104,14 +104,18 @@ struct ItemRow: View {
             if item.list == .registry {
                 Menu("Move to Person", systemImage: "gift") {
                     ForEach(store.registryPeople) { person in
-                        Button(person.name) { store.move(item, toGiftFor: person.id) }
+                        Button { store.move(item, toGiftFor: person.id) } label: {
+                            PersonLabel(name: person.name, color: store.color(named: person.name))
+                        }
                     }
                     Button("Not assigned yet") { store.move(item, toGiftFor: nil) }
                 }
             } else if item.list == .clothing {
                 Menu("Move to Person", systemImage: "person.crop.circle") {
                     ForEach(store.people) { person in
-                        Button(person.name) { store.move(item, toPerson: person.id) }
+                        Button { store.move(item, toPerson: person.id) } label: {
+                            PersonLabel(name: person.name, color: store.color(named: person.name))
+                        }
                     }
                     Button("No one yet") { store.move(item, toPerson: nil) }
                 }
