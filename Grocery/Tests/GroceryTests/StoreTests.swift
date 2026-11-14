@@ -302,10 +302,10 @@ final class StockAndSpendingTests: StoreTestCase {
     }
 
     func testBudgetIsSavedAndCleared() {
-        GroceryStore.monthlyBudget = 200
-        XCTAssertEqual(GroceryStore.monthlyBudget, 200)
-        GroceryStore.monthlyBudget = nil
-        XCTAssertNil(GroceryStore.monthlyBudget)
+        store.monthlyBudget = 200
+        XCTAssertEqual(store.monthlyBudget, 200)
+        store.monthlyBudget = nil
+        XCTAssertNil(store.monthlyBudget)
     }
 }
 

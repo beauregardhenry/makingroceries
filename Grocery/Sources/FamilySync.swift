@@ -477,7 +477,7 @@ struct FamilySharingView: View {
                     }
                 }
                 Section {
-                    Text("Shared: the list, including Travel, Clothing and Registry, with your stores, custom aisles, family members, Registry people and allergies. Meals, the kitchen, history, spending and Save Up stay yours.")
+                    Text("Shared: everything. The list (with Travel, Clothing and Registry), stores, aisles, family members and their sizes, Registry people, allergies, meals and the meal plan, the kitchen, spending, prices and the budget, and Save Up with its monthly amount. Only this phone's color, icon and sync settings stay its own.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 if let problem {

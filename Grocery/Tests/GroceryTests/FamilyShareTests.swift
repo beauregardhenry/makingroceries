@@ -14,12 +14,54 @@ final class FamilyShareTests: StoreTestCase {
         XCTAssertNotNil(store.applyCloudCopy(name: name, remote: data, base: nil))
     }
 
-    func testOnlyTheListAndWhatItNeedsAreShared() {
-        XCTAssertEqual(GroceryStore.familyFileNames, ["shops", "customAisles", "people", "registryPeople", "allergies", "grocery"])
-        XCTAssertTrue(Set(GroceryStore.familyFileNames).isSubset(of: GroceryStore.cloudFileNames))
-        for privateFile in ["meals", "history", "spending", "goals", "stock"] {
-            XCTAssertFalse(GroceryStore.familyFileNames.contains(privateFile))
-        }
+    func testEverythingIsShared() {
+        XCTAssertEqual(Set(GroceryStore.familyFileNames), Set(GroceryStore.cloudFileNames))
+        XCTAssertEqual(GroceryStore.familyFileNames.count, GroceryStore.cloudFileNames.count)
+        let order = GroceryStore.familyFileNames
+        XCTAssertLessThan(order.firstIndex(of: "shops")!, order.firstIndex(of: "grocery")!)
+        XCTAssertLessThan(order.firstIndex(of: "meals")!, order.firstIndex(of: "plan")!)
+    }
+
+    func testJoiningLinesUpMealsAndTheirPlan() throws {
+        let tacos = Meal(name: "Tacos"), soup = Meal(name: "Soup")
+        store.meals = [tacos, soup]
+        let today = Calendar.current.startOfDay(for: Date())
+        let soupNight = PlannedMeal(mealID: soup.id, day: today)
+        store.plan = [PlannedMeal(mealID: tacos.id, day: today), soupNight]
+        let familyTacos = Meal(name: "tacos")
+        let familyPlan = PlannedMeal(mealID: familyTacos.id, day: today)
+        try join("meals", [familyTacos])
+        try join("plan", [familyPlan])
+        XCTAssertEqual(Set(store.meals.map(\.id)), [familyTacos.id, soup.id])
+        XCTAssertEqual(Set(store.plan.map(\.id)), [familyPlan.id, soupNight.id])
+        XCTAssertEqual(store.plan.first { $0.id == soupNight.id }?.mealID, soup.id)
+    }
+
+    func testJoiningLinesUpUsualItemsRepeatsKitchenAndGoals() throws {
+        let now = Date()
+        store.favorites = [Favorite(name: "Oat Milk"), Favorite(name: "Bread")]
+        store.recurring = [RecurringItem(name: "Coffee", everyDays: 7, nextDue: now), RecurringItem(name: "Eggs", everyDays: 7, nextDue: now)]
+        store.stock = [StockEntry(name: "Milk", aisle: .dairy, bought: now, expires: now),
+                       StockEntry(name: "Milk", aisle: .dairy, bought: now.addingTimeInterval(-86_400 * 5), expires: now)]
+        store.goals = [Goal(name: "Van Repair", cost: 800), Goal(name: "Rainy-day Fund", cost: 500, isReserve: true)]
+
+        try join("favorites", [Favorite(name: "oat milk")])
+        try join("recurring", [RecurringItem(name: "coffee", everyDays: 14, nextDue: now)])
+        try join("stock", [StockEntry(name: "milk", aisle: .dairy, bought: now, expires: now)])
+        try join("goals", [Goal(name: "van repair", cost: 900), Goal(name: "Rainy-day Fund", cost: 500)])
+
+        XCTAssertEqual(store.favorites.count, 2)
+        XCTAssertEqual(store.recurring.count, 2)
+        XCTAssertEqual(store.stock.count, 2, "only the milk bought the same day is the same milk")
+        XCTAssertEqual(store.goals.count, 3, "a rainy-day fund isn't the same as an ordinary goal of the same name")
+    }
+
+    func testTheFamilysBudgetWinsWhenJoining() throws {
+        store.monthlyBudget = 300
+        store.savePerMonth = 50
+        try join("settings", [HouseholdSetting(id: "monthlyBudget", number: 600)])
+        XCTAssertEqual(store.monthlyBudget, 600)
+        XCTAssertEqual(store.savePerMonth, 50, "settings the family doesn't have are kept")
     }
 
     func testJoiningDoesNotListTheSameStoreOrItemTwice() throws {

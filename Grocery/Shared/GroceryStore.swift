@@ -70,6 +70,11 @@ final class GroceryStore {
         didSet { persist(\.allergies, "allergies") }
     }
 
+    /// Settings the household shares, like the grocery budget (see HouseholdSettings.swift).
+    var settings: [HouseholdSetting] = [] {
+        didSet { persist(\.settings, "settings") }
+    }
+
     /// Names of saved files that couldn't be read at launch. Each was copied into the Recovered folder
     /// before anything was saved over it. The list screen tells you once, then clears this.
     var loadProblems: [String] = []
@@ -99,6 +104,7 @@ final class GroceryStore {
         }
         applyRecurring()
         moveOldAvoidList()
+        moveOldSettings()
     }
 
     /// Picks up anything a widget, Siri, the share sheet or the watch saved since this copy last looked,
@@ -142,6 +148,7 @@ final class GroceryStore {
         list("customAisles", \.customAisles),
         list("registryPeople", \.registryPeople),
         list("allergies", \.allergies),
+        list("settings", \.settings),
     ]
 
     private static func list<Element: Codable & Equatable & Identifiable>(

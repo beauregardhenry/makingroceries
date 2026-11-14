@@ -4,7 +4,7 @@ import SwiftUI
 /// go, and cover a surprise expense without losing track of everything else.
 struct SaveUpView: View {
     @Environment(GroceryStore.self) private var store
-    @AppStorage("savePerMonth") private var monthly = 0.0
+    private var monthly: Double { store.savePerMonth }
     @State private var sheet: SaveUpSheet?
 
     enum SaveUpSheet: Identifiable {
@@ -75,7 +75,7 @@ struct SaveUpView: View {
                 switch sheet {
                 case .add: AddGoalSheet(monthly: monthly)
                 case .unexpected: UnexpectedSheet(monthly: monthly)
-                case .monthly: MonthlySheet(monthly: $monthly)
+                case .monthly: MonthlySheet(monthly: Binding(get: { store.savePerMonth }, set: { store.savePerMonth = $0 }))
                 case .aside(let id): AsideSheet(goalID: id)
                 case .edit(let id): EditGoalSheet(goalID: id)
                 }

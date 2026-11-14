@@ -60,9 +60,4 @@ extension GroceryStore {
         }
         return totals.map { SpendBucket(id: $0.key, label: $0.key, amount: $0.value) }.sorted { $0.amount != $1.amount ? $0.amount > $1.amount : $0.label < $1.label }
     }
-
-    static var monthlyBudget: Double? {
-        get { let v = UserDefaults.standard.double(forKey: "monthlyBudget"); return v > 0 ? v : nil }
-        set { UserDefaults.standard.set(newValue ?? 0, forKey: "monthlyBudget") }
-    }
 }

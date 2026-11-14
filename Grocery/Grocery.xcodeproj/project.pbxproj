@@ -12,6 +12,7 @@
 		02903ADFEE33816DF616E2A1 /* Measurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5B4452BB7C457EBB5BD8F /* Measurements.swift */; };
 		02EB98AE83B87E7793D7D05C /* Receipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030476D5D0FF57B2EA1F0CD8 /* Receipt.swift */; };
 		0943D99455E5C1546280D098 /* PriceCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003F75A1C18E5A58003AB701 /* PriceCharts.swift */; };
+		098FF78A6C87788FC22DDC55 /* HouseholdSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */; };
 		09D660BEFD13125551918C70 /* GoogleCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08422B353A28E9FBCFBDD2C9 /* GoogleCalendar.swift */; };
 		0B44040EDA3BDECD0821CAAD /* RegistryPeopleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE41C0FECBE2A56228C1C5F /* RegistryPeopleView.swift */; };
 		0C2E455BB4F705A5E18F6F32 /* RouteLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B84C4CD60D5F780900D9A /* RouteLearning.swift */; };
@@ -169,6 +170,7 @@
 		97CB476D7BB3E9CD42F6FFEB /* Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14527CF1B699BFBDC2E2925 /* Goals.swift */; };
 		9838038FB00F6D870873657E /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
 		98741531B2893C3C8E404F03 /* TextEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBE97352E4CAFB7C116165E /* TextEntry.swift */; };
+		98E3AE90D910BF1ECAB7A600 /* HouseholdSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */; };
 		9A3EFC4631D17205FAC30020 /* TextEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98858338674A20A592B261E8 /* TextEntryTests.swift */; };
 		9C302A5CA15A8F66B5A936D1 /* CookIdeas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087C81F96DFB7E3F84CBCFDC /* CookIdeas.swift */; };
 		9CC3456F271B36254658DF15 /* LiveSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5651E045DA1087FDFC9CB0 /* LiveSync.swift */; };
@@ -229,6 +231,7 @@
 		D2008248C5D5A2E2FC104D90 /* AtHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F6FF960721E9E3D2E77674 /* AtHome.swift */; };
 		D2D16593B71FD7BD7D3A12C1 /* Allergies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852AA011175AD74F9B8AD281 /* Allergies.swift */; };
 		D3AC30FACDE299D8E7A4B3B3 /* FeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE45D380C15317B3A9E75D02 /* FeatureTests.swift */; };
+		D3DEC5DB80939AF626FB3BE7 /* HouseholdSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */; };
 		D43A0D2A0F6B712545D06028 /* ListExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A7E5EB488FD37BD2073C8D /* ListExchange.swift */; };
 		D5BF9433A776E4968A981278 /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
 		D68ED53A9C354D63269E1F85 /* WatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF7115579F71E22F29E30AE /* WatchListView.swift */; };
@@ -240,6 +243,7 @@
 		DB8088368D6ED21F7F6D9C59 /* PriceFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4688F13FD87D2D9ED29904F /* PriceFormat.swift */; };
 		DBDF0D9DD20B635BBB1AD735 /* MeasurementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF80D1F252E06ABC70EA949 /* MeasurementTests.swift */; };
 		DCA30B49DC4A44336B3E177D /* ListMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8641B730C726ED388A11D1C2 /* ListMerge.swift */; };
+		DCC50AC9A92A60C36D98D219 /* HouseholdSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */; };
 		DDBA58C55FB9FB00D2F9FC4E /* FamilyShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD422F588AF263CA32D38A /* FamilyShare.swift */; };
 		DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65588F8D169654D2847F9EA9 /* ItemDetail.swift */; };
 		E0622C12FA9382137329EA06 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAEC66ED036A6C8B6C7B5B5 /* ShareView.swift */; };
@@ -367,6 +371,7 @@
 		5C4A2AAA337CE1F2DE89D1FE /* GroceryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryUITests.swift; sourceTree = "<group>"; };
 		5CEB81E467A02E4861CF888C /* ParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsingTests.swift; sourceTree = "<group>"; };
 		5D940F2136F269FF8EA91399 /* Grocery.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Grocery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdSettings.swift; sourceTree = "<group>"; };
 		5F4FABF22DF964392BCB1339 /* GroceryWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GroceryWidget.entitlements; sourceTree = "<group>"; };
 		61234DEB0C354BF184E85812 /* GroceryStore+History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroceryStore+History.swift"; sourceTree = "<group>"; };
 		627B02ECB1CD60CF7ABBB6D0 /* Quick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quick.swift; sourceTree = "<group>"; };
@@ -611,6 +616,7 @@
 				8DC51253BA7B4B5DD416E49A /* GroceryStore+Collections.swift */,
 				61234DEB0C354BF184E85812 /* GroceryStore+History.swift */,
 				B4F7AE0D6968690D09E95244 /* GroceryStore+Items.swift */,
+				5EE8B62C59CC5CF85B56DDBB /* HouseholdSettings.swift */,
 				4391A01E1754425EE50063C4 /* HouseholdSync.swift */,
 				86A7E5EB488FD37BD2073C8D /* ListExchange.swift */,
 				8641B730C726ED388A11D1C2 /* ListMerge.swift */,
@@ -924,6 +930,7 @@
 				3358D1272F7E94F7E2D1A792 /* GroceryStore+History.swift in Sources */,
 				97C0165B0B048242AD8C0FDD /* GroceryStore+Items.swift in Sources */,
 				AAF8172A82FF23E0F0395E56 /* GroceryStore.swift in Sources */,
+				DCC50AC9A92A60C36D98D219 /* HouseholdSettings.swift in Sources */,
 				312C1FFDD9F79B550F5CAE80 /* HouseholdSync.swift in Sources */,
 				373DF9D3F8DC4530AF22E540 /* Insights.swift in Sources */,
 				DEA9C7695A760A3BF8B941EC /* ItemDetail.swift in Sources */,
@@ -1005,6 +1012,7 @@
 				76888D10F8176837AC29A46A /* GroceryStore+History.swift in Sources */,
 				8722B3D9D25242AEAA463060 /* GroceryStore+Items.swift in Sources */,
 				F1365F0FE977B1E49A0A9EF1 /* GroceryStore.swift in Sources */,
+				098FF78A6C87788FC22DDC55 /* HouseholdSettings.swift in Sources */,
 				11996877C29330D86608F3D4 /* HouseholdSync.swift in Sources */,
 				6E6183D69B0EDADD3935AC4D /* ListExchange.swift in Sources */,
 				20A0230DD3C2DF993C34F1FE /* ListMerge.swift in Sources */,
@@ -1063,6 +1071,7 @@
 				B5996344E422C1DDDBA8A222 /* GroceryStore+Items.swift in Sources */,
 				1981862ECC919BA3D38086EC /* GroceryStore.swift in Sources */,
 				B099E857BDD2AECDD992B6E6 /* GroceryWidget.swift in Sources */,
+				D3DEC5DB80939AF626FB3BE7 /* HouseholdSettings.swift in Sources */,
 				0D3E2D1DA7E11769130CA012 /* HouseholdSync.swift in Sources */,
 				9F147B256896F9FF86695885 /* ListExchange.swift in Sources */,
 				F764D4A45D2616CA6AAE0ABD /* ListMerge.swift in Sources */,
@@ -1127,6 +1136,7 @@
 				EBB3F2A629FB64F56D8E0EF5 /* GroceryStore+History.swift in Sources */,
 				5E425B102B8ED45EBF53F346 /* GroceryStore+Items.swift in Sources */,
 				9415BA5755A4F6F7204953E0 /* GroceryStore.swift in Sources */,
+				98E3AE90D910BF1ECAB7A600 /* HouseholdSettings.swift in Sources */,
 				6106C79AA562E235067BBF5E /* HouseholdSync.swift in Sources */,
 				D43A0D2A0F6B712545D06028 /* ListExchange.swift in Sources */,
 				DCA30B49DC4A44336B3E177D /* ListMerge.swift in Sources */,
