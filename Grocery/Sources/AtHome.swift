@@ -52,12 +52,10 @@ struct AtHomeView: View {
                                 Text("Bought \(entry.bought.formatted(.dateTime.month(.abbreviated).day()))")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
-                            .swipeActions(edge: .trailing) {
-                                Button("Used", systemImage: "checkmark") { store.useUp(entry, addBack: false) }.tint(.green)
-                                Button("Buy Again", systemImage: "cart.badge.plus") { store.useUp(entry, addBack: true) }.tint(.blue)
-                            }
-                            .swipeActions(edge: .leading) {
-                                Button("Tossed", systemImage: "trash") { store.removeStock(entry.id) }.tint(.red)
+                            .contextMenu {
+                                Button("Used It Up", systemImage: "checkmark") { store.useUp(entry, addBack: false) }
+                                Button("Used, Buy Again", systemImage: "cart.badge.plus") { store.useUp(entry, addBack: true) }
+                                Button("Tossed", systemImage: "trash", role: .destructive) { store.removeStock(entry.id) }
                             }
                         }
                     }

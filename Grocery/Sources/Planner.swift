@@ -60,11 +60,10 @@ struct PlannerView: View {
                                         Label("On list", systemImage: "checkmark").font(.caption).foregroundStyle(.secondary)
                                     }
                                 }
+                                .contextMenu {
+                                    Button("Remove from Plan", systemImage: "trash", role: .destructive) { store.removePlan(entry.id) }
+                                }
                             }
-                        }
-                        .onDelete { offsets in
-                            let entries = store.planned(on: day)
-                            offsets.map { entries[$0].id }.forEach(store.removePlan)
                         }
                         Menu {
                             ForEach(store.meals) { meal in

@@ -90,7 +90,7 @@ extension GroceryStore {
     @discardableResult
     func addGoal(name: String, cost: Double, saved: Double = 0, priority: GoalPriority = .normal,
                  isReserve: Bool = false, note: String? = nil) -> Goal? {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty, cost > 0 else { return nil }
         // Only one rainy-day fund.
         let reserve = isReserve && reserveGoal == nil
@@ -144,7 +144,7 @@ extension GroceryStore {
     /// Returns true when the rainy-day fund paid for it.
     @discardableResult
     func addUnexpected(name: String, cost: Double, priority: GoalPriority, useReserve: Bool, on date: Date = Date()) -> Bool {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty, cost > 0 else { return false }
         if useReserve, let reserve = reserveGoal, reserve.saved >= cost {
             setAside(-cost, for: reserve.id)

@@ -65,6 +65,11 @@ final class GroceryStore {
         didSet { persist(\.customAisles, "customAisles") }
     }
 
+    /// Foods to avoid and what they do to you, shared with the family list.
+    var allergies: [Allergy] = [] {
+        didSet { persist(\.allergies, "allergies") }
+    }
+
     /// Names of saved files that couldn't be read at launch. Each was copied into the Recovered folder
     /// before anything was saved over it. The list screen tells you once, then clears this.
     var loadProblems: [String] = []
@@ -93,6 +98,7 @@ final class GroceryStore {
             history = items.map { PastItem(name: $0.name, aisle: $0.aisle, shopID: $0.shopID, price: $0.price) }
         }
         applyRecurring()
+        moveOldAvoidList()
     }
 
     /// Picks up anything a widget, Siri, the share sheet or the watch saved since this copy last looked,
@@ -135,6 +141,7 @@ final class GroceryStore {
         list("people", \.people),
         list("customAisles", \.customAisles),
         list("registryPeople", \.registryPeople),
+        list("allergies", \.allergies),
     ]
 
     private static func list<Element: Codable & Equatable & Identifiable>(
@@ -171,8 +178,9 @@ final class GroceryStore {
 
     // MARK: Storage
 
+    /// Whether two names are the same thing: ignoring case, spaces at the ends, and singular or plural.
     static func same(_ a: String, _ b: String) -> Bool {
-        a.trimmingCharacters(in: .whitespaces).caseInsensitiveCompare(b.trimmingCharacters(in: .whitespaces)) == .orderedSame
+        PluralForms.same(a, b)
     }
 
     func refreshWidgets() {

@@ -63,7 +63,7 @@ extension Shop {
 extension GroceryStore {
     @discardableResult
     func addCustomAisle(named name: String) -> CustomAisle? {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty,
               !customAisles.contains(where: { Self.same($0.name, trimmed) }),
               !Aisle.allCases.contains(where: { Self.same($0.rawValue, trimmed) }) else { return nil }

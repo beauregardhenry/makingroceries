@@ -31,6 +31,18 @@ struct QuickAddBar: View {
 
     private var canAdd: Bool { !QuickAdd.parse(text).isEmpty }
 
+    /// A leading count on the entry being typed ("6 "), kept when a spelling fix replaces the name.
+    private var quantityPrefix: String {
+        let digits = token.prefix { $0.isNumber }
+        return digits.isEmpty ? "" : "\(digits) "
+    }
+
+    /// A better spelling of the entry being typed, if it looks misspelled.
+    private var spellingFix: String? {
+        let name = String(token.drop { $0.isNumber || $0 == " " })
+        return store.spellingSuggestion(for: name)
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             let due = text.isEmpty && showsDue ? store.dueItems() : []
@@ -52,6 +64,14 @@ struct QuickAddBar: View {
                         }
                     }
                 }
+            }
+
+            if let fix = spellingFix {
+                SpellingSuggestion(suggestion: fix) {
+                    text = typedBefore + quantityPrefix + fix
+                    focused = true
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             let suggestions = store.suggestions(for: token)
@@ -82,7 +102,7 @@ struct QuickAddBar: View {
                     .accessibilityIdentifier("quickAddField")
                     .focused($focused)
                     .submitLabel(.done)
-                    .textInputAutocapitalization(.words)
+                    .titleCase($text)
                     .onSubmit(submit)
                 Button {
                     Task { await dictation.toggle() }

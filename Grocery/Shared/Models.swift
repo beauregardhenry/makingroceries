@@ -396,4 +396,5 @@ struct Backup: Codable {
     var people: [Person]? = nil
     var customAisles: [CustomAisle]? = nil
     var registryPeople: [RegistryPerson]? = nil
+    var allergies: [Allergy]? = nil
 }

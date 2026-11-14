@@ -1,6 +1,6 @@
 # Privacy Policy for Makin' Groceries
 
-_Last updated: November 14, 2026_
+_Last updated: November 15, 2026_
 
 Makin' Groceries is a grocery list app for iPhone and iPad. This policy says what the app does with your information. The short version: **your data stays on your devices and in your own iCloud account. I don't run any servers, I don't collect your data, and there is no advertising, tracking or analytics in the app.**
 
@@ -14,7 +14,7 @@ If you turn on iCloud Sync, the same files are copied to **your private iCloud d
 
 ## Family Sharing (optional)
 
-If you share your list with family, the shared part (the grocery list, including Travel, Clothing and Registry, plus stores, custom aisles, family members and Registry people) is kept in **the sharer's private iCloud database** and shared through Apple's CloudKit sharing with the people they invite. Only invited people who accept can see or change it. Apple shows each person's name and Apple ID contact to the others on the share. Meals, history, spending, what's at home and Save Up are never shared. The developer has no access to any of it.
+If you share your list with family, the shared part (the grocery list, including Travel, Clothing and Registry, plus stores, custom aisles, family members, Registry people and allergies, including any reactions noted) is kept in **the sharer's private iCloud database** and shared through Apple's CloudKit sharing with the people they invite. Only invited people who accept can see or change it. Apple shows each person's name and Apple ID contact to the others on the share. Meals, history, spending, what's at home and Save Up are never shared. The developer has no access to any of it.
 
 ## Live Sync (optional)
 

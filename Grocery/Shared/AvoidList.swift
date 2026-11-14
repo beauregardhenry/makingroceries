@@ -1,14 +1,7 @@
 import Foundation
 
-/// Foods you want a warning about, like peanuts or gluten. Kept on the device.
+/// Matching products against the Allergies list (`GroceryStore.allergies`).
 enum AvoidList {
-    private static let key = "avoidWords"
-
-    static var words: [String] {
-        get { UserDefaults.standard.stringArray(forKey: key) ?? [] }
-        set { UserDefaults.standard.set(newValue, forKey: key) }
-    }
-
     /// Which avoided words show up in a product's allergen tags or ingredient text.
     static func warnings(allergens: [String], ingredients: String?, avoid: [String]) -> [String] {
         let tags = allergens.map { tag in

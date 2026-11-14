@@ -4,7 +4,7 @@ extension GroceryStore {
     // MARK: Usual items
 
     func addFavorite(name: String, quantity: Int = 1, aisle: Aisle? = nil) {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty, !favorites.contains(where: { Self.same($0.name, trimmed) }) else { return }
         favorites.append(Favorite(name: trimmed, quantity: quantity, aisle: aisle ?? resolveAisle(for: trimmed)))
     }
@@ -27,10 +27,10 @@ extension GroceryStore {
     /// A meal from ingredient lines (pasted, photographed or from a web page).
     func makeMeal(named name: String, fromLines lines: String) -> Meal {
         let ingredients = RecipeParser.fromText(lines).map { line in
-            MealIngredient(name: line.name, quantity: line.quantity, aisle: resolveAisle(for: line.name),
+            MealIngredient(name: TitleCase.apply(line.name), quantity: line.quantity, aisle: resolveAisle(for: line.name),
                            amount: line.amount, unit: line.unit)
         }
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         return Meal(name: trimmed.isEmpty ? "Imported recipe" : trimmed, ingredients: ingredients)
     }
 
@@ -70,7 +70,7 @@ extension GroceryStore {
     /// Adds a store unless the name is blank or already taken (ignoring case).
     @discardableResult
     func addShop(named name: String) -> Shop? {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = TitleCase.apply(name.trimmingCharacters(in: .whitespaces))
         guard !trimmed.isEmpty,
               !shops.contains(where: { $0.name.caseInsensitiveCompare(trimmed) == .orderedSame })
         else { return nil }
@@ -100,7 +100,7 @@ extension GroceryStore {
     // MARK: Backup
 
     func makeBackup() -> Backup {
-        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan, stock: stock, spending: spending, goals: goals, people: people, customAisles: customAisles, registryPeople: registryPeople)
+        Backup(items: items, shops: shops, favorites: favorites, meals: meals, history: history, recurring: recurring, plan: plan, stock: stock, spending: spending, goals: goals, people: people, customAisles: customAisles, registryPeople: registryPeople, allergies: allergies)
     }
 
     func restore(_ backup: Backup) {
@@ -117,6 +117,8 @@ extension GroceryStore {
         people = backup.people ?? []
         customAisles = backup.customAisles ?? []
         registryPeople = backup.registryPeople ?? []
+        // Backups from before allergies were kept here don't have them; keep this phone's rather than lose them.
+        if let saved = backup.allergies { allergies = saved }
     }
 
     // MARK: First launch

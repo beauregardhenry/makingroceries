@@ -28,7 +28,10 @@ struct AddItemView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Item name", text: $name).textInputAutocapitalization(.words)
+                TextField("Item name", text: $name).titleCase($name)
+                if let fix = store.spellingSuggestion(for: name) {
+                    SpellingSuggestion(suggestion: fix) { name = fix }
+                }
                 Button("Scan Barcode", systemImage: "barcode.viewfinder") { showingScanner = true }
                 if isLookingUp {
                     HStack { ProgressView(); Text("Looking up product…").foregroundStyle(.secondary) }
@@ -102,8 +105,7 @@ struct AddItemView: View {
         do {
             if let product = try await ProductLookup.product(for: code) {
                 let size = product.size.flatMap(SizeParser.parse)
-                let warning = AvoidList.message(AvoidList.warnings(allergens: product.allergens, ingredients: product.ingredients,
-                                                                    avoid: AvoidList.words))
+                let warning = store.allergyWarning(allergens: product.allergens, ingredients: product.ingredients)
                 store.add(name: product.name, quantity: quantity, aisle: product.aisle ?? aisle, shopID: shopID,
                           price: Price.parse(priceText), sizeAmount: size?.amount, sizeUnit: size?.unit,
                           warning: warning, barcode: code, list: list, personID: personID,

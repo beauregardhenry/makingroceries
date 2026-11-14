@@ -92,12 +92,10 @@ struct ManageShopsView: View {
                                         }
                                     }
                                 }
+                                .contextMenu {
+                                    Button("Delete Store", systemImage: "trash", role: .destructive) { store.deleteShop(shop) }
+                                }
                             }
-                        }
-                    }
-                    .onDelete { offsets in
-                        for offset in offsets {
-                            if case .shop(let id) = entries[offset], let shop = store.shop(for: id) { store.deleteShop(shop) }
                         }
                     }
                     .onMove { offsets, destination in
@@ -109,7 +107,7 @@ struct ManageShopsView: View {
                 } header: {
                     Text("Your stores")
                 } footer: {
-                    Text("Drag to put the stores, Travel, Clothing and Registry in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Swipe to delete a store; its items stay on your list without a store.")
+                    Text("Drag to put the stores, Travel, Clothing and Registry in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Press and hold a store to delete it; its items stay on your list without a store.")
                 }
 
                 Section {
@@ -123,7 +121,7 @@ struct ManageShopsView: View {
 
                 Section("Add your own") {
                     HStack {
-                        TextField("Custom store name", text: $customName).textInputAutocapitalization(.words)
+                        TextField("Custom store name", text: $customName).titleCase($customName)
                             .submitLabel(.done)
                             .onSubmit(addCustom)
                         Button("Add", action: addCustom)
@@ -164,7 +162,7 @@ struct ShopMapView: View {
         if let i = store.shops.firstIndex(where: { $0.id == shopID }) {
             List {
                 Section {
-                    TextField("Store name", text: $store.shops[i].name).textInputAutocapitalization(.words)
+                    TextField("Store name", text: $store.shops[i].name).titleCase($store.shops[i].name)
                     Picker("Type", selection: Binding(
                         get: { store.shops[i].kind ?? .grocery },
                         set: { kind in
@@ -188,7 +186,7 @@ struct ShopMapView: View {
                                 AisleBadge(aisle: aisle, size: 28)
                                 Text(aisle.rawValue)
                                 Spacer()
-                                TextField("Aisle", text: labelBinding(index: i, aisle: aisle)).textInputAutocapitalization(.words)
+                                TextField("Aisle", text: labelBinding(index: i, aisle: aisle)).titleCase(labelBinding(index: i, aisle: aisle))
                                     .multilineTextAlignment(.trailing)
                                     .foregroundStyle(.secondary)
                                     .frame(maxWidth: 120)
