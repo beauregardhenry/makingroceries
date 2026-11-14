@@ -8,10 +8,13 @@ struct RegistryPeopleView: View {
         @Bindable var store = store
         NamedListEditor(
             title: "Registry People", placeholder: "Name (Grandma, Emma, Mr. Lee…)", header: "People",
-            footer: "Gifts are listed under each person's name, in this order. These names sync with your family on iCloud. Deleting someone keeps their gifts under \"Not assigned yet\".",
+            footer: "Gifts are listed under each person's name, in this order and in the color you pick. These names sync with your family on iCloud. Deleting someone keeps their gifts under \"Not assigned yet\".",
             items: $store.registryPeople, name: \.name,
             add: { store.addRegistryPerson(named: $0) != nil }, delete: store.deleteRegistryPerson
         ) { $person in
+            NameColorPicker(selected: store.color(ofRegistryPerson: person.id)) {
+                store.setColor($0, ofRegistryPerson: person.id)
+            }
             Toggle("Birthday", isOn: Binding(
                 get: { person.birthday != nil },
                 set: { person.birthday = $0 ? (person.birthday ?? Date()) : nil }

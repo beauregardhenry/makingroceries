@@ -175,15 +175,12 @@ struct ContentView: View {
         return result
     }
 
-    private static let personColors: [Color] = [.blue, .pink, .green, .orange, .purple, .teal, .red, .indigo]
-
     /// Clothing: a header for each person, in the order of your family list.
     private var clothingDisplaySections: [DisplaySection] {
         store.clothingSections(visibleItems).map { group in
             if let person = group.person {
-                let index = store.people.firstIndex { $0.id == person.id } ?? 0
                 return DisplaySection(id: "person-\(person.id)", title: person.name, symbol: "person.fill", aisle: nil,
-                                      tint: Self.personColors[index % Self.personColors.count], label: nil, items: group.items)
+                                      tint: store.color(ofPerson: person.id).color, label: nil, items: group.items)
             }
             return DisplaySection(id: "person-none", title: "No one yet", symbol: "person.crop.circle.badge.questionmark",
                                   aisle: nil, tint: .gray, label: nil, items: group.items)
@@ -194,9 +191,8 @@ struct ContentView: View {
     private var registryDisplaySections: [DisplaySection] {
         store.registrySections(visibleItems).map { group in
             if let person = group.person {
-                let index = store.registryPeople.firstIndex { $0.id == person.id } ?? 0
                 return DisplaySection(id: "gift-\(person.id)", title: person.name, symbol: "gift.fill", aisle: nil,
-                                      tint: Self.personColors[index % Self.personColors.count],
+                                      tint: store.color(ofRegistryPerson: person.id).color,
                                       label: RegistryInfo.birthdayText(person), items: group.items)
             }
             return DisplaySection(id: "gift-none", title: "Not assigned yet", symbol: "gift", aisle: nil, tint: .gray,

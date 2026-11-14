@@ -9,10 +9,13 @@ struct FamilyMembersView: View {
         @Bindable var store = store
         NamedListEditor(
             title: "Family Members", placeholder: "Name (Mom, Emma, Jake…)", header: "Family",
-            footer: "Clothing is listed under each person's name, in this order. Drag to reorder. Tap Sizes & Measurements to save someone's sizes; they're suggested when you add clothing for them. Deleting someone keeps their clothing under \"No one yet\".",
+            footer: "Clothing is listed under each person's name, in this order and in the color you pick. Drag to reorder. Tap Sizes & Measurements to save someone's sizes; they're suggested when you add clothing for them. Deleting someone keeps their clothing under \"No one yet\".",
             items: $store.people, name: \.name,
             add: { store.addPerson(named: $0) != nil }, delete: store.deletePerson
         ) { $person in
+            NameColorPicker(selected: store.color(ofPerson: person.id)) {
+                store.setColor($0, ofPerson: person.id)
+            }
             NavigationLink {
                 MeasurementsView(personID: person.id)
             } label: {
