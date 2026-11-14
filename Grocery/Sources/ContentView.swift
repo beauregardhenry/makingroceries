@@ -58,6 +58,16 @@ struct ContentView: View {
     }
 
     /// The store new items start in: the chosen one, otherwise none.
+    /// Online, Clothing and Registry items need more than a name (a size, who it's for), so on those lists items
+    /// are added only with + and the typing bar is hidden.
+    private var showsQuickAdd: Bool {
+        switch filter {
+        case .all: true
+        case .list(let list): list == .travel
+        case .shop(let id): store.shop(for: id)?.kind != .online
+        }
+    }
+
     private var newItemShopID: UUID? {
         if case .shop(let id) = filter { return id }
         return nil
@@ -237,7 +247,7 @@ struct ContentView: View {
         case .quickAdd:
             sheet = nil
             quickAddPrefill = ""
-            quickAddRequest += 1
+            if showsQuickAdd { quickAddRequest += 1 } else { sheet = .add }
         case .startShopping:
             sheet = nil
             if let id = NearbyStore.currentShopID(among: store.shops) { selectedShopRaw = ShopFilter.shop(id).raw }
@@ -400,8 +410,10 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if runningTotal.pricedCount > 0 { RunningTotalBar(total: runningTotal) }
-            QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, list: filter.separateList, focusRequest: quickAddRequest, prefill: quickAddPrefill,
-                        showsDue: !shoppingMode)
+            if showsQuickAdd {
+                QuickAddBar(shopID: newItemShopID, inferShop: filter == .all, list: filter.separateList, focusRequest: quickAddRequest,
+                            prefill: quickAddPrefill, showsDue: !shoppingMode)
+            }
         }
         .padding(.horizontal)
         .padding(.top, 8)
