@@ -102,3 +102,39 @@ final class AllergyTests: StoreTestCase {
         XCTAssertEqual(store.allergies.map(\.id), [family.id])
     }
 }
+
+final class HouseholdSettingsTests: StoreTestCase {
+    func testBudgetAndMonthlySavingsAreSavedAndCleared() {
+        XCTAssertNil(store.monthlyBudget)
+        XCTAssertEqual(store.savePerMonth, 0)
+        store.monthlyBudget = 450
+        store.savePerMonth = 75
+        XCTAssertEqual(store.monthlyBudget, 450)
+        XCTAssertEqual(store.savePerMonth, 75)
+        store.monthlyBudget = 0
+        XCTAssertNil(store.monthlyBudget)
+        store.savePerMonth = 75
+        XCTAssertEqual(store.settings.count, 2)
+    }
+
+    func testOldOnPhoneSettingsMoveOverOnce() {
+        let defaults = UserDefaults(suiteName: "HouseholdSettingsTests")!
+        defaults.removePersistentDomain(forName: "HouseholdSettingsTests")
+        defaults.set(250.0, forKey: "monthlyBudget")
+        defaults.set(0.0, forKey: "savePerMonth")
+        store.moveOldSettings(defaults: defaults)
+        XCTAssertEqual(store.monthlyBudget, 250)
+        XCTAssertEqual(store.savePerMonth, 0)
+        XCTAssertNil(defaults.object(forKey: "monthlyBudget"))
+        XCTAssertNil(defaults.object(forKey: "savePerMonth"))
+    }
+
+    func testSettingsAreBackedUp() {
+        store.monthlyBudget = 500
+        var backup = store.makeBackup()
+        XCTAssertEqual(backup.settings?.first?.number, 500)
+        backup.settings = nil
+        store.restore(backup)
+        XCTAssertEqual(store.monthlyBudget, 500)
+    }
+}

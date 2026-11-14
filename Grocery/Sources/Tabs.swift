@@ -189,7 +189,7 @@ struct MoneyHub: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("This month").font(.subheadline).foregroundStyle(.secondary)
                         Text(Price.format(spent)).font(.largeTitle.weight(.semibold)).monospacedDigit()
-                        if let budget = GroceryStore.monthlyBudget, budget > 0 {
+                        if let budget = store.monthlyBudget, budget > 0 {
                             ProgressView(value: min(spent, budget), total: budget)
                                 .tint(spent > budget ? .red : (spent > budget * 0.8 ? .orange : .green))
                             Text("\(Price.format(max(budget - spent, 0))) left of \(Price.format(budget))")

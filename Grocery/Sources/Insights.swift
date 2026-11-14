@@ -6,9 +6,9 @@ struct InsightsView: View {
     @Environment(GroceryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var days = 30
-    @State private var budget = GroceryStore.monthlyBudget
     @State private var editingBudget = false
     @State private var budgetText = ""
+    private var budget: Double? { store.monthlyBudget }
     @State private var addingTrip = false
     @State private var tripText = ""
     @State private var tripShop: UUID?
@@ -54,10 +54,9 @@ struct InsightsView: View {
             .alert("Monthly Budget", isPresented: $editingBudget) {
                 TextField("0.00", text: $budgetText).keyboardType(.decimalPad)
                 Button("Save") {
-                    budget = Price.parse(budgetText).flatMap { $0 > 0 ? $0 : nil }
-                    GroceryStore.monthlyBudget = budget
+                    store.monthlyBudget = Price.parse(budgetText)
                 }
-                Button("Remove Budget", role: .destructive) { budget = nil; GroceryStore.monthlyBudget = nil }
+                Button("Remove Budget", role: .destructive) { store.monthlyBudget = nil }
                 Button("Cancel", role: .cancel) {}
             } message: { Text("What you'd like to spend on groceries each month.") }
             .alert("Add a Trip", isPresented: $addingTrip) {

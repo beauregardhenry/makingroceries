@@ -3,10 +3,13 @@ import Foundation
 /// The part of Family Sharing that doesn't need iCloud: which files a family list shares, and lining up this
 /// phone's entries with the family's before the first merge. FamilySync (in the app) moves the bytes.
 extension GroceryStore {
-    /// What a family list shares: the list itself (with its Travel, Clothing and Registry chips), what the
-    /// list needs to show it, and everyone's allergies. Stores come first so items can be lined up with the family's stores. Meals,
-    /// the kitchen, history, spending and Save Up stay private.
-    static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "allergies", "grocery"]
+    /// What a family list shares: everything the app keeps, so the whole household works from one list, one
+    /// kitchen, one set of meals, one budget and one set of Save Up goals. Files that others point into come
+    /// first (stores before items, meals before the meal plan) so this phone's entries can be lined up with the
+    /// family's before what refers to them arrives. Only this phone's look (color, icon) and its syncing setup
+    /// stay its own, since those aren't saved in these files.
+    static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "allergies", "meals", "plan",
+                                  "favorites", "recurring", "history", "stock", "spending", "goals", "settings", "grocery"]
 
     /// Before this phone first combines one file with the family's copy: anything here that is the same as
     /// one of theirs (a store, aisle or person with the same name, or an item still needed from the same
@@ -38,6 +41,42 @@ extension GroceryStore {
             let map = Self.matchingIDs(ours: allergies, theirs: theirs) { Self.same($0.name, $1.name) }
             guard !map.isEmpty else { return }
             allergies = allergies.map { var allergy = $0; allergy.id = map[allergy.id] ?? allergy.id; return allergy }
+        case "meals":
+            guard let theirs = try? decoder.decode([Meal].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: meals, theirs: theirs) { Self.same($0.name, $1.name) }
+            guard !map.isEmpty else { return }
+            meals = meals.map { var meal = $0; meal.id = map[meal.id] ?? meal.id; return meal }
+            plan = plan.map { var entry = $0; entry.mealID = map[entry.mealID] ?? entry.mealID; return entry }
+        case "plan":
+            guard let theirs = try? decoder.decode([PlannedMeal].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: plan, theirs: theirs) {
+                $0.mealID == $1.mealID && Calendar.current.isDate($0.day, inSameDayAs: $1.day)
+            }
+            plan = plan.map { var entry = $0; entry.id = map[entry.id] ?? entry.id; return entry }
+        case "favorites":
+            guard let theirs = try? decoder.decode([Favorite].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: favorites, theirs: theirs) { Self.same($0.name, $1.name) }
+            favorites = favorites.map { var favorite = $0; favorite.id = map[favorite.id] ?? favorite.id; return favorite }
+        case "recurring":
+            guard let theirs = try? decoder.decode([RecurringItem].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: recurring, theirs: theirs) { Self.same($0.name, $1.name) }
+            recurring = recurring.map { var entry = $0; entry.id = map[entry.id] ?? entry.id; return entry }
+        case "stock":
+            // The same food bought the same day on both phones is one thing in the kitchen.
+            guard let theirs = try? decoder.decode([StockEntry].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: stock, theirs: theirs) {
+                Self.same($0.name, $1.name) && Calendar.current.isDate($0.bought, inSameDayAs: $1.bought)
+            }
+            stock = stock.map { var entry = $0; entry.id = map[entry.id] ?? entry.id; return entry }
+        case "goals":
+            guard let theirs = try? decoder.decode([Goal].self, from: remote) else { return }
+            let map = Self.matchingIDs(ours: goals, theirs: theirs) { Self.same($0.name, $1.name) && $0.reserve == $1.reserve }
+            goals = goals.map { var goal = $0; goal.id = map[goal.id] ?? goal.id; return goal }
+        case "settings":
+            // The family's budget and monthly savings win over the ones this phone had before joining.
+            guard let theirs = try? decoder.decode([HouseholdSetting].self, from: remote) else { return }
+            let theirIDs = Set(theirs.map(\.id))
+            if settings.contains(where: { theirIDs.contains($0.id) }) { settings.removeAll { theirIDs.contains($0.id) } }
         case "grocery":
             guard let theirs = try? decoder.decode([GroceryItem].self, from: remote) else { return }
             // Only items still needed: a bought item on one phone and a needed one on the other are two trips.

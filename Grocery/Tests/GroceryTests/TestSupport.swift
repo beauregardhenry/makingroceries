@@ -6,7 +6,7 @@ class StoreTestCase: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        for key in ["tracksStock", "monthlyBudget", "avoidWords", "expiryReminders", "nearbyShopID", "nearbyShopDate"] {
+        for key in ["tracksStock", "monthlyBudget", "savePerMonth", "avoidWords", "expiryReminders", "nearbyShopID", "nearbyShopDate"] {
             UserDefaults.standard.removeObject(forKey: key)
         }
         // Start every test from no saved files at all.
