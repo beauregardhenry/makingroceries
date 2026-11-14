@@ -48,6 +48,23 @@ enum ListMerge {
                 seen.insert(id)
             }
         }
+        // Moving entries is a change too: if only we reordered (they just edited contents), keep our order.
+        if reordered(ours, from: base), !reordered(theirs, from: base) {
+            let position = Dictionary(ours.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { first, _ in first })
+            let fallback = ours.count
+            result = result.enumerated().sorted {
+                let a = position[$0.element.id] ?? fallback + $0.offset, b = position[$1.element.id] ?? fallback + $1.offset
+                return a < b
+            }.map(\.element)
+        }
         return result
+    }
+
+    /// Whether `list` puts the entries it shares with `base` in a different order.
+    private static func reordered<Element: Identifiable>(_ list: [Element], from base: [Element]) -> Bool {
+        let baseIDs = Set(base.map(\.id)), listIDs = Set(list.map(\.id))
+        let mine = list.map(\.id).filter { baseIDs.contains($0) }
+        let original = base.map(\.id).filter { listIDs.contains($0) }
+        return mine != original
     }
 }

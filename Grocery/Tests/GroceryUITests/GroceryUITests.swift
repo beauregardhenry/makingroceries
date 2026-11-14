@@ -205,6 +205,21 @@ final class GroceryUITests: XCTestCase {
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Added'")).firstMatch.exists, "and when it was added")
     }
 
+    func testStoresStayWhereTheyAreDraggedWithNoDeleteButton() {
+        app.buttons["Manage stores"].tap()
+        XCTAssertTrue(app.navigationBars["Stores"].waitForExistence(timeout: 5))
+        app.staticTexts["Online"].press(forDuration: 1.5, thenDragTo: app.staticTexts["Kroger"], withVelocity: .slow, thenHoldForDuration: 0.8)
+        XCTAssertFalse(app.buttons["Delete Store"].exists, "press and hold drags; it doesn't offer to delete")
+        app.navigationBars["Stores"].buttons["Edit"].tap()
+        let handles = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Reorder'"))
+        XCTAssertTrue(handles.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(handles.firstMatch.label, "Reorder Online", "Online is where it was dropped")
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Delete'")).count, 0, "reordering shows no delete buttons")
+        app.buttons["Reorder Chinese Grocery"].press(forDuration: 0.5, thenDragTo: app.buttons["Reorder Kroger"],
+                                                      withVelocity: .slow, thenHoldForDuration: 0.5)
+        XCTAssertEqual(handles.element(boundBy: 1).label, "Reorder Chinese Grocery", "a store moves all the way, not one place")
+    }
+
     func testCompanyComingOffersMakeAheadMeals() {
         showTab("Meals")
         app.buttons["Company Coming"].firstMatch.tap()

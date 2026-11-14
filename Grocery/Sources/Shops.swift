@@ -92,9 +92,6 @@ struct ManageShopsView: View {
                                         }
                                     }
                                 }
-                                .contextMenu {
-                                    Button("Delete Store", systemImage: "trash", role: .destructive) { store.deleteShop(shop) }
-                                }
                             }
                         }
                     }
@@ -107,7 +104,7 @@ struct ManageShopsView: View {
                 } header: {
                     Text("Your stores")
                 } footer: {
-                    Text("Drag to put the stores, Travel, Clothing and Registry in the order you want them on the list screen. Tap a store to rename it and set its aisle order. Press and hold a store to delete it; its items stay on your list without a store.")
+                    Text("Press and hold a store, Travel, Clothing or Registry, then drag it to where you want it on the list screen. Tap a store to rename it, set its aisle order, or delete it.")
                 }
 
                 Section {
@@ -155,7 +152,9 @@ struct ManageShopsView: View {
 struct ShopMapView: View {
     @Environment(GroceryStore.self) private var store
     let shopID: UUID
+    @Environment(\.dismiss) private var dismiss
     @State private var locationMessage: String?
+    @State private var confirmingDelete = false
 
     var body: some View {
         @Bindable var store = store
@@ -264,8 +263,24 @@ struct ShopMapView: View {
                     .disabled(store.shops[i].aisleOrder == store.shops[i].defaultOrder && store.shops[i].aisleLabels.isEmpty
                               && store.shops[i].customAnchors == nil)
                 }
+
+                Section {
+                    Button("Delete Store", systemImage: "trash", role: .destructive) { confirmingDelete = true }
+                } footer: {
+                    Text("Its items stay on your list, under All, without a store.")
+                }
             }
             .environment(\.editMode, .constant(.active))
+            .confirmationDialog("Delete \(store.shops[i].name.isEmpty ? "this store" : store.shops[i].name)?",
+                                isPresented: $confirmingDelete, titleVisibility: .visible) {
+                Button("Delete Store", role: .destructive) {
+                    let shop = store.shops[i]
+                    dismiss()
+                    store.deleteShop(shop)
+                }
+            } message: {
+                Text("Its items stay on your list without a store.")
+            }
             .navigationTitle(store.shops[i].name.isEmpty ? "Store" : store.shops[i].name)
             .navigationBarTitleDisplayMode(.inline)
         } else {

@@ -240,6 +240,7 @@
 		D43A0D2A0F6B712545D06028 /* ListExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A7E5EB488FD37BD2073C8D /* ListExchange.swift */; };
 		D5BF9433A776E4968A981278 /* TripPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB705D847A427E040B53B7AE /* TripPlanner.swift */; };
 		D68ED53A9C354D63269E1F85 /* WatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF7115579F71E22F29E30AE /* WatchListView.swift */; };
+		D6E05EDFD47256275E24A72C /* StoreOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F9FF0899707DCCC1E4A865 /* StoreOrderTests.swift */; };
 		D71ADD46EEA7744664B5D804 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17FAC5973D74EB28D7F4FAC2 /* Assets.xcassets */; };
 		D73A70D67FBA474B15608CAA /* Measurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5B4452BB7C457EBB5BD8F /* Measurements.swift */; };
 		D9C94FA77717FE9E13CBAC6B /* WatchSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6785649CFE2C1543568EE24 /* WatchSnapshot.swift */; };
@@ -374,6 +375,7 @@
 		4BAD422F588AF263CA32D38A /* FamilyShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyShare.swift; sourceTree = "<group>"; };
 		4CC858F1DBEB1FDB8F628DED /* GroceryWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GroceryWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504E059EBD40D84873D6C1F3 /* GroceryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryApp.swift; sourceTree = "<group>"; };
+		51F9FF0899707DCCC1E4A865 /* StoreOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreOrderTests.swift; sourceTree = "<group>"; };
 		59A2611C6625D05974C3C3E3 /* ReceiptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptView.swift; sourceTree = "<group>"; };
 		5A5651E045DA1087FDFC9CB0 /* LiveSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSync.swift; sourceTree = "<group>"; };
 		5C4A2AAA337CE1F2DE89D1FE /* GroceryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryUITests.swift; sourceTree = "<group>"; };
@@ -681,6 +683,7 @@
 				E55BF4F340A304CBE9D1CD3D /* OCRTests.swift */,
 				5CEB81E467A02E4861CF888C /* ParsingTests.swift */,
 				31A28564619FB3AE7F685AB2 /* RegistryTests.swift */,
+				51F9FF0899707DCCC1E4A865 /* StoreOrderTests.swift */,
 				3CD8F4CA29AEF54DAB62DFEB /* StoreTests.swift */,
 				4A689FB469E99DEA380D4B1F /* TestSupport.swift */,
 				98858338674A20A592B261E8 /* TextEntryTests.swift */,
@@ -1186,6 +1189,7 @@
 				15D069B92F4E3E43F487F1AF /* SpotlightEntries.swift in Sources */,
 				3DB3335C63C0F921050BF56B /* Stock.swift in Sources */,
 				6F4D9AC4AB85CEAF2DD10BAA /* Storage.swift in Sources */,
+				D6E05EDFD47256275E24A72C /* StoreOrderTests.swift in Sources */,
 				31ED99592D0BDE552822AE80 /* StoreTests.swift in Sources */,
 				437781725E65FD701A23B2C3 /* TestSupport.swift in Sources */,
 				1A691E06EE497264AF76E8E1 /* TextEntry.swift in Sources */,
