@@ -49,3 +49,26 @@ struct NameColorPicker: View {
         .accessibilityLabel("Color")
     }
 }
+
+/// A person's name with a dot in their color, for pickers and menus (which otherwise drop colors).
+struct PersonLabel: View {
+    let name: String
+    let color: NameColor
+
+    var body: some View {
+        Label {
+            Text(name)
+        } icon: {
+            Image(uiImage: Self.dot(color))
+        }
+    }
+
+    private static func dot(_ color: NameColor) -> UIImage {
+        let size = CGSize(width: 14, height: 14)
+        return UIGraphicsImageRenderer(size: size).image { _ in
+            UIColor(color.color).setFill()
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: size)).fill()
+        }
+        .withRenderingMode(.alwaysOriginal)
+    }
+}

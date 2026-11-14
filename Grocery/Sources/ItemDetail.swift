@@ -35,7 +35,7 @@ struct ItemDetailView: View {
                     if draft.list == .registry {
                         Picker("For", selection: $draft.giftForID) {
                             Text("Not assigned yet").tag(UUID?.none)
-                            ForEach(store.registryPeople) { Text($0.name).tag(UUID?.some($0.id)) }
+                            ForEach(store.registryPeople) { PersonLabel(name: $0.name, color: store.color(named: $0.name)).tag(UUID?.some($0.id)) }
                         }
                         Picker("Occasion", selection: Binding(get: { draft.occasion ?? "" }, set: { draft.occasion = $0.isEmpty ? nil : $0 })) {
                             Text("None").tag("")
@@ -44,7 +44,7 @@ struct ItemDetailView: View {
                     } else if draft.list == .clothing {
                         Picker("For", selection: $draft.personID) {
                             Text("No one yet").tag(UUID?.none)
-                            ForEach(store.people) { Text($0.name).tag(UUID?.some($0.id)) }
+                            ForEach(store.people) { PersonLabel(name: $0.name, color: store.color(named: $0.name)).tag(UUID?.some($0.id)) }
                         }
                         LabeledContent("Size") {
                             TextField("M, 8, 10 Kids, 32x30", text: $clothingSizeText)

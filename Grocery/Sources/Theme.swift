@@ -198,6 +198,20 @@ private struct TintedBand: ViewModifier {
     }
 }
 
+/// A person's header on the Clothing and Registry lists: solid in their color, so it's clear whose it is.
+private struct PersonBand: ViewModifier {
+    let color: NameColor
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(color.prefersDarkText ? Color.black.opacity(0.8) : Color.white)
+            .padding(.vertical, 6).padding(.horizontal, 10)
+            .background(color.color, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .textCase(nil)
+    }
+}
+
 extension View {
     func tintedBand(_ tint: Color) -> some View { modifier(TintedBand(tint: tint)) }
+    func personBand(_ color: NameColor) -> some View { modifier(PersonBand(color: color)) }
 }
