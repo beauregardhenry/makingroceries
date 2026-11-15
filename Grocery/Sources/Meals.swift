@@ -402,7 +402,8 @@ struct DocumentScanner: UIViewControllerRepresentable {
 
     func updateUIViewController(_ controller: VNDocumentCameraViewController, context: Context) {}
 
-    final class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+    @MainActor
+    final class Coordinator: NSObject, @preconcurrency VNDocumentCameraViewControllerDelegate {
         let parent: DocumentScanner
         init(_ parent: DocumentScanner) { self.parent = parent }
 

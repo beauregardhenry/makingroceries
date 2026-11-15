@@ -12,7 +12,9 @@ struct GroceryWatchApp: App {
     }
 }
 
-/// The watch's copy of your lists, kept up to date by the iPhone.
+/// The watch's copy of your lists, kept up to date by the iPhone. Runs on the main thread; WatchConnectivity
+/// calls in from its own thread, and only plain values (a decoded snapshot, a true/false) are handed across.
+@MainActor
 @Observable
 final class WatchModel: NSObject, WCSessionDelegate {
     var snapshot = WatchSnapshot(groups: [])
@@ -41,13 +43,14 @@ final class WatchModel: NSObject, WCSessionDelegate {
         snapshot.toggle(entryID: entry.id)
         guard !Self.isDemo else { return }
         save()
-        let message = WatchSnapshot.toggleMessage(for: entry.id)
+        let id = entry.id
         if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message, replyHandler: nil) { _ in
-                WCSession.default.transferUserInfo(message)
+            WCSession.default.sendMessage(WatchSnapshot.toggleMessage(for: id), replyHandler: nil) { _ in
+                // Not reachable after all: queue it to arrive later instead.
+                WCSession.default.transferUserInfo(WatchSnapshot.toggleMessage(for: id))
             }
         } else {
-            WCSession.default.transferUserInfo(message)
+            WCSession.default.transferUserInfo(WatchSnapshot.toggleMessage(for: id))
         }
     }
 
@@ -55,24 +58,27 @@ final class WatchModel: NSObject, WCSessionDelegate {
         if let data = try? JSONEncoder().encode(snapshot) { UserDefaults.standard.set(data, forKey: Self.cacheKey) }
     }
 
-    private func receive(_ context: [String: Any]) {
-        guard let fresh = WatchSnapshot(context: context) else { return }
-        DispatchQueue.main.async {
-            self.snapshot = fresh
-            self.save()
+    private func show(_ fresh: WatchSnapshot) {
+        snapshot = fresh
+        save()
+    }
+
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        let fresh = WatchSnapshot(context: session.receivedApplicationContext)
+        let reachable = session.isReachable
+        Task { @MainActor in
+            if let fresh { self.show(fresh) }
+            self.isReachable = reachable
         }
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        receive(session.receivedApplicationContext)
-        DispatchQueue.main.async { self.isReachable = session.isReachable }
+    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        guard let fresh = WatchSnapshot(context: applicationContext) else { return }
+        Task { @MainActor in self.show(fresh) }
     }
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        receive(applicationContext)
-    }
-
-    func sessionReachabilityDidChange(_ session: WCSession) {
-        DispatchQueue.main.async { self.isReachable = session.isReachable }
+    nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
+        let reachable = session.isReachable
+        Task { @MainActor in self.isReachable = reachable }
     }
 }

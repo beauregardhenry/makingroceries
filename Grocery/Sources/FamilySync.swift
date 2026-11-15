@@ -10,6 +10,7 @@ import SwiftUI
 ///
 /// Safety rules, as for iCloud Sync: joining combines and never deletes; when sharing ends, everyone keeps the
 /// list as it was; a copy this version can't read is left alone.
+@MainActor
 @Observable
 final class FamilySync {
     /// One for the app, so an invite opened from Messages can reach it before any screen exists.
@@ -265,7 +266,7 @@ struct FamilySharingView: View {
                 case .none:
                     nameSection
                     Section {
-                        ShareLink(item: FamilyInviteItem(family: family, name: myName, existing: nil),
+                        ShareLink(item: FamilyInviteItem(family: family, container: family.cloudContainer, name: myName, existing: nil),
                                   message: Text(FamilyInvite.message(from: myName)),
                                   preview: SharePreview(FamilyInvite.title(from: myName))) {
                             Label("Share My List with Family", systemImage: "person.2.badge.plus")
@@ -293,7 +294,7 @@ struct FamilySharingView: View {
                     }
                     Section {
                         if family.role == .owner, let ownShare {
-                            ShareLink(item: FamilyInviteItem(family: family, name: myName, existing: ownShare),
+                            ShareLink(item: FamilyInviteItem(family: family, container: family.cloudContainer, name: myName, existing: ownShare),
                                       message: Text(FamilyInvite.message(from: myName)),
                                       preview: SharePreview(FamilyInvite.title(from: myName))) {
                                 Label("Invite Someone", systemImage: "person.badge.plus")
@@ -390,6 +391,7 @@ private struct CloudSharingView: UIViewControllerRepresentable {
 /// `FamilyInvite.message` above it.
 private struct FamilyInviteItem: Transferable {
     let family: FamilySync
+    let container: CKContainer
     let name: String
     let existing: CKShare?
 
@@ -398,9 +400,9 @@ private struct FamilyInviteItem: Transferable {
             let options = CKAllowedSharingOptions(allowedParticipantPermissionOptions: .readWrite,
                                                   allowedParticipantAccessOptions: .specifiedRecipientsOnly)
             if let existing = item.existing {
-                return .existing(existing, container: item.family.cloudContainer, allowedSharingOptions: options)
+                return .existing(existing, container: item.container, allowedSharingOptions: options)
             }
-            return .prepareShare(container: item.family.cloudContainer, allowedSharingOptions: options) {
+            return .prepareShare(container: item.container, allowedSharingOptions: options) {
                 try await item.family.startSharing(title: FamilyInvite.title(from: item.name))
             }
         }

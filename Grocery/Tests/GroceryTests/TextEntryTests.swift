@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class TitleCaseTests: XCTestCase {
     func testEachWordStartsWithACapital() {
         XCTAssertEqual(TitleCase.apply("green apples"), "Green Apples")
@@ -14,6 +15,7 @@ final class TitleCaseTests: XCTestCase {
     }
 }
 
+@MainActor
 final class PluralFormsTests: XCTestCase {
     func testSingularAndPluralAreTheSame() {
         for (a, b) in [("Apple", "apples"), ("Cookie", "Cookies"), ("Berry", "berries"), ("Peach", "Peaches"),
@@ -29,6 +31,7 @@ final class PluralFormsTests: XCTestCase {
     }
 }
 
+@MainActor
 final class SingularPluralStoreTests: StoreTestCase {
     func testAddingThePluralRaisesTheSameItem() {
         store.addOrBump(name: "Apple", shopID: nil)
@@ -57,33 +60,34 @@ final class SingularPluralStoreTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class SpellingTests: StoreTestCase {
-    private let dictionary = ["bananna": "banana", "brocoli": "broccoli", "pepar": "paper"]
-    private func correct(_ word: String) -> String? { dictionary[word.lowercased()] }
+    private static let dictionary = ["bananna": "banana", "brocoli": "broccoli", "pepar": "paper"]
+    private static func correct(_ word: String) -> String? { dictionary[word.lowercased()] }
 
     func testAMisspelledWordGetsASuggestion() {
-        XCTAssertEqual(Spelling.suggestion(for: "brocoli", known: [], correct: correct), "Broccoli")
-        XCTAssertEqual(Spelling.suggestion(for: "ripe bananna", known: [], correct: correct), "Ripe Banana")
+        XCTAssertEqual(Spelling.suggestion(for: "brocoli", known: [], correct: Self.correct), "Broccoli")
+        XCTAssertEqual(Spelling.suggestion(for: "ripe bananna", known: [], correct: Self.correct), "Ripe Banana")
     }
 
     func testANameYouUsedBeforeWinsOverTheDictionary() {
-        XCTAssertEqual(Spelling.suggestion(for: "Clementinez", known: ["Clementines"], correct: correct), "Clementines")
-        XCTAssertNil(Spelling.suggestion(for: "clementine", known: ["Clementines"], correct: correct))
+        XCTAssertEqual(Spelling.suggestion(for: "Clementinez", known: ["Clementines"], correct: Self.correct), "Clementines")
+        XCTAssertNil(Spelling.suggestion(for: "clementine", known: ["Clementines"], correct: Self.correct))
     }
 
     func testWordsYouAlreadyUseAreNeverCorrected() {
-        XCTAssertNil(Spelling.suggestion(for: "Pepar Towels", known: ["Pepar Napkins"], correct: correct))
+        XCTAssertNil(Spelling.suggestion(for: "Pepar Towels", known: ["Pepar Napkins"], correct: Self.correct))
     }
 
     func testShortOrCorrectNamesGetNothing() {
-        XCTAssertNil(Spelling.suggestion(for: "egs", known: [], correct: correct))
-        XCTAssertNil(Spelling.suggestion(for: "Milk", known: [], correct: correct))
-        XCTAssertNil(Spelling.suggestion(for: "6-pack cola", known: [], correct: correct))
+        XCTAssertNil(Spelling.suggestion(for: "egs", known: [], correct: Self.correct))
+        XCTAssertNil(Spelling.suggestion(for: "Milk", known: [], correct: Self.correct))
+        XCTAssertNil(Spelling.suggestion(for: "6-pack cola", known: [], correct: Self.correct))
     }
 
     func testTheStoreChecksTheListAndHistory() {
         store.addOrBump(name: "Asparagus", shopID: nil)
-        XCTAssertEqual(store.spellingSuggestion(for: "Asparagos", correct: correct), "Asparagus")
+        XCTAssertEqual(store.spellingSuggestion(for: "Asparagos", correct: Self.correct), "Asparagus")
     }
 
     func testThePhonesDictionaryIsUsed() throws {
@@ -93,6 +97,7 @@ final class SpellingTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class AllergenSuggestionTests: XCTestCase {
     func testBeforeTypingTheMajorAllergensAreOffered() {
         let offered = AllergenSuggestions.matches(for: "", excluding: [])

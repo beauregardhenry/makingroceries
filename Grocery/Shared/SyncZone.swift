@@ -61,7 +61,7 @@ final class SyncZone {
     }
 
     /// The record type every synced file uses. It already exists in the app's iCloud schema.
-    static let recordType = "DataFile"
+    nonisolated static let recordType = "DataFile"
 
     /// Whether this phone may create the zone: only its own zones, in its private database.
     var ownsZone: Bool { scope == .private }

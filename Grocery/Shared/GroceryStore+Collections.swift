@@ -145,7 +145,7 @@ extension GroceryStore {
         isFirstRun = false
     }
 
-    static let onlineOfferedKey = "offeredOnlineStore"
+    nonisolated static let onlineOfferedKey = "offeredOnlineStore"
 
     /// Adds an Online store once, for lists made before it existed. It is only offered once, so deleting it
     /// sticks, and never on a first launch, where setup adds it.

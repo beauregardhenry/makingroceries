@@ -113,8 +113,9 @@ struct ItemDetailView: View {
                                 .buttonStyle(.borderless)
                         }
                     }
+                    let hasPhoto = draft.photo != nil
                     PhotosPicker(selection: $pickedPhoto, matching: .images) {
-                        Label(draft.photo == nil ? "Add Photo" : "Change Photo", systemImage: "photo")
+                        Label(hasPhoto ? "Change Photo" : "Add Photo", systemImage: "photo")
                     }
                 }
 

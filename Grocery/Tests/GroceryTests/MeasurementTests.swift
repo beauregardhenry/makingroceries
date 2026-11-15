@@ -1,10 +1,11 @@
 import XCTest
 
+@MainActor
 final class MeasurementTests: StoreTestCase {
     private var emma: Person!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         emma = store.addPerson(named: "Emma")
     }
 

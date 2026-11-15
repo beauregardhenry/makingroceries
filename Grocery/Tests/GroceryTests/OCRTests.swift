@@ -2,6 +2,7 @@ import XCTest
 import UIKit
 
 /// Draws a receipt and a recipe into an image and reads them back with the on-device text recognition.
+@MainActor
 final class OCRTests: XCTestCase {
     private func render(_ lines: [(String, String?)]) -> CGImage {
         let size = CGSize(width: 700, height: CGFloat(lines.count) * 50 + 80)

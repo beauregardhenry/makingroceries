@@ -8,7 +8,7 @@ extension GroceryStore {
     /// first (stores before items, meals before the meal plan) so this phone's entries can be lined up with the
     /// family's before what refers to them arrives. Only this phone's look (color, icon) and its syncing setup
     /// stay its own, since those aren't saved in these files.
-    static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "allergies", "meals", "plan",
+    nonisolated static let familyFileNames = ["shops", "customAisles", "people", "registryPeople", "allergies", "meals", "plan",
                                   "favorites", "recurring", "history", "stock", "spending", "goals", "settings", "grocery"]
 
     /// Before this phone first combines one file with the family's copy: anything here that is the same as
@@ -90,7 +90,7 @@ extension GroceryStore {
 
     /// For each of ours that the family doesn't have by id, the id of the family's entry that `matches` it, if
     /// there is one that isn't already matched. Entries with the same id on both sides are already lined up.
-    static func matchingIDs<Element: Identifiable>(ours: [Element], theirs: [Element], matches: (Element, Element) -> Bool) -> [UUID: UUID]
+    nonisolated static func matchingIDs<Element: Identifiable>(ours: [Element], theirs: [Element], matches: (Element, Element) -> Bool) -> [UUID: UUID]
     where Element.ID == UUID {
         let ourIDs = Set(ours.map(\.id))
         var available = theirs.filter { !ourIDs.contains($0.id) }
@@ -104,7 +104,7 @@ extension GroceryStore {
     }
 
     /// The same item twice: same name (singular or plural), same store, same list chip, and for the same person.
-    private static func sameItem(_ a: GroceryItem, _ b: GroceryItem) -> Bool {
+    nonisolated private static func sameItem(_ a: GroceryItem, _ b: GroceryItem) -> Bool {
         a.shopID == b.shopID && a.list == b.list && a.personID == b.personID && a.giftForID == b.giftForID && same(a.name, b.name)
     }
 

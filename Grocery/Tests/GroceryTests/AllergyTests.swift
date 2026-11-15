@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class AllergyTests: StoreTestCase {
     func testAllergiesAreGroupedByCategoryAndAlphabetized() {
         for name in ["walnuts", "Shrimp", "milk", "Peanuts", "Sulfites", "Cashews", "Glitter"] { store.addAllergy(named: name) }
@@ -103,6 +104,7 @@ final class AllergyTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class HouseholdSettingsTests: StoreTestCase {
     func testBudgetAndMonthlySavingsAreSavedAndCleared() {
         XCTAssertNil(store.monthlyBudget)

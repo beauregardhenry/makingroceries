@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class MealCategoryTests: StoreTestCase {
     func testNamesAreGuessedIntoCategories() {
         XCTAssertEqual(MealCategory.guess(fromName: "Chicken Noodle Soup"), .soup)
@@ -32,6 +33,7 @@ final class MealCategoryTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class TravelItemTests: StoreTestCase {
     func testTripItemsAreKeptSeparateFromTheSameItemOnTheList() {
         store.addOrBump(name: "Sunscreen", shopID: nil)
@@ -62,6 +64,7 @@ final class TravelItemTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class NonFoodStoreTests: StoreTestCase {
     func testHardwareAndHomeItemsAreFiledInTheirOwnAisles() {
         let expected: [(String, Aisle)] = [
@@ -134,6 +137,7 @@ final class NonFoodStoreTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class MakeAheadTests: StoreTestCase {
     private func date(_ y: Int, _ m: Int, _ d: Int, _ h: Int = 12) -> Date {
         Calendar.current.date(from: DateComponents(year: y, month: m, day: d, hour: h))!
@@ -228,6 +232,7 @@ final class MakeAheadTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ChipOrderTests: XCTestCase {
     private let shops = [Shop(name: "Kroger"), Shop(name: "Walmart"), Shop(name: "Aldi")]
     private let travel = ChipEntry.list(.travel), clothing = ChipEntry.list(.clothing), registry = ChipEntry.list(.registry)
@@ -315,6 +320,7 @@ final class ChipOrderTests: XCTestCase {
     }
 }
 
+@MainActor
 final class OnlineStoreTests: StoreTestCase {
     private func freshDefaults() -> UserDefaults {
         let defaults = UserDefaults(suiteName: "online-store-tests")!

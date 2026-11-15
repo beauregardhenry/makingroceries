@@ -3,7 +3,8 @@ import UIKit
 
 /// Item photos, shrunk and kept next to the rest of the app's data.
 enum PhotoStore {
-    private static let cache = NSCache<NSString, UIImage>()
+    // NSCache is thread-safe; it just isn't marked Sendable.
+    nonisolated(unsafe) private static let cache = NSCache<NSString, UIImage>()
 
     /// Saves a picked photo as a small JPEG and returns its file name.
     static func save(_ data: Data) -> String? {

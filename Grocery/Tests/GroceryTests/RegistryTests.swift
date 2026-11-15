@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class RegistryTests: StoreTestCase {
     private func person(_ name: String) throws -> RegistryPerson {
         try XCTUnwrap(store.addRegistryPerson(named: name))

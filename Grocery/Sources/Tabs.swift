@@ -30,6 +30,7 @@ enum AppTab: String {
 }
 
 /// The store the list is showing, for screens outside the list that add items to it.
+@MainActor
 private func currentShopID(_ store: GroceryStore) -> UUID? {
     let raw = UserDefaults.standard.string(forKey: "selectedShop") ?? ""
     if case .shop(let id) = ShopFilter(raw: raw), store.shop(for: id) != nil { return id }

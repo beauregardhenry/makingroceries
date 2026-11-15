@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class NameColorTests: StoreTestCase {
     func testAPickedColorIsTheSameOnBothLists() throws {
         let emma = try XCTUnwrap(store.addPerson(named: "Emma"))

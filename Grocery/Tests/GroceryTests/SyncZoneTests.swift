@@ -2,21 +2,22 @@ import CloudKit
 import XCTest
 
 
+@MainActor
 final class SyncZoneTests: StoreTestCase {
     private var folder: URL!
     private let zoneID = CKRecordZone.ID(zoneName: "Test", ownerName: CKCurrentUserDefaultName)
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         folder = FileManager.default.temporaryDirectory.appending(path: "SyncZoneTests-\(UUID().uuidString)")
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         try? FileManager.default.removeItem(at: folder)
-        super.tearDown()
+        try await super.tearDown()
     }
 
-    @MainActor private func makeZone(files: [String] = GroceryStore.cloudFileNames, linesUp: Bool = false) -> SyncZone {
+    private func makeZone(files: [String] = GroceryStore.cloudFileNames, linesUp: Bool = false) -> SyncZone {
         let zone = SyncZone(zoneID: zoneID, scope: .private, fileNames: files, folder: folder, linesUpOnFirstMerge: linesUp)
         zone.store = store
         return zone
@@ -38,7 +39,7 @@ final class SyncZoneTests: StoreTestCase {
         return try encoder.encode(value)
     }
 
-    @MainActor func testTheFirstLookSendsEverythingThenOnlyWhatChanged() {
+    func testTheFirstLookSendsEverythingThenOnlyWhatChanged() {
         let zone = makeZone(files: ["grocery", "shops"])
         XCTAssertEqual(Set(zone.changedRecordIDs().map(\.recordName)), ["grocery", "shops"])
         XCTAssertTrue(zone.changedRecordIDs().isEmpty, "nothing changed since")
@@ -46,7 +47,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertEqual(zone.changedRecordIDs().map(\.recordName), ["grocery"])
     }
 
-    @MainActor func testTheRecordCarriesThisPhonesCopy() throws {
+    func testTheRecordCarriesThisPhonesCopy() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
         let zone = makeZone(files: ["grocery"])
         let record = try XCTUnwrap(zone.record(for: CKRecord.ID(recordName: "grocery", zoneID: zoneID)))
@@ -55,7 +56,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertNil(zone.record(for: CKRecord.ID(recordName: "meals", zoneID: zoneID)), "not one of this zone's files")
     }
 
-    @MainActor func testASavedRecordBecomesTheBaselineAndSurvivesARelaunch() throws {
+    func testASavedRecordBecomesTheBaselineAndSurvivesARelaunch() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
         let zone = makeZone(files: ["grocery"])
         let record = try XCTUnwrap(zone.record(for: CKRecord.ID(recordName: "grocery", zoneID: zoneID)))
@@ -65,7 +66,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertEqual(relaunched.record(for: record.recordID)?.recordID, record.recordID, "sent as an update of the saved record")
     }
 
-    @MainActor func testAFailedSaveIsTriedAgain() throws {
+    func testAFailedSaveIsTriedAgain() throws {
         let zone = makeZone(files: ["grocery"])
         let id = try XCTUnwrap(zone.changedRecordIDs().first)
         _ = zone.record(for: id)
@@ -74,7 +75,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertEqual(zone.changedRecordIDs(), [id])
     }
 
-    @MainActor func testReceivingMergesAndSaysWhenThisPhoneHasMore() throws {
+    func testReceivingMergesAndSaysWhenThisPhoneHasMore() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
         let zone = makeZone(files: ["grocery"])
         let theirs = [GroceryItem(name: "Eggs", aisle: .dairy)]
@@ -84,7 +85,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertFalse(zone.receive(try remoteRecord("grocery", same)), "nothing more to send")
     }
 
-    @MainActor func testRecordsFromElsewhereAreIgnored() throws {
+    func testRecordsFromElsewhereAreIgnored() throws {
         let zone = makeZone(files: ["grocery"])
         let data = try encoded([GroceryItem(name: "Eggs", aisle: .dairy)])
         let otherZone = CKRecordZone.ID(zoneName: "Other", ownerName: CKCurrentUserDefaultName)
@@ -95,7 +96,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertTrue(store.items.isEmpty)
     }
 
-    @MainActor func testACopyThisVersionCantReadIsLeftAloneAndReported() throws {
+    func testACopyThisVersionCantReadIsLeftAloneAndReported() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
         let zone = makeZone(files: ["grocery"])
         var reported: SyncStatus?
@@ -111,7 +112,7 @@ final class SyncZoneTests: StoreTestCase {
         guard case .upToDate = reported else { return XCTFail("a new sync clears it") }
     }
 
-    @MainActor func testFamilyZonesLineUpBeforeTheFirstMerge() throws {
+    func testFamilyZonesLineUpBeforeTheFirstMerge() throws {
         let mine = Shop(name: "Kroger")
         store.shops = [mine]
         let zone = makeZone(files: ["shops"], linesUp: true)
@@ -120,7 +121,7 @@ final class SyncZoneTests: StoreTestCase {
         XCTAssertEqual(store.shops.map(\.id), [family.id])
     }
 
-    @MainActor func testResettingAndRemovingKeepTheLists() throws {
+    func testResettingAndRemovingKeepTheLists() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)
         let zone = makeZone(files: ["grocery"])
         let record = try XCTUnwrap(zone.record(for: CKRecord.ID(recordName: "grocery", zoneID: zoneID)))

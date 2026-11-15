@@ -12,18 +12,22 @@ struct ShopEntity: AppEntity {
 }
 
 struct ShopQuery: EntityStringQuery {
+    @MainActor
     private func all() -> [ShopEntity] {
         GroceryStore().shops.map { ShopEntity(id: $0.id, name: $0.name) }
     }
 
+    @MainActor
     func entities(for identifiers: [UUID]) async throws -> [ShopEntity] {
         all().filter { identifiers.contains($0.id) }
     }
 
+    @MainActor
     func entities(matching string: String) async throws -> [ShopEntity] {
         all().filter { $0.name.localizedCaseInsensitiveContains(string) }
     }
 
+    @MainActor
     func suggestedEntities() async throws -> [ShopEntity] { all() }
 }
 
@@ -41,6 +45,7 @@ struct AddItemIntent: AppIntent {
         Summary("Add \(\.$items) to \(\.$shop)")
     }
 
+    @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let entries = QuickAdd.parse(items)
         guard !entries.isEmpty else { return .result(dialog: "I didn't catch an item to add.") }
@@ -64,6 +69,7 @@ struct ReadListIntent: AppIntent {
         Summary("Read the list for \(\.$shop)")
     }
 
+    @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let items = GroceryStore().widgetItems(shopID: shop?.id)
         guard !items.isEmpty else { return .result(dialog: "Your list is empty.") }
@@ -84,6 +90,7 @@ struct ToggleItemIntent: AppIntent {
     init() {}
     init(itemID: String) { self.itemID = itemID }
 
+    @MainActor
     func perform() async throws -> some IntentResult {
         let store = GroceryStore()
         if let item = store.items.first(where: { $0.id.uuidString == itemID }) { store.toggle(item) }

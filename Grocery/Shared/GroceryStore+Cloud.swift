@@ -8,8 +8,11 @@ import Foundation
 /// additions, edits and deletions are kept. With no base (the first sync on a device) nothing is
 /// deleted; the phone's lists and the cloud's are combined.
 extension GroceryStore {
-    /// The files that sync, in the order they're sent.
-    static let cloudFileNames = lists.map(\.name)
+    /// The files that sync, in the order they're sent: the names in `lists`, kept here too so code off the main
+    /// thread can use them (a test checks they match).
+    nonisolated static let cloudFileNames = ["grocery", "shops", "favorites", "meals", "history", "recurring", "plan",
+                                             "stock", "spending", "goals", "people", "customAisles", "registryPeople",
+                                             "allergies", "settings"]
 
     /// This phone's copy of one file, as the cloud stores it.
     func cloudData(for name: String) -> Data? {

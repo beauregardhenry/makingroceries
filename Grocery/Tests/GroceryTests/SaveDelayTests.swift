@@ -1,9 +1,10 @@
 import XCTest
 
+@MainActor
 final class SaveDelayTests: StoreTestCase {
-    override func tearDown() {
+    override func tearDown() async throws {
         store.saveDelay = 0
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func testWithoutAPauseChangesAreWrittenAtOnce() {

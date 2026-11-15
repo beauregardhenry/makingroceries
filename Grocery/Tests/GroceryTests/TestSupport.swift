@@ -1,11 +1,12 @@
 import XCTest
 
 /// A fresh, empty store and clean preferences for every test, so tests never see each other's data.
+@MainActor
 class StoreTestCase: XCTestCase {
     var store: GroceryStore!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         for key in ["tracksStock", "monthlyBudget", "savePerMonth", "avoidWords", "expiryReminders", "nearbyShopID", "nearbyShopDate"] {
             UserDefaults.standard.removeObject(forKey: key)
         }

@@ -51,12 +51,14 @@ enum PluralForms {
     }
 }
 
-/// "Did you mean…?" for a name that looks misspelled. Nothing changes unless you tap the suggestion.
+/// "Did you mean…?" for a name that looks misspelled. Nothing changes unless you tap the suggestion. On the main
+/// thread, where the phone's spelling checker lives.
+@MainActor
 enum Spelling {
     /// A better spelling of `typed`, or nil when it looks right. A name you've used before wins (a typo of one
     /// of them is corrected to it); otherwise each word goes to `correct`, which returns a fix for a misspelled
     /// word or nil. Words from names you've used before are never corrected, so brand names you buy stay put.
-    static func suggestion(for typed: String, known: [String], correct: (String) -> String? = systemCorrection) -> String? {
+    static func suggestion(for typed: String, known: [String], correct: @MainActor (String) -> String? = systemCorrection) -> String? {
         let trimmed = typed.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= 4 else { return nil }
         if known.contains(where: { GroceryStore.same($0, trimmed) }) { return nil }
@@ -127,7 +129,7 @@ enum AllergenSuggestions {
 
 extension GroceryStore {
     /// "Did you mean…?" for a name being typed, checked against names on the list and in history first.
-    func spellingSuggestion(for typed: String, correct: (String) -> String? = Spelling.systemCorrection) -> String? {
+    func spellingSuggestion(for typed: String, correct: @MainActor (String) -> String? = Spelling.systemCorrection) -> String? {
         Spelling.suggestion(for: typed, known: items.map(\.name) + history.map(\.name), correct: correct)
     }
 }

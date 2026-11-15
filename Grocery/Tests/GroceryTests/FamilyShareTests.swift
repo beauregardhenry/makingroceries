@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class FamilyShareTests: StoreTestCase {
     private func encoded<T: Encodable>(_ value: T) throws -> Data {
         let encoder = JSONEncoder()
@@ -15,6 +16,7 @@ final class FamilyShareTests: StoreTestCase {
     }
 
     func testEverythingIsShared() {
+        XCTAssertEqual(GroceryStore.lists.map(\.name), GroceryStore.cloudFileNames, "the name list matches the table")
         XCTAssertEqual(Set(GroceryStore.familyFileNames), Set(GroceryStore.cloudFileNames))
         XCTAssertEqual(GroceryStore.familyFileNames.count, GroceryStore.cloudFileNames.count)
         let order = GroceryStore.familyFileNames
@@ -217,6 +219,7 @@ final class FamilyShareTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class FamilyInviteTests: XCTestCase {
     func testTheInviteSaysWhoSentItAndWhatTheLinkDoes() {
         let message = FamilyInvite.message(from: "  Pat ")
