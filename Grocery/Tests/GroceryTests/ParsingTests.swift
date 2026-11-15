@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class QuickAddTests: XCTestCase {
     private func parsed(_ text: String, spoken: Bool = false) -> [String] {
         QuickAdd.parse(text, spoken: spoken).map { "\($0.name)×\($0.quantity)" }
@@ -41,6 +42,7 @@ final class QuickAddTests: XCTestCase {
     }
 }
 
+@MainActor
 final class AmountTests: XCTestCase {
     func testParsesFractions() {
         XCTAssertEqual(Amount.parse("1 1/2"), 1.5)
@@ -79,6 +81,7 @@ final class AmountTests: XCTestCase {
     }
 }
 
+@MainActor
 final class RecipeParserTests: XCTestCase {
     private func summary(_ lines: [RecipeLine]) -> [String] {
         lines.map { $0.unit != nil ? "\($0.name)|\(Amount.text($0.amount!, unit: $0.unit!))" : "\($0.name)×\($0.quantity)" }
@@ -128,6 +131,7 @@ final class RecipeParserTests: XCTestCase {
     }
 }
 
+@MainActor
 final class AisleGuessTests: XCTestCase {
     func testKeywordsPickTheRightAisle() {
         XCTAssertEqual(Aisle.guess(fromCategories: ["en:frozen-vegetables"]), .frozen)

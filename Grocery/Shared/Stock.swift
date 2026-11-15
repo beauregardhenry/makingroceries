@@ -41,7 +41,7 @@ enum ShelfLife {
 
 extension GroceryStore {
     /// Whether checking something off also adds it to "at home". On unless you turn it off.
-    static var tracksStock: Bool {
+    nonisolated static var tracksStock: Bool {
         get { UserDefaults.standard.object(forKey: "tracksStock") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: "tracksStock") }
     }

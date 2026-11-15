@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class ClothingTests: StoreTestCase {
     private func person(_ name: String) throws -> Person {
         try XCTUnwrap(store.addPerson(named: name))

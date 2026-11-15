@@ -35,11 +35,12 @@ final class StubProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
+@MainActor
 class NetworkTestCase: XCTestCase {
     let session = StubProtocol.session()
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         StubProtocol.reply = .init()
         StubProtocol.requests = []
     }
@@ -131,6 +132,7 @@ final class RecipeFetcherTests: NetworkTestCase {
     }
 }
 
+@MainActor
 func XCTAssertThrowsErrorAsync<T>(_ expression: @autoclosure () async throws -> T, file: StaticString = #filePath, line: UInt = #line) async {
     do {
         _ = try await expression()

@@ -24,8 +24,12 @@ extension GroceryStore {
     /// a message about an item that's since been deleted is ignored.
     @discardableResult
     func applyWatchMessage(_ message: [String: Any]) -> Bool {
-        guard let id = WatchSnapshot.toggledID(in: message),
-              let item = items.first(where: { $0.id.uuidString == id }) else { return false }
+        WatchSnapshot.toggledID(in: message).map(applyWatchToggle) ?? false
+    }
+
+    /// Checks off (or puts back) the item the watch toggled. False when it isn't on the list.
+    func applyWatchToggle(_ id: String) -> Bool {
+        guard let item = items.first(where: { $0.id.uuidString == id }) else { return false }
         toggle(item)
         return true
     }

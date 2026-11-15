@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class GoalTests: StoreTestCase {
     func testGoalsKeepTheOrderYouGiveThem() {
         store.addGoal(name: "Computer", cost: 1200)
@@ -137,6 +138,7 @@ final class GoalTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class RunningTotalTests: XCTestCase {
     private func item(_ name: String, _ price: Double?, qty: Int = 1, checked: Bool = false, travel: Bool = false) -> GroceryItem {
         var item = GroceryItem(name: name, quantity: qty, aisle: .pantry, price: price)

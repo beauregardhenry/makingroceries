@@ -1,12 +1,14 @@
-import MultipeerConnectivity
+// Multipeer types predate Swift concurrency; they are only used here, handed to the main thread as received.
+@preconcurrency import MultipeerConnectivity
 import SwiftUI
 
 /// Keeps the list in step with other phones in the household, directly over Wi-Fi or Bluetooth, while
 /// the app is open on both. Phones find each other only when they use the same household code. Nothing
-/// goes through iCloud or any server.
+/// goes through iCloud or any server. Runs on the main thread; Multipeer calls in from its own thread.
+@MainActor
 @Observable
 final class HouseholdSync: NSObject {
-    static let serviceType = "mkgroceries"
+    nonisolated static let serviceType = "mkgroceries"
 
     private(set) var connected: [String] = []
     private(set) var isRunning = false
@@ -23,12 +25,12 @@ final class HouseholdSync: NSObject {
     @ObservationIgnored private var applyingRemote = false
     @ObservationIgnored private var pendingSend: Task<Void, Never>?
 
-    static var enabled: Bool {
+    nonisolated static var enabled: Bool {
         get { UserDefaults.standard.bool(forKey: "householdSync") }
         set { UserDefaults.standard.set(newValue, forKey: "householdSync") }
     }
 
-    static var savedCode: String {
+    nonisolated static var savedCode: String {
         get { UserDefaults.standard.string(forKey: "householdCode") ?? "" }
         set { UserDefaults.standard.set(newValue, forKey: "householdCode") }
     }
@@ -117,7 +119,7 @@ final class HouseholdSync: NSObject {
 }
 
 extension HouseholdSync: MCSessionDelegate {
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+    nonisolated func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         Task { @MainActor in
             self.peersChanged()
             // A phone that just joined gets the whole list; it may have been offline for a while.
@@ -127,32 +129,40 @@ extension HouseholdSync: MCSessionDelegate {
         }
     }
 
-    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+    nonisolated func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         Task { @MainActor in self.receive(data) }
     }
 
-    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
+    nonisolated func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
+    nonisolated func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
+    nonisolated func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
 }
 
 extension HouseholdSync: MCNearbyServiceBrowserDelegate {
-    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
-        guard let session, info?["tag"] == HouseholdCode.tag(for: code), !session.connectedPeers.contains(peerID) else { return }
-        // Usually only one side invites, so two phones don't invite each other at once. With the same
-        // name both do, which still connects.
-        guard let me = peer, me.displayName >= peerID.displayName else { return }
-        browser.invitePeer(peerID, to: session, withContext: Data(HouseholdCode.tag(for: code).utf8), timeout: 20)
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
+        let tag = info?["tag"]
+        Task { @MainActor in
+            guard let session = self.session, tag == HouseholdCode.tag(for: self.code), !session.connectedPeers.contains(peerID) else { return }
+            // Usually only one side invites, so two phones don't invite each other at once. With the same
+            // name both do, which still connects.
+            guard let me = self.peer, me.displayName >= peerID.displayName else { return }
+            browser.invitePeer(peerID, to: session, withContext: Data(HouseholdCode.tag(for: self.code).utf8), timeout: 20)
+        }
     }
 
-    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {}
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {}
 }
 
 extension HouseholdSync: MCNearbyServiceAdvertiserDelegate {
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID,
-                    withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        let matches = context.map { String(decoding: $0, as: UTF8.self) } == HouseholdCode.tag(for: code)
-        invitationHandler(matches, matches ? session : nil)
+    nonisolated func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID,
+                                withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+        let offered = context.map { String(decoding: $0, as: UTF8.self) }
+        // Multipeer lets the answer come from any thread; its handler just isn't marked Sendable.
+        nonisolated(unsafe) let answer = invitationHandler
+        Task { @MainActor in
+            let matches = offered == HouseholdCode.tag(for: self.code)
+            answer(matches, matches ? self.session : nil)
+        }
     }
 }
 

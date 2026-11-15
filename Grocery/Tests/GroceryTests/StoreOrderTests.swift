@@ -1,6 +1,7 @@
 import XCTest
 
 /// Dragging chips on the Stores screen: what's saved must put every chip back exactly where it was dropped.
+@MainActor
 final class StoreOrderTests: XCTestCase {
     private let shops = ["A", "B", "C", "D"].map { Shop(name: $0) }
 

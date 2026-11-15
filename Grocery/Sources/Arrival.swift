@@ -78,10 +78,11 @@ final class ArrivalReminders: NSObject, CLLocationManagerDelegate, UNUserNotific
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
         Task { @MainActor in
             guard pendingLocation != nil else { return }
-            switch manager.authorizationStatus {
-            case .authorizedWhenInUse, .authorizedAlways: manager.requestLocation()
+            switch status {
+            case .authorizedWhenInUse, .authorizedAlways: self.manager.requestLocation()
             case .denied, .restricted:
                 pendingLocation?.resume(returning: nil)
                 pendingLocation = nil

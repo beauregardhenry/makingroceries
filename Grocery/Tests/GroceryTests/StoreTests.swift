@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class ItemTests: StoreTestCase {
     func testAddOrBumpMergesPlurals() {
         store.add(name: "Tomatoes", quantity: 1, aisle: .produce)
@@ -83,6 +84,7 @@ final class ItemTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ShopTests: StoreTestCase {
     func testShopsAreUniqueAndDeletingKeepsItems() {
         let kroger = store.addShop(named: "Kroger")!
@@ -150,11 +152,12 @@ final class ShopTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class TripPlannerTests: StoreTestCase {
     private var kroger: Shop!, walmart: Shop!, chinese: Shop!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         kroger = store.addShop(named: "Kroger")
         walmart = store.addShop(named: "Walmart")
         chinese = store.addShop(named: "Chinese Grocery")
@@ -208,11 +211,12 @@ final class TripPlannerTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class MealPlanTests: StoreTestCase {
     private var curry: Meal!, pasta: Meal!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         curry = Meal(name: "Curry", ingredients: [MealIngredient(name: "Rice", quantity: 1, amount: 2, unit: "cup"), MealIngredient(name: "Onion", quantity: 2)])
         pasta = Meal(name: "Pasta", ingredients: [MealIngredient(name: "Spaghetti", quantity: 1), MealIngredient(name: "Onion", quantity: 1)])
         store.meals = [curry, pasta]
@@ -253,6 +257,7 @@ final class MealPlanTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class StockAndSpendingTests: StoreTestCase {
     func testPerishablesGoAtHomeWithAUseByDate() {
         store.items = [GroceryItem(name: "Spinach", aisle: .produce), GroceryItem(name: "Dish soap", aisle: .household)]
@@ -309,6 +314,7 @@ final class StockAndSpendingTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ListExchangeTests: StoreTestCase {
     private func makeExport() -> (ListExport, Shop) {
         let kroger = store.addShop(named: "Kroger")!
@@ -363,11 +369,12 @@ final class ListExchangeTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class BarcodeCheckOffTests: StoreTestCase {
     private var kroger: Shop!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         kroger = store.addShop(named: "Kroger")
         store.items = [GroceryItem(name: "Hazelnut spread", aisle: .pantry, shopID: kroger.id),
                        GroceryItem(name: "Milk", aisle: .dairy, shopID: kroger.id)]
@@ -404,6 +411,7 @@ final class BarcodeCheckOffTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class WatchSnapshotTests: StoreTestCase {
     func testGroupsFollowStoresAndWalkingOrder() throws {
         let kroger = store.addShop(named: "Kroger")!, walmart = store.addShop(named: "Walmart")!
@@ -435,11 +443,12 @@ final class WatchSnapshotTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class WatchSyncTests: StoreTestCase {
     private var kroger: Shop!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         kroger = store.addShop(named: "Kroger")!
         store.items = [
             GroceryItem(name: "Milk", aisle: .dairy, shopID: kroger.id),
@@ -495,6 +504,7 @@ final class WatchSyncTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ItemEditingTests: StoreTestCase {
     func testMovingAndPricingAnItem() {
         let kroger = store.addShop(named: "Kroger")!
@@ -575,6 +585,7 @@ final class ItemEditingTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class UsualAndRepeatTests: StoreTestCase {
     func testUsualItemsAreUniqueAndGoOnTheList() {
         store.history = [PastItem(name: "Oat milk", aisle: .dairy, shopID: nil, price: nil)]
@@ -628,6 +639,7 @@ final class UsualAndRepeatTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class SuggestionTests: StoreTestCase {
     private func past(_ name: String, count: Int, daysAgo: Int) -> PastItem {
         var item = PastItem(name: name, aisle: .other, shopID: nil, price: nil)
@@ -656,6 +668,7 @@ final class SuggestionTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ModelTests: XCTestCase {
     func testEveryAisleHasItsOwnSymbol() {
         let symbols = Aisle.allCases.map(\.symbol)

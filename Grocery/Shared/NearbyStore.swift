@@ -3,7 +3,8 @@ import Foundation
 /// Which store you're probably at, shared between the app and the widget. The app writes it when you
 /// arrive somewhere or open the app near a store; it goes stale after a few hours.
 enum NearbyStore {
-    private static let defaults = UserDefaults(suiteName: Storage.groupID) ?? .standard
+    // UserDefaults is thread-safe; it just isn't marked Sendable yet.
+    nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: Storage.groupID) ?? .standard
     private static let idKey = "nearbyShopID"
     private static let dateKey = "nearbyShopDate"
     static let lifetime: TimeInterval = 3 * 3600

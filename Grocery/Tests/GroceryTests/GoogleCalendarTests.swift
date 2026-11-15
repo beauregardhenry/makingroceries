@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class GoogleCalendarTests: XCTestCase {
     private let config = GoogleCalendarAPI.Config(clientID: "123-abc.apps.googleusercontent.com")
 

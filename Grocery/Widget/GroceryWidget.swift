@@ -20,6 +20,7 @@ struct ListEntry: TimelineEntry {
 }
 
 struct ListProvider: AppIntentTimelineProvider {
+    @MainActor
     private func entry(for configuration: SelectShopIntent) -> ListEntry {
         let store = GroceryStore()
         let nearbyID = configuration.followLocation ? NearbyStore.currentShopID(among: store.shops) : nil
@@ -37,11 +38,11 @@ struct ListProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: SelectShopIntent, in context: Context) async -> ListEntry {
-        entry(for: configuration)
+        await entry(for: configuration)
     }
 
     func timeline(for configuration: SelectShopIntent, in context: Context) async -> Timeline<ListEntry> {
-        Timeline(entries: [entry(for: configuration)], policy: .after(Date().addingTimeInterval(60 * 60)))
+        Timeline(entries: [await entry(for: configuration)], policy: .after(Date().addingTimeInterval(60 * 60)))
     }
 }
 

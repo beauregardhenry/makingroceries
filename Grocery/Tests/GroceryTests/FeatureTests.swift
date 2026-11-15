@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class CookIdeasTests: StoreTestCase {
     private func stock(_ name: String, aisle: Aisle = .produce, daysLeft: Int) -> StockEntry {
         StockEntry(name: name, aisle: aisle, bought: day(-1), expires: day(daysLeft))
@@ -76,9 +77,10 @@ final class CookIdeasTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ControlRequestTests: XCTestCase {
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         _ = PendingAction.take()
     }
 
@@ -101,11 +103,12 @@ final class ControlRequestTests: XCTestCase {
     }
 }
 
+@MainActor
 final class PriceHistoryTests: StoreTestCase {
     private var kroger: Shop!, walmart: Shop!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         kroger = store.addShop(named: "Kroger")!
         walmart = store.addShop(named: "Walmart")!
     }
@@ -168,6 +171,7 @@ final class PriceHistoryTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class HouseholdSyncTests: StoreTestCase {
     /// The other phone's list, packed and sent through bytes the way it crosses the network. (A second
     /// GroceryStore would share this test's files, so the packet is built by hand.)
@@ -269,6 +273,7 @@ final class HouseholdSyncTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class SpotlightTests: StoreTestCase {
     func testMealsItemsAndPastPurchasesAreSearchable() {
         let kroger = store.addShop(named: "Kroger")!
@@ -307,6 +312,7 @@ final class SpotlightTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class ShoppingProgressTests: XCTestCase {
     private func item(_ name: String, _ aisle: Aisle, checked: Bool = false) -> GroceryItem {
         var item = GroceryItem(name: name, aisle: aisle)
@@ -345,6 +351,7 @@ final class ShoppingProgressTests: XCTestCase {
     }
 }
 
+@MainActor
 final class FirstLaunchTests: StoreTestCase {
     func testAFreshStoreIsAFirstRun() {
         // StoreTestCase deletes every saved file before making the store.
@@ -372,6 +379,7 @@ final class FirstLaunchTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class FirstLaunchSafetyTests: StoreTestCase {
     func testAMissingListAloneIsNotAFirstRun() {
         store.items = [GroceryItem(name: "Milk")]
@@ -382,6 +390,7 @@ final class FirstLaunchSafetyTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class PharmacyAisleTests: StoreTestCase {
     func testStoresSavedBeforePharmacyGetItJustBeforeOther() {
         var shop = Shop(name: "Kroger")
@@ -417,6 +426,7 @@ final class PharmacyAisleTests: StoreTestCase {
     }
 }
 
+@MainActor
 final class CloudMergeTests: StoreTestCase {
     private func data<T: Encodable>(_ value: [T]) -> Data {
         let encoder = JSONEncoder()

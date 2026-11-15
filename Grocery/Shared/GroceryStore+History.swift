@@ -30,7 +30,7 @@ extension GroceryStore {
     }
 
     /// Keeps a short price trail, skipping a repeat of the latest price at the same store.
-    static func append(_ point: PricePoint, to past: inout PastItem) {
+    nonisolated static func append(_ point: PricePoint, to past: inout PastItem) {
         var trail = past.priceHistory ?? []
         if let last = trail.last(where: { $0.shopID == point.shopID }), abs(last.price - point.price) < 0.005 { return }
         trail.append(point)
@@ -107,7 +107,7 @@ extension GroceryStore {
         return near?.0 ?? typed
     }
 
-    static func stem(_ text: String) -> String {
+    nonisolated static func stem(_ text: String) -> String {
         var s = text.trimmingCharacters(in: .whitespaces).lowercased()
         if s.count > 4, s.hasSuffix("ies") { s = String(s.dropLast(3)) + "y" }
         else if s.count > 4, s.hasSuffix("oes") { s = String(s.dropLast(2)) }
@@ -115,7 +115,7 @@ extension GroceryStore {
         return s
     }
 
-    static func distance(_ a: String, _ b: String) -> Int {
+    nonisolated static func distance(_ a: String, _ b: String) -> Int {
         let a = Array(a), b = Array(b)
         if a.isEmpty { return b.count }
         if b.isEmpty { return a.count }

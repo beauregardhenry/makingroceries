@@ -7,6 +7,7 @@ import SwiftUI
 ///
 /// Safety rules: the first sync on a device combines, never deletes; a record deleted in the cloud never deletes
 /// anything here; a copy this version can't read is left alone.
+@MainActor
 @Observable
 final class CloudSync {
     typealias Status = SyncStatus
@@ -14,7 +15,7 @@ final class CloudSync {
     private(set) var status: Status = .off
 
     static let containerID = "iCloud.com.beauregardhenry.makingroceries"
-    static let recordType = SyncEngines.recordType
+    static let recordType = SyncZone.recordType
 
     static var enabled: Bool {
         get { UserDefaults.standard.bool(forKey: "iCloudSync") }

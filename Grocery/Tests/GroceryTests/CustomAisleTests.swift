@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class CustomAisleTests: StoreTestCase {
     func testAddingTrimsAndRejectsDuplicatesAndCategoryNames() {
         XCTAssertNotNil(store.addCustomAisle(named: "  Aisle 5 "))

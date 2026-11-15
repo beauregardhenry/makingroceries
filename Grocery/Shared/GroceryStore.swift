@@ -6,6 +6,7 @@ import WidgetKit
 
 /// The app's data: the list, stores, history and everything else, kept in memory and saved as JSON files.
 /// The topics are split across GroceryStore+*.swift files.
+@MainActor
 @Observable
 final class GroceryStore {
     var items: [GroceryItem] = [] {
@@ -101,7 +102,7 @@ final class GroceryStore {
     /// Each file's bytes as this copy last read or saved them, to notice when another process saved since.
     @ObservationIgnored private var lastSeen: [String: Data] = [:]
 
-    private static let sampleItems = [
+    nonisolated private static let sampleItems = [
         GroceryItem(name: "Bananas", quantity: 6, aisle: .produce),
         GroceryItem(name: "Milk", aisle: .dairy),
         GroceryItem(name: "Sourdough", aisle: .bakery),
@@ -199,7 +200,7 @@ final class GroceryStore {
     // MARK: Storage
 
     /// Whether two names are the same thing: ignoring case, spaces at the ends, and singular or plural.
-    static func same(_ a: String, _ b: String) -> Bool {
+    nonisolated static func same(_ a: String, _ b: String) -> Bool {
         PluralForms.same(a, b)
     }
 
@@ -369,13 +370,13 @@ final class GroceryStore {
 struct StoredList {
     let name: String
     /// Merges in what another process saved since this copy last looked.
-    let reload: (GroceryStore) -> Void
+    let reload: @MainActor (GroceryStore) -> Void
     /// Reads the file into memory without writing it back. True when the file was missing.
-    let read: (GroceryStore) -> Bool
+    let read: @MainActor (GroceryStore) -> Bool
     /// This copy as the cloud stores it.
-    let encode: (GroceryStore) -> Data?
+    let encode: @MainActor (GroceryStore) -> Data?
     /// Merges a cloud copy (and the copy both sides last agreed on) into this phone's list.
-    let merge: (GroceryStore, Data, Data?) -> Data?
+    let merge: @MainActor (GroceryStore, Data, Data?) -> Data?
     /// Empties the list (tests).
-    let clear: (GroceryStore) -> Void
+    let clear: @MainActor (GroceryStore) -> Void
 }

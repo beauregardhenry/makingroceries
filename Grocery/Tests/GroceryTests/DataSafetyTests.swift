@@ -5,6 +5,7 @@ private struct Entry: Identifiable, Equatable {
     var value: String
 }
 
+@MainActor
 final class ListMergeTests: XCTestCase {
     private let base = [Entry(id: 1, value: "a"), Entry(id: 2, value: "b"), Entry(id: 3, value: "c")]
 
@@ -69,6 +70,7 @@ final class ListMergeTests: XCTestCase {
 }
 
 /// A file that can't be read must never be replaced by sample data or an empty list without a copy.
+@MainActor
 final class UnreadableFileTests: StoreTestCase {
     private func corrupt(_ name: String) throws {
         try Data("{ this is not a grocery list".utf8).write(to: Storage.url(name))
@@ -126,6 +128,7 @@ final class UnreadableFileTests: StoreTestCase {
 }
 
 /// The app keeps the list in memory while the widget, Siri and the share sheet change the same files.
+@MainActor
 final class ConcurrentChangeTests: StoreTestCase {
     func testChangesFromAnotherProcessAreMergedOnSave() throws {
         store.add(name: "Milk", quantity: 1, aisle: .dairy)

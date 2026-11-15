@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class ListTableTests: StoreTestCase {
     func testEveryListHasAUniqueNameAndSyncs() {
         let names = GroceryStore.lists.map(\.name)

@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class UnitPriceTests: XCTestCase {
     private func size(_ text: String) -> String {
         SizeParser.parse(text).map { SizeParser.label($0.amount, $0.unit) } ?? "nil"
@@ -42,6 +43,7 @@ final class UnitPriceTests: XCTestCase {
     }
 }
 
+@MainActor
 final class ReceiptTests: XCTestCase {
     private func summary(_ entries: [ReceiptEntry]) -> [String] {
         entries.map { "\($0.name)|\($0.quantity)x\($0.unitPrice)=\($0.total)" }
@@ -95,6 +97,7 @@ final class ReceiptTests: XCTestCase {
     }
 }
 
+@MainActor
 final class AvoidListTests: XCTestCase {
     func testAllergenTagsAndIngredientText() {
         XCTAssertEqual(AvoidList.warnings(allergens: ["en:peanuts", "en:soybeans"], ingredients: nil, avoid: ["peanut", "gluten"]), ["Peanut"])
@@ -109,6 +112,7 @@ final class AvoidListTests: XCTestCase {
     }
 }
 
+@MainActor
 final class RouteLearningTests: XCTestCase {
     private let t0 = Date(timeIntervalSince1970: 1_800_000_000)
 
@@ -140,6 +144,7 @@ final class RouteLearningTests: XCTestCase {
     }
 }
 
+@MainActor
 final class ShelfLifeTests: XCTestCase {
     func testKnownFoods() {
         XCTAssertEqual(ShelfLife.days(for: "Baby spinach", aisle: .produce), 5)
@@ -155,6 +160,7 @@ final class ShelfLifeTests: XCTestCase {
     }
 }
 
+@MainActor
 final class NearbyStoreTests: XCTestCase {
     private func shop(_ name: String, _ lat: Double, _ lon: Double) -> Shop {
         var shop = Shop(name: name)
@@ -163,9 +169,9 @@ final class NearbyStoreTests: XCTestCase {
         return shop
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         NearbyStore.record(nil)
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func testNearestWithinRadius() {
