@@ -53,20 +53,7 @@ struct MeasurementsView: View {
             if !measurements.isEmpty {
                 Section {
                     ForEach(measurements) { measurement in
-                        VStack(alignment: .leading, spacing: 2) {
-                            LabeledContent(measurement.label) {
-                                TextField("Size", text: Binding(
-                                    get: { measurement.value },
-                                    set: { store.setMeasurement(measurement.id, to: $0, for: personID) }))
-                                    .multilineTextAlignment(.trailing)
-                                    .textInputAutocapitalization(.characters)
-                                    .focused($focused, equals: measurement.id)
-                            }
-                            if !measurement.value.isEmpty {
-                                Text("Updated \(measurement.updated.formatted(date: .abbreviated, time: .omitted))")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
+                        MeasurementRow(measurement: measurement, personID: personID, focus: $focused)
                         .contextMenu {
                             Button("Delete", systemImage: "trash", role: .destructive) {
                                 store.removeMeasurement(measurement.id, for: personID)
@@ -74,7 +61,7 @@ struct MeasurementsView: View {
                         }
                     }
                 } footer: {
-                    Text("Press and hold one to delete it. Sizes are free text: M, 8, 10 Kids, 32x30, 5 ft 2 in.")
+                    Text("Press and hold one to delete it. Sizes are free text: M, 8, 10 Kids, 32x30, Petite.")
                 }
             }
 
@@ -107,5 +94,53 @@ struct MeasurementsView: View {
         }
         .navigationTitle(person.map { "\($0.name)'s Sizes" } ?? "Sizes")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// One size: its own copy of the text while you type (so fast typing never loses letters to the list redrawing),
+/// saved as you go, and given a capital at the start of each word when you press Return or leave it.
+private struct MeasurementRow: View {
+    @Environment(GroceryStore.self) private var store
+    let measurement: Measurement
+    let personID: UUID
+    var focus: FocusState<UUID?>.Binding
+    @State private var text: String
+
+    init(measurement: Measurement, personID: UUID, focus: FocusState<UUID?>.Binding) {
+        self.measurement = measurement
+        self.personID = personID
+        self.focus = focus
+        _text = State(initialValue: measurement.value)
+    }
+
+    private func finish() {
+        let fixed = TitleCase.apply(text)
+        if fixed != text { text = fixed }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            LabeledContent(measurement.label) {
+                TextField("Size", text: $text)
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.words)
+                    .focused(focus, equals: measurement.id)
+                    .onSubmit(finish)
+            }
+            if !measurement.value.isEmpty {
+                Text("Updated \(measurement.updated.formatted(date: .abbreviated, time: .omitted))")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .onChange(of: text) { _, typed in
+            store.setMeasurement(measurement.id, to: typed, for: personID)
+        }
+        .onChange(of: focus.wrappedValue) { was, now in
+            if was == measurement.id, now != measurement.id { finish() }
+        }
+        .onChange(of: measurement.value) { _, synced in
+            // A change from another phone shows here unless you're in the middle of typing.
+            if focus.wrappedValue != measurement.id, synced != text { text = synced }
+        }
     }
 }

@@ -221,6 +221,21 @@ final class GroceryUITests: XCTestCase {
         XCTAssertEqual(handles.element(boundBy: 1).label, "Reorder Chinese Grocery", "a store moves all the way, not one place")
     }
 
+    func testFamilySizesAreTitleCased() {
+        chooseFromMore("Family Members")
+        let nameField = app.textFields["Name (Mom, Emma, Jake…)"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 10))
+        nameField.tap()
+        nameField.typeText("emma\n")
+        app.buttons["measurements-Emma"].tap()
+        app.buttons["Shoes"].firstMatch.tap()
+        let size = app.textFields["Size"]
+        XCTAssertTrue(size.waitForExistence(timeout: 5))
+        size.tap()
+        size.typeText("wide 7\n")
+        XCTAssertEqual(app.textFields["Size"].value as? String, "Wide 7", "each word starts with a capital, not all caps")
+    }
+
     func testCompanyComingOffersMakeAheadMeals() {
         showTab("Meals")
         app.buttons["Company Coming"].firstMatch.tap()
