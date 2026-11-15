@@ -72,6 +72,7 @@
 		396A580751BF1AA419029C0E /* WatchSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1CEB85CCB8F361563D08 /* WatchSnapshotBuilder.swift */; };
 		39DEB0EDDE2F4E5AFA1395DC /* RecipeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C5E915E268E866E34C383 /* RecipeFetcher.swift */; };
 		3DB3335C63C0F921050BF56B /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD53CEEF85F63223C2DC032 /* Stock.swift */; };
+		3DF4C64F5A6225410492B6BD /* SaveDelayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E029CA39CDD469051F9E6E39 /* SaveDelayTests.swift */; };
 		3F2CA4131B45FB76FA4A85A0 /* Planner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFB8D712FA685DD46F21593 /* Planner.swift */; };
 		3F6AA24FBC1150895A572E30 /* GroceryStore+Barcodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C90D65820F39561A46074B6 /* GroceryStore+Barcodes.swift */; };
 		3F709B9AA94F39C697B2B2FA /* SpotlightEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BE769E2E0B38F61F3CB710 /* SpotlightEntries.swift */; };
@@ -454,6 +455,7 @@
 		DA4C07D3387031B608836E44 /* Clothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clothing.swift; sourceTree = "<group>"; };
 		DF340084309CE7A4D328EFF1 /* GoogleCalendarAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarAccount.swift; sourceTree = "<group>"; };
 		DFE1FA71A439BF06CBA7561E /* ListTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTableTests.swift; sourceTree = "<group>"; };
+		E029CA39CDD469051F9E6E39 /* SaveDelayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveDelayTests.swift; sourceTree = "<group>"; };
 		E14527CF1B699BFBDC2E2925 /* Goals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Goals.swift; sourceTree = "<group>"; };
 		E2DE728B369F8F573245B660 /* GroceryShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryShortcuts.swift; sourceTree = "<group>"; };
 		E3E98F73823A9CB343BB40F7 /* ControlIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlIntents.swift; sourceTree = "<group>"; };
@@ -683,6 +685,7 @@
 				E55BF4F340A304CBE9D1CD3D /* OCRTests.swift */,
 				5CEB81E467A02E4861CF888C /* ParsingTests.swift */,
 				31A28564619FB3AE7F685AB2 /* RegistryTests.swift */,
+				E029CA39CDD469051F9E6E39 /* SaveDelayTests.swift */,
 				51F9FF0899707DCCC1E4A865 /* StoreOrderTests.swift */,
 				3CD8F4CA29AEF54DAB62DFEB /* StoreTests.swift */,
 				4A689FB469E99DEA380D4B1F /* TestSupport.swift */,
@@ -1182,6 +1185,7 @@
 				0E7E14A41F12D35283E47D5E /* Registry.swift in Sources */,
 				453535C77C2504802933A73C /* RegistryTests.swift in Sources */,
 				C7CD69E7816004C0B26C8BB7 /* RouteLearning.swift in Sources */,
+				3DF4C64F5A6225410492B6BD /* SaveDelayTests.swift in Sources */,
 				A418766CDCAE7C609ABCA47A /* ShopFilter.swift in Sources */,
 				F798A4D5913E359AAAAE768E /* ShoppingActivity.swift in Sources */,
 				A4FDC9886728530F404C0FE9 /* ShoppingProgress.swift in Sources */,

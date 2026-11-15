@@ -31,6 +31,8 @@ struct GroceryApp: App {
                 .environment(cloud)
                 .environment(family)
                 .task {
+                    // Typing changes a list on every keystroke; write it once you pause instead.
+                    store.saveDelay = 0.5
                     ArrivalReminders.shared.syncRegions(store.shops)
                     PhoneSession.shared.start(store: store)
                     sync.start(store: store, name: myName)
@@ -55,7 +57,11 @@ struct GroceryApp: App {
                         sync.start(store: store, name: myName)
                         cloud.start(store: store)
                         family.start(store: store)
-                    } else if phase == .background {
+                    } else {
+                        // Leaving the app: write anything still waiting, so the widget, Siri and a relaunch see it.
+                        store.savePendingChanges()
+                    }
+                    if phase == .background {
                         sync.stop()
                     }
                 }
