@@ -76,11 +76,7 @@ struct ItemDetailView: View {
                 }
 
                 Section {
-                    LabeledContent("Price of one") {
-                        TextField("Optional", text: $priceText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
+                    PriceField(label: "Price of one", text: $priceText)
                     LabeledContent("Size") {
                         TextField("16 oz, 1 lb, 12 ct", text: $sizeText)
                             .multilineTextAlignment(.trailing)

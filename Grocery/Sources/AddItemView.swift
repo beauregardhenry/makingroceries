@@ -39,7 +39,7 @@ struct AddItemView: View {
                     Text(lookupMessage).font(.footnote).foregroundStyle(.secondary)
                 }
                 Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
-                TextField("Price (optional)", text: $priceText).keyboardType(.decimalPad)
+                PriceField(label: "Price (optional)", text: $priceText)
                 if list == .registry {
                     Picker("For", selection: $giftForID) {
                         Text("Not assigned yet").tag(UUID?.none)

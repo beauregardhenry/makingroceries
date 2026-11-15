@@ -45,3 +45,25 @@ struct SpellingSuggestion: View {
         .accessibilityIdentifier("spellingSuggestion")
     }
 }
+
+/// A price box: labeled, with the currency symbol always beside the number, so a typed price can't be mistaken
+/// for a quantity.
+struct PriceField: View {
+    let label: String
+    @Binding var text: String
+    var placeholder = "0.00"
+
+    var body: some View {
+        LabeledContent(label) {
+            HStack(spacing: 2) {
+                Spacer(minLength: 0)
+                Text(Locale.current.currencySymbol ?? "$").foregroundStyle(.secondary)
+                TextField(placeholder, text: $text)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .fixedSize()
+                    .accessibilityLabel(label)
+            }
+        }
+    }
+}
