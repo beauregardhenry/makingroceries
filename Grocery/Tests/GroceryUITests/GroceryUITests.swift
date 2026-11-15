@@ -2,11 +2,12 @@ import XCTest
 
 /// Smoke tests for the screens: launch, add, check off, undo, every menu screen, and a recipe import.
 /// The app runs with -ui-testing, so it starts from the sample list in a throwaway folder.
+@MainActor
 final class GroceryUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = ["-ui-testing"]
