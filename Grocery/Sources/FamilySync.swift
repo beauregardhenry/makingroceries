@@ -5,13 +5,13 @@ import SwiftUI
 ///
 /// Whoever shares keeps the list in a "Family" zone in their private iCloud database and shares the whole
 /// zone; everyone who accepts the invite sees that zone in their shared database. Each shared file
-/// (`GroceryStore.familyFileNames`) is one record, merged the same way as iCloud Sync. The records use iCloud
-/// Sync's record type, so the iCloud schema needs nothing new; iCloud Sync only reads its own zone.
+/// (`GroceryStore.familyFileNames`) is one record, synced by `SyncEngines` and merged by `SyncZone` the same way
+/// as iCloud Sync, after lining this phone's entries up with the family's the first time.
 ///
 /// Safety rules, as for iCloud Sync: joining combines and never deletes; when sharing ends, everyone keeps the
 /// list as it was; a copy this version can't read is left alone.
 @Observable
-final class FamilySync: @unchecked Sendable {
+final class FamilySync {
     /// One for the app, so an invite opened from Messages can reach it before any screen exists.
     static let shared = FamilySync()
 
@@ -19,14 +19,7 @@ final class FamilySync: @unchecked Sendable {
         case none, owner, member
     }
 
-    enum Status: Equatable {
-        case off
-        case checking
-        case noAccount
-        case syncing
-        case upToDate(Date)
-        case failed(String)
-    }
+    typealias Status = SyncStatus
 
     private(set) var role: Role
     private(set) var status: Status = .off
@@ -39,12 +32,7 @@ final class FamilySync: @unchecked Sendable {
     private static let folder = Storage.directory.appending(path: "FamilySync", directoryHint: .isDirectory)
 
     @ObservationIgnored private weak var store: GroceryStore?
-    @ObservationIgnored private var engine: CKSyncEngine?
-    @ObservationIgnored private var baseline = CloudBaseline(folder: FamilySync.folder)
-    /// The bytes sent for each record and not yet confirmed, which become the baseline once saved.
-    @ObservationIgnored private var inFlight: [String: Data] = [:]
-    /// The store's `fileVersions` when files were last compared with the baseline; empty means compare them all.
-    @ObservationIgnored private var checked: [String: Int] = [:]
+    @ObservationIgnored private var zone: SyncZone?
     @ObservationIgnored private lazy var container = CKContainer(identifier: CloudSync.containerID)
 
     private init() {
@@ -74,67 +62,67 @@ final class FamilySync: @unchecked Sendable {
     func start(store: GroceryStore) {
         self.store = store
         guard role != .none, zoneID != nil else { status = .off; return }
-        if engine != nil {
-            refresh()
+        if let zone, SyncEngines.shared.isSyncing(zone) {
+            SyncEngines.shared.refresh(zone)
             return
         }
         status = .checking
         Task { @MainActor in
             let account = try? await container.accountStatus()
-            guard role != .none, engine == nil else { return }
+            guard role != .none, zone.map({ !SyncEngines.shared.isSyncing($0) }) ?? true, let zoneID else { return }
             guard account == .available else {
                 status = .noAccount
                 return
             }
-            startEngine()
+            let zone = SyncZone(zoneID: zoneID, scope: role == .member ? .shared : .private,
+                                fileNames: GroceryStore.familyFileNames, folder: Self.folder, linesUpOnFirstMerge: true)
+            zone.store = store
+            zone.onStatus = { [weak self] in self?.status = $0 }
+            zone.onZoneGone = { [weak self] in
+                guard let self else { return }
+                if self.role == .member {
+                    self.endLocally(notice: "The family list is no longer shared with you. Your list stays on this phone as it was.")
+                } else {
+                    // Our zone was deleted (say, from iCloud settings), which also ends the share. Keep the list.
+                    self.endLocally(notice: "Family Sharing stopped because its iCloud data was removed. Your list stays on this phone.")
+                }
+            }
+            zone.onAccountChange = { [weak self] change in
+                switch change {
+                case .signOut, .switchAccounts:
+                    self?.endLocally(notice: "This phone left the family list because iCloud signed out. Your list stays here.")
+                default:
+                    break
+                }
+            }
+            self.zone = zone
+            SyncEngines.shared.add(zone)
+            SyncEngines.shared.refresh(zone)
         }
-    }
-
-    @MainActor
-    private func startEngine() {
-        guard let zoneID else { return }
-        let saved = loadState()
-        let engine = CKSyncEngine(CKSyncEngine.Configuration(database: database, stateSerialization: saved, delegate: self))
-        self.engine = engine
-        if saved == nil, role == .owner {
-            engine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: zoneID))])
-        }
-        UIApplication.shared.registerForRemoteNotifications()
-        refresh()
     }
 
     /// Fetches what family members changed and sends what changed here.
     @MainActor
     func refresh() {
-        guard let engine else { return }
-        status = .syncing
-        scheduleUpload()
-        Task {
-            try? await engine.fetchChanges()
-            try? await engine.sendChanges()
-            await MainActor.run { if case .syncing = self.status { self.status = .upToDate(Date()) } }
-        }
+        if let zone { SyncEngines.shared.refresh(zone) }
     }
 
     /// Queues every shared file that differs from what the family list last had. Called when the lists change.
     @MainActor
     func scheduleUpload() {
-        guard let engine, let store, let zoneID else { return }
-        let changed = store.cloudFilesChanged(since: baseline, checked: checked).filter(GroceryStore.familyFileNames.contains)
-        checked = store.fileVersions
-        guard !changed.isEmpty else { return }
-        engine.state.add(pendingRecordZoneChanges: changed.map { .saveRecord(CKRecord.ID(recordName: $0, zoneID: zoneID)) })
+        if let zone { SyncEngines.shared.queueChanges(of: zone) }
     }
 
     /// Leaves sharing on this phone only: the list stays as it is, and nothing is deleted anywhere.
     @MainActor
     func endLocally(notice: String? = nil) {
-        engine = nil
-        inFlight = [:]
-        baseline.reset()
-        checked = [:]
-        try? FileManager.default.removeItem(at: Self.folder)
-        baseline = CloudBaseline(folder: Self.folder)
+        if let zone {
+            SyncEngines.shared.remove(zone)
+            zone.removeLocalState()
+        } else {
+            try? FileManager.default.removeItem(at: Self.folder)
+        }
+        zone = nil
         for key in ["familyRole", "familyOwnerName", "familyZoneOwner", "familyZoneName"] {
             UserDefaults.standard.removeObject(forKey: key)
         }
@@ -213,168 +201,6 @@ final class FamilySync: @unchecked Sendable {
             } catch {
                 notice = "Couldn't join the list: \(error.localizedDescription)"
             }
-        }
-    }
-
-    // MARK: Records
-
-    /// The record to send for a file: the last known server record (so iCloud sees it as an update),
-    /// carrying this phone's current copy.
-    @MainActor
-    private func record(for id: CKRecord.ID) -> CKRecord? {
-        let name = id.recordName
-        guard GroceryStore.familyFileNames.contains(name), let data = store?.cloudData(for: name) else { return nil }
-        let record = savedRecord(name) ?? CKRecord(recordType: CloudSync.recordType, recordID: id)
-        let file = FileManager.default.temporaryDirectory.appending(path: "family-\(name)-\(UUID().uuidString).json")
-        guard (try? data.write(to: file, options: .atomic)) != nil else { return nil }
-        record["data"] = CKAsset(fileURL: file)
-        inFlight[name] = data
-        return record
-    }
-
-    /// Merges a copy from the family list. The first time, this phone's matching stores, people and items take
-    /// the family's ids first. If this phone had changes the family list doesn't, they're sent back.
-    @MainActor
-    private func receive(_ record: CKRecord) {
-        let name = record.recordID.recordName
-        guard record.recordType == CloudSync.recordType, record.recordID.zoneID == zoneID,
-              GroceryStore.familyFileNames.contains(name),
-              let url = (record["data"] as? CKAsset)?.fileURL, let data = try? Data(contentsOf: url), let store else { return }
-        saveFields(of: record)
-        if baseline[name] == nil { store.adoptFamilyIDs(name: name, remote: data) }
-        guard let merged = store.applyCloudCopy(name: name, remote: data, base: baseline[name]) else { return }
-        baseline[name] = data
-        if merged != data { engine?.state.add(pendingRecordZoneChanges: [.saveRecord(record.recordID)]) }
-    }
-
-    // MARK: Saved engine state and record fields
-
-    private func loadState() -> CKSyncEngine.State.Serialization? {
-        guard let data = try? Data(contentsOf: Self.folder.appending(path: "engine-state.json")) else { return nil }
-        return try? JSONDecoder().decode(CKSyncEngine.State.Serialization.self, from: data)
-    }
-
-    private func saveState(_ state: CKSyncEngine.State.Serialization) {
-        guard role != .none, let data = try? JSONEncoder().encode(state) else { return }
-        try? FileManager.default.createDirectory(at: Self.folder, withIntermediateDirectories: true)
-        try? data.write(to: Self.folder.appending(path: "engine-state.json"), options: .atomic)
-    }
-
-    private func saveFields(of record: CKRecord) {
-        let coder = NSKeyedArchiver(requiringSecureCoding: true)
-        record.encodeSystemFields(with: coder)
-        try? FileManager.default.createDirectory(at: Self.folder, withIntermediateDirectories: true)
-        try? coder.encodedData.write(to: Self.folder.appending(path: "fields-\(record.recordID.recordName).data"), options: .atomic)
-    }
-
-    private func forgetFields(_ name: String) {
-        try? FileManager.default.removeItem(at: Self.folder.appending(path: "fields-\(name).data"))
-    }
-
-    private func savedRecord(_ name: String) -> CKRecord? {
-        guard let data = try? Data(contentsOf: Self.folder.appending(path: "fields-\(name).data")),
-              let coder = try? NSKeyedUnarchiver(forReadingFrom: data) else { return nil }
-        coder.requiresSecureCoding = true
-        defer { coder.finishDecoding() }
-        return CKRecord(coder: coder)
-    }
-}
-
-extension FamilySync: CKSyncEngineDelegate {
-    func handleEvent(_ event: CKSyncEngine.Event, syncEngine: CKSyncEngine) async {
-        // An engine left over from before sharing ended or changed has nothing more to do.
-        guard await MainActor.run(body: { syncEngine === self.engine }) else { return }
-        switch event {
-        case .stateUpdate(let update):
-            saveState(update.stateSerialization)
-
-        case .accountChange(let change):
-            await MainActor.run {
-                switch change.changeType {
-                case .signIn:
-                    break
-                case .signOut, .switchAccounts:
-                    endLocally(notice: "This phone left the family list because iCloud signed out. Your list stays here.")
-                @unknown default:
-                    break
-                }
-            }
-
-        case .fetchedDatabaseChanges(let changes):
-            await MainActor.run {
-                guard let zoneID, changes.deletions.contains(where: { $0.zoneID == zoneID }) else { return }
-                if role == .member {
-                    endLocally(notice: "The family list is no longer shared with you. Your list stays on this phone as it was.")
-                } else {
-                    // Our zone was deleted (say, from iCloud settings), which also ends the share. Keep the list.
-                    endLocally(notice: "Family Sharing stopped because its iCloud data was removed. Your list stays on this phone.")
-                }
-            }
-
-        case .fetchedRecordZoneChanges(let changes):
-            // Deletions are ignored on purpose: nothing in iCloud can delete lists on this phone.
-            await MainActor.run {
-                let order = GroceryStore.familyFileNames
-                let records = changes.modifications.map(\.record).sorted {
-                    (order.firstIndex(of: $0.recordID.recordName) ?? order.count) < (order.firstIndex(of: $1.recordID.recordName) ?? order.count)
-                }
-                for record in records { receive(record) }
-            }
-
-        case .sentRecordZoneChanges(let sent):
-            await MainActor.run {
-                for record in sent.savedRecords {
-                    let name = record.recordID.recordName
-                    saveFields(of: record)
-                    if let data = inFlight.removeValue(forKey: name) { baseline[name] = data }
-                }
-                for failure in sent.failedRecordSaves {
-                    let id = failure.record.recordID
-                    // Compare this file again next time, so a save that didn't go through is tried again.
-                    checked[id.recordName] = nil
-                    switch failure.error.code {
-                    case .serverRecordChanged:
-                        // Someone else saved first: merge their copy, then send the combined one.
-                        if let server = failure.error.serverRecord { receive(server) }
-                        syncEngine.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
-                    case .zoneNotFound, .userDeletedZone:
-                        if role == .member {
-                            endLocally(notice: "The family list is no longer shared with you. Your list stays on this phone as it was.")
-                        } else {
-                            syncEngine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: id.zoneID))])
-                            syncEngine.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
-                        }
-                    case .unknownItem:
-                        forgetFields(id.recordName)
-                        syncEngine.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
-                    case .permissionFailure:
-                        status = .failed("The list's owner hasn't let you make changes.")
-                    case .quotaExceeded:
-                        status = .failed(role == .member ? "The owner's iCloud storage is full." : "Your iCloud storage is full.")
-                    case .networkUnavailable, .networkFailure, .serviceUnavailable, .requestRateLimited:
-                        break // CKSyncEngine retries these on its own.
-                    default:
-                        status = .failed(failure.error.localizedDescription)
-                    }
-                }
-            }
-
-        case .didSendChanges, .didFetchChanges:
-            await MainActor.run {
-                if case .failed = status { return }
-                status = .upToDate(Date())
-            }
-
-        default:
-            break
-        }
-    }
-
-    func nextRecordZoneChangeBatch(_ context: CKSyncEngine.SendChangesContext, syncEngine: CKSyncEngine) async -> CKSyncEngine.RecordZoneChangeBatch? {
-        let pending = syncEngine.state.pendingRecordZoneChanges.filter { context.options.scope.contains($0) }
-        guard !pending.isEmpty else { return nil }
-        return await CKSyncEngine.RecordZoneChangeBatch(pendingChanges: pending) { id in
-            await MainActor.run { self.record(for: id) }
         }
     }
 }
