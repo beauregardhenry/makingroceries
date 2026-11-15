@@ -85,6 +85,17 @@ final class GroceryStore {
     /// Goes up whenever any list changes, so iCloud sync knows when to look for something to send.
     private(set) var revision = 0
 
+    /// Goes up for a file each time it changes, so iCloud and Family Sharing look only at files that changed.
+    @ObservationIgnored private(set) var fileVersions: [String: Int] = [:]
+
+    /// How long to wait after a change before writing it to its file. Zero, the default for the widget, Siri and
+    /// the share sheet, writes at once. The app sets a short pause so typing doesn't rewrite a file (and refresh
+    /// the widget) on every keystroke, and calls `savePendingChanges()` before it goes to the background.
+    @ObservationIgnored var saveDelay: TimeInterval = 0
+    /// Lists changed in memory and waiting for the pause to end, by file name.
+    @ObservationIgnored private var pendingSaves: [String: () -> Void] = [:]
+    @ObservationIgnored private var saveTimer: DispatchWorkItem?
+
     /// While loading, assignments update memory only; nothing is written back.
     @ObservationIgnored private var suppressWrites = false
     /// Each file's bytes as this copy last read or saved them, to notice when another process saved since.
@@ -110,6 +121,8 @@ final class GroceryStore {
     /// Picks up anything a widget, Siri, the share sheet or the watch saved since this copy last looked,
     /// merging it with this copy's own changes. Files that haven't changed aren't touched.
     func reload() {
+        // Write our own waiting changes first, so merging with the files starts from what's really on disk.
+        savePendingChanges()
         for list in Self.lists { list.reload(self) }
         applyRecurring()
     }
@@ -236,8 +249,44 @@ final class GroceryStore {
     private func persist<Element: Codable & Equatable & Identifiable>(
         _ keyPath: ReferenceWritableKeyPath<GroceryStore, [Element]>, _ name: String, refreshesWidgets: Bool = false
     ) {
+        guard !suppressWrites else {
+            // Memory only (loading, or merging in another process's save): sync still needs to hear about it.
+            noteChange(name)
+            return
+        }
+        guard saveDelay > 0 else {
+            write(keyPath, name, refreshesWidgets: refreshesWidgets)
+            return
+        }
+        pendingSaves[name] = { [weak self] in self?.write(keyPath, name, refreshesWidgets: refreshesWidgets) }
+        saveTimer?.cancel()
+        let timer = DispatchWorkItem { [weak self] in self?.savePendingChanges() }
+        saveTimer = timer
+        DispatchQueue.main.asyncAfter(deadline: .now() + saveDelay, execute: timer)
+    }
+
+    /// Writes every change still waiting for the pause to end. Safe to call any time.
+    func savePendingChanges() {
+        saveTimer?.cancel()
+        saveTimer = nil
+        let waiting = pendingSaves
+        pendingSaves = [:]
+        for save in waiting.values { save() }
+    }
+
+    /// Whether any change is still waiting to be written.
+    var hasPendingChanges: Bool { !pendingSaves.isEmpty }
+
+    private func noteChange(_ name: String) {
+        fileVersions[name, default: 0] &+= 1
         revision &+= 1
-        guard !suppressWrites else { return }
+    }
+
+    /// Writes one list to its file, first merging in whatever another process saved since this copy last looked.
+    private func write<Element: Codable & Equatable & Identifiable>(
+        _ keyPath: ReferenceWritableKeyPath<GroceryStore, [Element]>, _ name: String, refreshesWidgets: Bool
+    ) {
+        noteChange(name)
         var merged: [Element]?
         coordinate(writing: Storage.url(name)) { url in
             let ours = self[keyPath: keyPath]

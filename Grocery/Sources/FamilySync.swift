@@ -43,6 +43,8 @@ final class FamilySync: @unchecked Sendable {
     @ObservationIgnored private var baseline = CloudBaseline(folder: FamilySync.folder)
     /// The bytes sent for each record and not yet confirmed, which become the baseline once saved.
     @ObservationIgnored private var inFlight: [String: Data] = [:]
+    /// The store's `fileVersions` when files were last compared with the baseline; empty means compare them all.
+    @ObservationIgnored private var checked: [String: Int] = [:]
     @ObservationIgnored private lazy var container = CKContainer(identifier: CloudSync.containerID)
 
     private init() {
@@ -118,7 +120,8 @@ final class FamilySync: @unchecked Sendable {
     @MainActor
     func scheduleUpload() {
         guard let engine, let store, let zoneID else { return }
-        let changed = store.cloudFilesChanged(since: baseline).filter(GroceryStore.familyFileNames.contains)
+        let changed = store.cloudFilesChanged(since: baseline, checked: checked).filter(GroceryStore.familyFileNames.contains)
+        checked = store.fileVersions
         guard !changed.isEmpty else { return }
         engine.state.add(pendingRecordZoneChanges: changed.map { .saveRecord(CKRecord.ID(recordName: $0, zoneID: zoneID)) })
     }
@@ -129,6 +132,7 @@ final class FamilySync: @unchecked Sendable {
         engine = nil
         inFlight = [:]
         baseline.reset()
+        checked = [:]
         try? FileManager.default.removeItem(at: Self.folder)
         baseline = CloudBaseline(folder: Self.folder)
         for key in ["familyRole", "familyOwnerName", "familyZoneOwner", "familyZoneName"] {
@@ -326,6 +330,8 @@ extension FamilySync: CKSyncEngineDelegate {
                 }
                 for failure in sent.failedRecordSaves {
                     let id = failure.record.recordID
+                    // Compare this file again next time, so a save that didn't go through is tried again.
+                    checked[id.recordName] = nil
                     switch failure.error.code {
                     case .serverRecordChanged:
                         // Someone else saved first: merge their copy, then send the combined one.

@@ -24,9 +24,14 @@ extension GroceryStore {
         Self.lists.first { $0.name == name }?.merge(self, remote, base)
     }
 
-    /// The files whose current contents differ from what the cloud last had, so they need sending.
-    func cloudFilesChanged(since baseline: CloudBaseline) -> [String] {
-        Self.cloudFileNames.filter { cloudData(for: $0) != baseline[$0] }
+    /// The files whose current contents differ from what the cloud last had, so they need sending. Only files
+    /// that changed since `checked` (the `fileVersions` the caller last looked at) are encoded and compared; the
+    /// caller then remembers `fileVersions` for next time. An empty `checked` looks at every file.
+    func cloudFilesChanged(since baseline: CloudBaseline, checked: [String: Int] = [:]) -> [String] {
+        Self.cloudFileNames.filter { name in
+            if let seen = checked[name], seen == fileVersions[name, default: 0] { return false }
+            return cloudData(for: name) != baseline[name]
+        }
     }
 }
 

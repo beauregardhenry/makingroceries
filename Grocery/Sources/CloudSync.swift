@@ -33,6 +33,8 @@ final class CloudSync: @unchecked Sendable {
     @ObservationIgnored private var baseline = CloudBaseline()
     /// The bytes sent for each record and not yet confirmed, which become the baseline once saved.
     @ObservationIgnored private var inFlight: [String: Data] = [:]
+    /// The store's `fileVersions` when files were last compared with the baseline; empty means compare them all.
+    @ObservationIgnored private var checked: [String: Int] = [:]
     @ObservationIgnored private lazy var container = CKContainer(identifier: Self.containerID)
     private let zoneID = CKRecordZone.ID(zoneName: "Groceries", ownerName: CKCurrentUserDefaultName)
     private let folder = Storage.directory.appending(path: "CloudSync", directoryHint: .isDirectory)
@@ -74,6 +76,7 @@ final class CloudSync: @unchecked Sendable {
         engine = nil
         inFlight = [:]
         baseline.reset()
+        checked = [:]
         try? FileManager.default.removeItem(at: folder.appending(path: "engine-state.json"))
         for name in GroceryStore.cloudFileNames {
             try? FileManager.default.removeItem(at: folder.appending(path: "fields-\(name).data"))
@@ -98,7 +101,8 @@ final class CloudSync: @unchecked Sendable {
     @MainActor
     func scheduleUpload() {
         guard let engine, let store else { return }
-        let changed = store.cloudFilesChanged(since: baseline)
+        let changed = store.cloudFilesChanged(since: baseline, checked: checked)
+        checked = store.fileVersions
         guard !changed.isEmpty else { return }
         engine.state.add(pendingRecordZoneChanges: changed.map { .saveRecord(recordID($0)) })
     }
@@ -180,10 +184,12 @@ extension CloudSync: CKSyncEngineDelegate {
                 switch change.changeType {
                 case .signIn:
                     baseline.reset()
+                    checked = [:]
                     scheduleUpload()
                 case .signOut, .switchAccounts:
                     // Keep everything on this device; combine afresh with whichever account comes next.
                     baseline.reset()
+                    checked = [:]
                     status = .noAccount
                 @unknown default:
                     break
@@ -195,6 +201,7 @@ extension CloudSync: CKSyncEngineDelegate {
             if changes.deletions.contains(where: { $0.zoneID == zoneID }) {
                 await MainActor.run {
                     baseline.reset()
+                    checked = [:]
                     for name in GroceryStore.cloudFileNames { forgetFields(name) }
                     syncEngine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: zoneID))])
                     scheduleUpload()
@@ -216,6 +223,8 @@ extension CloudSync: CKSyncEngineDelegate {
                 }
                 for failure in sent.failedRecordSaves {
                     let id = failure.record.recordID
+                    // Compare this file again next time, so a save that didn't go through is tried again.
+                    checked[id.recordName] = nil
                     switch failure.error.code {
                     case .serverRecordChanged:
                         // Another device saved first: merge its copy, then send the combined one.
